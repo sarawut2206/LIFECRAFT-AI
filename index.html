@@ -5,11 +5,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=Sarabun:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#0C1420;--panel:#14212F;--panel2:#1B2E42;--line:#28405A;--gold:#F0B429;--mint:#5FD3A6;
---red:#E4572E;--violet:#9B8CFF;--text:#E8F0F7;--muted:#8FA6BC;--r:14px;
---display:'Bai Jamjuree','Sarabun',system-ui,sans-serif;--body:'Sarabun',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;}
+:root{
+  --bg:#F2FAF7; --panel:#FFFFFF; --panel2:#E6F5EF; --soft:#F4FBF8; --line:#CDE5DB;
+  --teal:#0E9F8C; --teal-d:#0A7A6C; --mint:#12B48E; --gold:#F0A500; --amber:#FFD34D;
+  --red:#D94F3D; --violet:#6C63C7;
+  --text:#123029; --muted:#5C7C73; --r:14px;
+  --display:'Bai Jamjuree','Sarabun',system-ui,sans-serif;--body:'Sarabun',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(1100px 600px at 80% -10%,#1B3350 0%,transparent 60%),var(--ink);
+body{margin:0;background:radial-gradient(1200px 700px at 85% -15%,#DCF3EA 0%,transparent 60%),var(--bg);
 color:var(--text);font-family:var(--body);font-size:15px;line-height:1.65}
 h1,h2,h3,h4{font-family:var(--display);font-weight:700;line-height:1.25;margin:0 0 .4em}
 h1{font-size:clamp(26px,5vw,40px)}h2{font-size:clamp(19px,3vw,25px)}h3{font-size:17px}
@@ -17,29 +20,30 @@ p{margin:0 0 .8em}
 .wrap{max-width:1060px;margin:0 auto;padding:18px 16px 80px}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 header.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:12px 0 14px;margin-bottom:20px}
-.logo{font-family:var(--display);font-weight:700;font-size:18px}.logo span{color:var(--gold)}
+.logo{font-family:var(--display);font-weight:700;font-size:18px}.logo span{color:var(--teal)}
 .tagline{color:var(--muted);font-size:12px}.spacer{flex:1}
 .badge{border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px;box-shadow:0 1px 2px #0e402f0d}
 .card.tight{padding:14px 16px}
-.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal-d);margin-bottom:6px}
 .muted{color:var(--muted)}.small{font-size:13px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
-button{font-family:var(--body);font-size:15px;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 18px;transition:.15s}
-button:hover{border-color:var(--gold)}
-button.primary{background:var(--gold);color:#231704;border-color:var(--gold);font-weight:600}
+button{font-family:var(--body);font-size:15px;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text);padding:10px 18px;transition:.15s}
+button:hover{border-color:var(--teal);color:var(--teal-d)}
+button.primary{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:600}
+button.primary:hover{background:var(--teal-d);color:#fff}
 button.ghost{background:transparent}button.small{padding:6px 12px;font-size:13px}
 button[disabled]{opacity:.45;cursor:not-allowed}
-button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-input,textarea,select{width:100%;background:#0F1B27;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:var(--body);font-size:15px}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+input,textarea,select{width:100%;background:var(--soft);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:var(--body);font-size:15px}
 textarea{min-height:70px;resize:vertical}
 label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.opt{border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:9px;background:#0F1B27;cursor:pointer}
-.opt:hover{border-color:var(--gold)}
-.opt.sel{border-color:var(--gold);background:var(--panel2)}
+.opt{border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:9px;background:var(--soft);cursor:pointer}
+.opt:hover{border-color:var(--teal)}
+.opt.sel{border-color:var(--teal);background:var(--panel2);box-shadow:0 0 0 2px #0e9f8c22}
 .opt h4{margin:0 0 3px;font-size:15px}
 .pill{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:99px;padding:2px 9px;color:var(--muted);margin-right:6px}
 .steps{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
@@ -47,56 +51,63 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
 .st .l{font-family:var(--mono);font-size:15px;color:var(--muted)}
 .st .n{font-size:11px;color:var(--muted);margin-top:1px}
 .st.done{border-color:var(--mint)}.st.done .l{color:var(--mint)}
-.st.now{border-color:var(--gold);background:var(--panel2)}.st.now .l,.st.now .n{color:var(--gold)}
-.coach{background:#1A2A3D;border:1px solid var(--line);border-left:3px solid var(--violet);border-radius:12px;padding:13px 15px;margin:12px 0}
+.st.now{border-color:var(--teal);background:var(--panel2)}.st.now .l,.st.now .n{color:var(--teal-d)}
+.coach{background:#F1F0FC;border:1px solid #DBD8F5;border-left:3px solid var(--violet);border-radius:12px;padding:13px 15px;margin:12px 0}
 .coach .who{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--violet);text-transform:uppercase}
-.bubble{margin:8px 0;padding:10px 12px;border-radius:10px;background:#0F1B27;border:1px solid var(--line)}
-.bubble.me{background:var(--panel2)}
+.bubble{margin:8px 0;padding:10px 12px;border-radius:10px;background:var(--soft);border:1px solid var(--line)}
+.bubble.me{background:var(--panel2);border-color:#BFE5D8}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 tr.click:hover{background:var(--panel2);cursor:pointer}
 .bignum{font-family:var(--mono);font-size:clamp(26px,5vw,42px);font-weight:600;line-height:1}
-.ok{color:var(--mint)}.bad{color:var(--red)}
-.notice{border-left:3px solid var(--red);background:#2A1A16;padding:10px 14px;border-radius:8px;font-size:14px;margin:10px 0}
-.notice.good{border-left-color:var(--mint);background:#12291F}
-.bar{height:20px;border-radius:6px;overflow:hidden;display:flex;background:#0F1B27;border:1px solid var(--line)}
+.ok{color:var(--teal-d)}.bad{color:var(--red)}
+.notice{border-left:3px solid var(--red);background:#FDEDEA;padding:10px 14px;border-radius:8px;font-size:14px;margin:10px 0}
+.notice.good{border-left-color:var(--teal);background:#E7F7F1}
+.bar{height:20px;border-radius:6px;overflow:hidden;display:flex;background:var(--soft);border:1px solid var(--line)}
 .bar i{display:block;height:100%}
 .hide{display:none}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 4px}
+.chiphint{width:100%;font-size:12px;color:var(--muted)}
+.chip{font-size:13px;padding:7px 12px;min-height:auto;border-radius:999px;background:var(--soft);
+  border:1px solid var(--line);color:var(--text);line-height:1.35;text-align:left}
+.chip:hover{border-color:var(--teal);background:#E9F8F2}
+.chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.chip.on::before{content:'\2713  '}
 /* ---- UX additions ---- */
-.prog{height:6px;background:#0F1B27;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:10px 0 2px}
-.prog i{display:block;height:100%;background:var(--gold);transition:width .35s ease}
+.prog{height:6px;background:var(--soft);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:10px 0 2px}
+.prog i{display:block;height:100%;background:var(--teal);transition:width .35s ease}
 .dots{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
 .dots button{width:34px;height:34px;min-height:34px;padding:0;border-radius:9px;font-size:13px;
-  font-family:var(--mono);background:#0F1B27;color:var(--muted)}
-.dots button.on{background:var(--mint);border-color:var(--mint);color:#06231a;font-weight:600}
-.dots button.cur{border-color:var(--gold);color:var(--gold)}
+  font-family:var(--mono);background:var(--soft);color:var(--muted)}
+.dots button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+.dots button.cur{border-color:var(--gold);color:var(--gold);background:#FFF7E6}
 .navrow{position:sticky;bottom:0;z-index:5;margin-top:18px;padding:12px 0 4px;
   background:linear-gradient(180deg,transparent,var(--panel) 30%)}
 #body .card>.row:last-of-type,#v-test .card>.row:nth-last-of-type(1){position:sticky;bottom:0;z-index:5;
-  padding:12px 0 4px;background:linear-gradient(180deg,transparent,var(--panel) 35%)}
+  padding:12px 0 4px;background:linear-gradient(180deg,#ffffff00,var(--panel) 35%)}
 .bad-field{border-color:var(--red)!important;box-shadow:0 0 0 3px #e4572e33}
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
 .rcard{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;
-  padding:12px;background:#0F1B27;cursor:pointer;transition:.15s}
-.rcard:hover{border-color:var(--gold);transform:translateY(-1px)}
+  padding:12px;background:var(--soft);cursor:pointer;transition:.15s}
+.rcard:hover{border-color:var(--teal);transform:translateY(-1px)}
 .rcard .no{width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:var(--panel2);
   display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:var(--muted)}
 .rcard .nm{font-size:14px;line-height:1.35}
 .rcard .st{font-size:11px;color:var(--muted);margin-top:2px}
-.rcard.done .no{background:#153228;color:var(--mint)}
-.rcard.doing .no{background:#3a2c0d;color:var(--gold)}
+.rcard.done .no{background:#DCF5EA;color:var(--teal-d)}
+.rcard.doing .no{background:#FFF3D6;color:#9A6B00}
 .stepnum{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em}
 .grid5{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.pcard{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#0F1B27}
+.pcard{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--soft)}
 .pcard .n{font-size:13px}
 .pcard .s{font-size:11px;color:var(--muted);margin-top:3px}
-.pcard.ok{border-color:var(--mint)}.pcard.ok .s{color:var(--mint)}
-.pcard.go{border-color:var(--gold)}.pcard.go .s{color:var(--gold)}
+.pcard.ok{border-color:var(--teal);background:#F0FBF7}.pcard.ok .s{color:var(--teal-d)}
+.pcard.go{border-color:var(--amber);background:#FFFBEF}.pcard.go .s{color:#9A6B00}
 @media(max-width:640px){.dots button{width:30px;height:30px}}
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:99;background:#2A1A16;border:1px solid var(--red);color:var(--text);padding:12px 18px;border-radius:10px;max-width:min(560px,92vw);font-size:14px;opacity:0;pointer-events:none;transition:.25s}
-#toast.show{opacity:1}#toast.good{background:#12291F;border-color:var(--mint)}
-.saved{font-family:var(--mono);font-size:11px;color:var(--mint);opacity:0;transition:.3s}.saved.on{opacity:1}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:99;background:#FDEDEA;border:1px solid var(--red);color:#7A2E22;box-shadow:0 10px 30px #0e402f22;padding:12px 18px;border-radius:10px;max-width:min(560px,92vw);font-size:14px;opacity:0;pointer-events:none;transition:.25s}
+#toast.show{opacity:1}#toast.good{background:#E7F7F1;border-color:var(--teal);color:var(--teal-d)}
+.saved{font-family:var(--mono);font-size:11px;color:var(--teal-d);opacity:0;transition:.3s}.saved.on{opacity:1}
 .saved.bad{color:var(--red);opacity:1}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:22px 0}
 @media(max-width:640px){.wrap{padding:12px 10px 70px}.card{padding:15px 13px}button{min-height:46px}
@@ -126,6 +137,7 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}}
     <div class="row" style="margin-top:16px">
       <button class="primary" onclick="go('pick')">นักเรียนเข้าสู่กิจกรรม</button>
       <button onclick="openTeacher()">ครู · Dashboard และผลก่อน–หลัง</button>
+      <button onclick="openResearch()">ฐานงานวิจัยอ้างอิง</button>
     </div>
   </div>
   <div class="grid3">
@@ -136,6 +148,8 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}}
     <div class="card tight"><div class="eyebrow">Teacher in the loop</div><h3>AI ถาม ครูตัดสิน</h3>
       <p class="small muted">AI ห้ามให้คำตอบและห้ามให้คะแนนขั้นสุดท้าย ครูเป็นผู้ยืนยันระดับสมรรถนะทุกครั้ง</p></div>
   </div>
+  <p class="small muted" style="text-align:center">ออกแบบจากงานวิจัย 22 รายการทั้งในและต่างประเทศ ·
+    <a href="#" onclick="openResearch('list');return false" style="color:var(--teal-d)">ดูฐานอ้างอิง</a></p>
 </section>
 
 <section id="v-pick" class="hide"></section>
@@ -143,6 +157,7 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}}
 <section id="v-mission" class="hide"></section>
 <section id="v-report" class="hide"></section>
 <section id="v-teacher" class="hide"></section>
+<section id="v-research" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -308,7 +323,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher'];
+const views=['home','pick','test','mission','report','teacher','research'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);}
 async function save(force){if(!s)return;const j=JSON.stringify(s);LS.set('lc:'+s.idx,j);LS.set('lc:last',String(s.idx));
   queueRemote('lc:'+s.idx,s.name,j); if(force) await flushRemote(true); flagSaved();}
@@ -321,6 +336,171 @@ function bad(id,msg){ toast(msg); const e=$(id); if(!e)return;
   e.classList.add('bad-field'); e.scrollIntoView({behavior:'smooth',block:'center'});
   setTimeout(()=>e.focus({preventScroll:true}),350);
   e.addEventListener('input',()=>e.classList.remove('bad-field'),{once:true}); }
+
+
+
+/* ---------- ตัวเลือกสำเร็จรูป ให้แตะเลือกแทนการพิมพ์ ---------- */
+const SUG={
+ a0n:['ซื้อของใช้ส่วนกลางที่ทุกคนได้ใช้ เช่น พัดลม ถังน้ำ ชั้นวางของ','ซื้ออุปกรณ์การเรียนกลางของห้อง เช่น ปากกาไวท์บอร์ด กระดาษ','จัดกิจกรรมที่ทุกคนร่วมได้ในห้อง','ซื้อของสำหรับดูแลความสะอาดของห้อง','กันเป็นกองกลางไว้ช่วยเพื่อนที่เดือดร้อน'],
+ a1n:['ซื้อของใช้ส่วนกลางที่ทุกคนได้ใช้ เช่น พัดลม ถังน้ำ ชั้นวางของ','ซื้ออุปกรณ์การเรียนกลางของห้อง เช่น ปากกาไวท์บอร์ด กระดาษ','จัดกิจกรรมที่ทุกคนร่วมได้ในห้อง','ซื้อของสำหรับดูแลความสะอาดของห้อง','กันเป็นกองกลางไว้ช่วยเพื่อนที่เดือดร้อน'],
+ a2n:['ซื้อของใช้ส่วนกลางที่ทุกคนได้ใช้ เช่น พัดลม ถังน้ำ ชั้นวางของ','ซื้ออุปกรณ์การเรียนกลางของห้อง เช่น ปากกาไวท์บอร์ด กระดาษ','จัดกิจกรรมที่ทุกคนร่วมได้ในห้อง','ซื้อของสำหรับดูแลความสะอาดของห้อง','กันเป็นกองกลางไว้ช่วยเพื่อนที่เดือดร้อน'],
+ er0:['ตัดรายการที่คนใช้น้อยที่สุด เพราะกระทบคนน้อยกว่า','ลดทุกอย่างเท่ากัน เพื่อไม่ให้ใครรู้สึกถูกตัดคนเดียว','เปิดให้ห้องโหวตใหม่ เพราะเงินเป็นของทุกคน'],
+ er1:['กันงบส่วนหนึ่งไว้ให้กลุ่มที่ยังไม่ได้ประโยชน์','เชิญเขามาร่วมออกแบบแผนใหม่ เพราะเขาเป็นเจ้าของเงินเท่ากัน','อธิบายเหตุผลของเสียงส่วนใหญ่ แล้วขอความเห็นเพิ่ม'],
+ er2:['เลือกของที่มีมาตรฐาน เพราะเป็นเรื่องความปลอดภัยของทุกคน','หาข้อมูลเพิ่มและถามครูก่อน เพราะยังมีข้อมูลไม่พอ','เลือกของถูกเพราะได้จำนวนมากกว่า แต่ต้องตรวจสอบก่อนใช้'],
+ er3:['ทำบัญชีพร้อมใบเสร็จติดหน้าห้อง เพื่อให้ทุกคนตรวจสอบได้เท่ากัน','แจ้งด้วยวาจาในคาบโฮมรูม เพราะรวดเร็วและทุกคนอยู่ครบ','ให้เฉพาะคนที่ขอดู เพราะไม่อยากให้เป็นเรื่องใหญ่'],
+ feel:['กดดัน เพราะเป็นเงินของทุกคน','ตื่นเต้นที่ได้ตัดสินใจเอง','กลัวเลือกผิดแล้วเพื่อนไม่พอใจ','เฉย ๆ แต่อยากให้จบเร็ว','อยากให้ทุกคนได้ใช้เท่ากัน'],
+ know:['รู้ว่าเพื่อนส่วนใหญ่อยากได้อะไร','รู้ว่าห้องขาดของใช้อะไรบ้าง','รู้ว่ามีเพื่อนบางกลุ่มไม่ค่อยได้ใช้ของส่วนกลาง','รู้ราคาของที่จะซื้อคร่าว ๆ','เคยเห็นห้องอื่นใช้งบแบบไหน'],
+ need:['ยังไม่รู้ว่าเพื่อนทุกคนคิดเหมือนกันไหม','ยังไม่รู้ราคาจริงและร้านที่ถูกที่สุด','ยังไม่รู้ว่าของที่จะซื้อใช้ได้นานแค่ไหน','ยังไม่รู้ว่ามีใครเดือดร้อนเป็นพิเศษหรือไม่','ยังไม่รู้ว่าครูอนุญาตให้ซื้ออะไรได้บ้าง'],
+ fact:['งบมี 1,500 บาท ใช้ได้ครั้งเดียว','ห้องมีสมาชิก 15 คน','ราคาของที่จะซื้อประมาณ ... บาทต่อชิ้น','เงินนี้เป็นเงินส่วนกลาง ไม่ใช่ของใครคนเดียว','เวลาตัดสินใจมีจำกัดภายในคาบนี้'],
+ op:['คิดว่าเพื่อนน่าจะชอบแบบนี้','คิดว่าของถูกน่าจะพอใช้','คิดว่าคนส่วนใหญ่คงไม่ว่าอะไร','คิดว่าซื้อของกินจะสนุกกว่า','คิดว่าเก็บเงินไว้ก่อนดีกว่า'],
+ who:['สมาชิกทุกคนในห้อง','เพื่อนที่ฐานะไม่ค่อยดี ได้ประโยชน์มากถ้าเป็นของส่วนกลาง','เพื่อนที่ไม่ได้ใช้ของชิ้นนั้นเลย','ครูที่ปรึกษาที่ต้องรับผิดชอบร่วม','รุ่นน้องที่จะใช้ห้องนี้ต่อ'],
+ why:['เพราะจำนวนคนที่ได้ใช้มากที่สุดเมื่อเทียบกับเงินที่จ่าย','เพราะราคาต่อคนถูกที่สุดเมื่อหารกับสมาชิก 15 คน','เพราะใช้ได้นานและไม่ต้องซื้อซ้ำ','เพราะปลอดภัยและมีมาตรฐานรับรอง','เพราะเพื่อนที่ยังไม่ได้ประโยชน์จะได้ใช้ด้วย'],
+ lose:['เพื่อนที่อยากได้อีกทางเลือกหนึ่ง จะไม่ได้สิ่งที่ต้องการ','กลุ่มที่ไม่ได้ใช้ของชิ้นนี้ ผมจะเสนอให้กันงบส่วนหนึ่งไว้ให้','คนที่ออกความเห็นแล้วไม่ถูกเลือก ผมจะอธิบายเหตุผลให้ฟัง','อาจไม่มีใครเสียประโยชน์ชัดเจน แต่ต้องถามความเห็นก่อน'],
+ own:['ถ้าผลไม่ดี ผมจะรับผิดชอบด้วยการเสนอแผนใหม่ให้ห้อง','ผมจะทำบัญชีรายรับรายจ่ายให้ทุกคนตรวจสอบได้','ผมจะขอโทษและรับฟังเพื่อนที่ไม่เห็นด้วย','ผมจะช่วยแก้ไขด้วยตัวเองก่อน ไม่โยนให้คนอื่น'],
+ contrib:['รวบรวมความเห็นของเพื่อนในกลุ่มแล้วสรุปให้ทีม','ตรวจสอบราคาและข้อมูลของแต่ละทางเลือก','เตือนทีมให้คิดถึงคนที่ไม่ได้ประโยชน์','จดบันทึกและทำตารางงบให้ทีม','เป็นคนนำเสนอผลของกลุ่ม'],
+ fix:['จะถามความเห็นเพื่อนให้ครบก่อนตัดสินใจ','จะหาข้อมูลราคาจริงมาประกอบมากขึ้น','จะคิดถึงคนที่ไม่ได้ประโยชน์ตั้งแต่ต้น','จะอธิบายเหตุผลด้วยตัวเลข ไม่ใช้ความรู้สึก','จะเปิดเผยรายจ่ายให้ทุกคนตรวจสอบได้'],
+ w1:['ทุกครั้งที่ใช้เงินส่วนกลาง ต้องมีบัญชีติดหน้าห้อง','ก่อนซื้อของส่วนกลาง ต้องถามความเห็นให้ครบทุกคน','ของส่วนกลางต้องเป็นของที่ทุกคนได้ใช้','ถ้ามีคนไม่ได้ประโยชน์ ต้องกันงบส่วนหนึ่งไว้ให้','ตั้งผู้ดูแลงบของห้องและสลับกันทุกเดือน'],
+ w2:['จะทำตารางบัญชีรายรับรายจ่ายของห้อง','จะไปถามเพื่อนที่ยังไม่ได้แสดงความเห็น','จะเสนอข้อตกลงนี้ในคาบโฮมรูมครั้งหน้า','จะช่วยดูแลของส่วนกลางไม่ให้เสียหาย'],
+ w3:['ดูจากบัญชีที่ติดหน้าห้องว่ามีการบันทึกครบไหม','ถามเพื่อนว่ารู้สึกว่าได้ใช้ของส่วนกลางจริงหรือไม่','นับจำนวนคนที่ได้ใช้ของที่ซื้อมา','ดูว่ามีเรื่องร้องเรียนเรื่องเงินห้องอีกหรือไม่'],
+ r0:['ฉันรู้ว่าตัวเองตัดสินใจเร็วเกินไปเมื่อมีคนเร่ง','ฉันกล้าพูดเหตุผลของตัวเองมากขึ้น','ฉันมักคิดถึงเพื่อนสนิทก่อนคนอื่น','ฉันชอบใช้ตัวเลขช่วยตัดสินใจมากกว่าที่คิด'],
+ r1:['ทำให้เพื่อนบางคนไม่ได้ใช้ของที่อยากได้','ทำให้ทุกคนได้ใช้เท่ากันมากขึ้น','ทำให้ห้องมีข้อตกลงเรื่องเงินที่ชัดขึ้น','ทำให้เพื่อนที่เงียบได้แสดงความเห็น'],
+ r2:['รับฟัง ตอนที่เพื่อนบอกว่ากลุ่มเขาไม่ได้ประโยชน์','ยังฟังน้อยไป เพราะรีบสรุปตามเสียงส่วนใหญ่','รับฟังและเปลี่ยนการตัดสินใจจริงหลังได้ข้อมูลใหม่'],
+ r3:['จะทำเหมือนเดิม เพราะเหตุผลยังใช้ได้','จะเปลี่ยน เพราะจะถามความเห็นให้ครบก่อน','จะเปลี่ยน เพราะจะดูข้อมูลราคาจริงก่อนตัดสินใจ'],
+ r4:['จะรับฟังคนที่เห็นต่างก่อนสรุป','จะทำงานตามบทบาทของตัวเองให้ครบ','จะใช้ข้อมูลจริงมาอธิบายแทนการเดา','จะเปิดเผยข้อมูลให้เพื่อนตรวจสอบได้']
+};
+function chipsFor(id){
+  const a=SUG[id]; if(!a) return '';
+  return `<div class="chips" data-for="${id}">
+    <span class="chiphint">แตะเลือกคำตอบที่ใกล้เคียง แล้วแก้ไขเพิ่มได้ หรือพิมพ์เองทั้งหมดก็ได้</span>
+    ${a.map((x,i)=>`<button type="button" class="chip" onclick="chipTap('${id}',${i},this)">${x}</button>`).join('')}</div>`;
+}
+function mountChips(){
+  Object.keys(SUG).forEach(id=>{
+    const el=document.getElementById(id); if(!el||el.dataset.chipped) return;
+    el.dataset.chipped='1';
+    el.insertAdjacentHTML('afterend',chipsFor(id));
+  });
+}
+function chipTap(id,i,btn){
+  const el=document.getElementById(id); if(!el)return;
+  const txt=SUG[id][i]; let v=el.value||'';
+  if(btn.classList.contains('on')){
+    v=v.replace(txt,'').replace(/\s+/g,' ').trim(); btn.classList.remove('on');
+  }else{
+    v=(v.trim()?v.trim()+' ':'')+txt; btn.classList.add('on');
+    s.picked=s.picked||{}; (s.picked[id]=s.picked[id]||[]).push(txt);
+    logEv('chip',id+' เลือกตัวเลือกสำเร็จรูป: '+txt);
+  }
+  el.value=v; el.dispatchEvent(new Event('input',{bubbles:true}));
+  el.classList.remove('bad-field');
+}
+
+/* ---------- ฐานงานวิจัย ---------- */
+const RESEARCH=[
+{g:'th',n:'Sangwanglao (2024)',f:'Competency-based education reform of Thailand\u2019s basic education system: A policy review. ECNU Review of Education.',
+ u:'https://journals.sagepub.com/doi/10.1177/20965311241240486',
+ p:'ไทยกำลังเคลื่อนสู่การศึกษาฐานสมรรถนะ ให้น้ำหนักกับการนำความรู้ไปใช้มากกว่าการจดจำ',s:['เหตุผลของโครงการ','กรอบสมรรถนะเป้าหมาย']},
+{g:'th',n:'กองทุนเพื่อความเสมอภาคทางการศึกษา (2567)',f:'ASAT Report: การประเมินทักษะและความพร้อมของกลุ่มประชากรวัยแรงงาน.',
+ u:'https://www.eef.or.th/wp-content/uploads/2024/02/ASAT_Report_Eng.pdf',
+ p:'ทักษะการอ่าน คำนวณ และแก้ปัญหาในชีวิตประจำวันยังเป็นโจทย์ของประเทศ',s:['ความสำคัญของปัญหา','การเลือกภารกิจเรื่องเงินส่วนรวม']},
+{g:'th',n:'Pimdee et al. (2024)',f:'Enhancing Thai student-teacher problem-solving skills through blended PBL in online flipped classrooms. Heliyon, 10(7).',
+ u:'https://pmc.ncbi.nlm.nih.gov/articles/PMC11004652/',
+ p:'ปัญหาเป็นฐานร่วมกับการสะท้อนคิด พัฒนาความสามารถในการแก้ปัญหา',s:['รูปแบบ UP TO GROW','ขั้น Reflect']},
+{g:'th',n:'การเปรียบเทียบสมรรถนะการแก้ปัญหา (2567)',f:'วารสารการศึกษาที่ครอบคลุมและสร้างสรรค์.',
+ u:'https://so01.tci-thaijo.org/index.php/cmujedu/article/download/271632/176508/1067798',
+ p:'สถานการณ์ปัญหาจริงและการทำงานกลุ่มให้ผลต่อสมรรถนะต่างจากการเรียนแบบผสมผสานทั่วไป',s:['ขั้น Group collaboration','บทบาทรายบุคคล']},
+{g:'th',n:'สมรรถนะดิจิทัลกับการเรียนรู้ตลอดชีวิต (2567)',f:'ERIC (EJ1441440).',
+ u:'https://files.eric.ed.gov/fulltext/EJ1441440.pdf',
+ p:'การใช้เทคโนโลยีต้องมีความหมายต่อการเรียนรู้ ไม่ใช่แค่ใช้เครื่องมือเป็น',s:['ระบบเก็บหลักฐานและสะท้อนคิด']},
+{g:'int',n:'OECD (2021)',f:'AI and the future of skills, Volume 1: Capabilities and assessments.',
+ u:'https://www.oecd.org/content/dam/oecd/en/publications/reports/2021/11/ai-and-the-future-of-skills-volume-1_2f19d213/5ee71f34-en.pdf',
+ p:'เมื่อ AI ทำงานที่เคยวัดด้วยข้อสอบได้ การประเมินต้องขยับไปที่สมรรถนะ',s:['ไม่ใช้คะแนนถูกผิดเป็นตัวชี้วัดหลัก']},
+{g:'int',n:'OECD (2025)',f:'What should teachers teach and students learn in a future of powerful AI?',
+ u:'https://www.oecd.org/en/publications/what-should-teachers-teach-and-students-learn-in-a-future-of-powerful-ai_ca56c7d6-en.html',
+ p:'สมรรถนะชีวิต การตัดสินใจ และความรับผิดชอบต่อผล ต้องถูกยกระดับในหลักสูตร',s:['ภารกิจที่ไม่มีคำตอบเดียว','ขั้น Own the decision']},
+{g:'int',n:'Pearson (2025)',f:'Assessment evolved: A guide for school educators.',
+ u:'https://plc.pearson.com/sites/pearson-corp/files/2025-12/assessment-evolved-report-pearson.pdf',
+ p:'ประเมินกระบวนการมากกว่าชิ้นงานสุดท้าย และใช้หลักฐานหลายแบบ',s:['การเก็บร่องรอยการตัดสินใจ']},
+{g:'int',n:'Social life simulation (2024)',f:'Social life simulation for non-cognitive skills learning. arXiv:2405.00273.',
+ u:'https://arxiv.org/abs/2405.00273',
+ p:'การจำลองสถานการณ์ช่วยพัฒนาการสะท้อนคิด แรงจูงใจ และการตัดสินใจ',s:['Mission 01','เหตุการณ์เปลี่ยนแปลง 4 เหตุการณ์']},
+{g:'int',n:'The use of simulation (2025)',f:'The use of simulation to improve non-technical skills. Elsevier.',
+ u:'https://www.sciencedirect.com/science/article/pii/S1876139925000039',
+ p:'ทักษะที่ไม่ใช่เทคนิคพัฒนาได้ดีกว่าเมื่อผู้เรียนได้ลงมือเผชิญสถานการณ์',s:['การตัดสินใจภายใต้ข้อจำกัด']},
+{g:'int',n:'Generative AI in K-12 formative assessment (2025)',f:'Proceedings of AIME-Con.',
+ u:'https://aclanthology.org/2025.aimecon-main.12.pdf',
+ p:'AI ช่วยให้ข้อมูลย้อนกลับเร็วขึ้น เฉพาะบุคคลขึ้น และสม่ำเสมอขึ้น',s:['AI Coach','ข้อมูลย้อนกลับระหว่างทาง']},
+{g:'int',n:'A practical guide for formative assessment (2025)',f:'Supporting formative assessment and feedback using generative AI. arXiv:2505.23405.',
+ u:'https://arxiv.org/abs/2505.23405',
+ p:'AI ควรตอบสามคำถาม ผู้เรียนจะไปที่ใด อยู่ที่ใด และก้าวต่ออย่างไร',s:['คำถามของโค้ช','ขั้น Optimize']},
+{g:'int',n:'Utilizing AI for assessment in higher education (2025)',f:'ERIC (EJ1484420).',
+ u:'https://files.eric.ed.gov/fulltext/EJ1484420.pdf',
+ p:'AI ลดเวลาตรวจงานและให้ข้อมูลเชิงวิเคราะห์ที่ครูนำไปปรับการสอนได้',s:['Teacher Dashboard','รายงานรายบุคคล']},
+{g:'int',n:'The impact of AI driven assessment (2025)',f:'Journal of Culture and Values in Education.',
+ u:'https://sci-cult.net/index.php/cult/article/download/3146/1855/11939',
+ p:'เพิ่มความรวดเร็ว ความแม่นยำเชิงวินิจฉัย และการกำกับตนเองของผู้เรียน',s:['การแสดงผลทันทีเมื่อจบภารกิจ']},
+{g:'int',n:'A systematic review of generative AI in K-12 (2025)',f:'Mapping goals, activities, roles and outcomes via the 3P model.',
+ u:'https://discovery.researcher.life/article/a-systematic-review-of-generative-ai-in-k-12-mapping-goals-activities-roles-and-outcomes-via-the-3p-model/eb25397985a63acf96fc9ec02c19bf38',
+ p:'รูปแบบที่พบมากคือ feedback ระหว่างเรียน ปัญหาเป็นฐาน และสถานการณ์จำลอง',s:['ยืนยันทิศทางการออกแบบทั้งระบบ']},
+{g:'int',n:'Defining and assessing AI competencies (2025)',f:'Interactive Learning Environments.',
+ u:'https://www.tandfonline.com/doi/full/10.1080/10494820.2025.2487538',
+ p:'การประเมินสมรรถนะควรใช้หลายวิธีร่วมกัน ทั้งรูบริก การสังเกต และการประเมินตนเอง',s:['รูบริก 4 ระดับ','การประเมินตนเอง','แบบวัดเชิงสถานการณ์']},
+{g:'int',n:'AI competency assessment and ranking (2025)',f:'Applied Sciences, 15(22), 12248.',
+ u:'https://www.mdpi.com/2076-3417/15/22/12248',
+ p:'ควรจำแนกระดับของผู้เรียนเพื่อให้ความช่วยเหลือได้ตรงจุด',s:['การคัดกรองผู้ที่ต้องดูแลก่อน']},
+{g:'int',n:'Reliable but supervised (2025)',f:'Evaluating a generative AI-rubric model. Assessment and Evaluation in Higher Education.',
+ u:'https://www.tandfonline.com/doi/full/10.1080/02602938.2025.2537774',
+ p:'การให้คะแนนด้วย AI เชื่อถือได้ระดับหนึ่ง แต่ต้องมีมนุษย์กำกับเพื่อความเป็นธรรม',s:['ครูเป็นผู้ยืนยันระดับสมรรถนะขั้นสุดท้าย']},
+{g:'int',n:'AI-driven rubrics (2025)',f:'Journal of Engineering Education Transformations.',
+ u:'https://journaleet.in/index.php/jeet/article/view/2127',
+ p:'AI ช่วยทำให้เกณฑ์การประเมินชัดเจนและสม่ำเสมอขึ้น',s:['การออกแบบรูบริกสมรรถนะชีวิต']},
+{g:'int',n:'An AI-driven competence-based education framework (2025)',f:'Proceedings of the ACM.',
+ u:'https://dl.acm.org/doi/full/10.1145/3802607.3802634',
+ p:'ต้องออกแบบกระบวนการเรียนรู้และระบบประเมินไปพร้อมกัน',s:['โครงสร้างสามส่วนของนวัตกรรม']},
+{g:'int',n:'UNESCO (2024)',f:'Artificial intelligence and the futures of learning / AI competency framework for teachers.',
+ u:'https://www.unesco.org/en/digital-education/ai-future-learning',
+ p:'AI ต้องเสริมการเรียนรู้โดยมีมนุษย์เป็นศูนย์กลาง และครูเป็นผู้ตัดสินผลสุดท้าย',s:['AI ห้ามตัดสินใจแทนผู้เรียน','Teacher in the loop']},
+{g:'int',n:'European Commission and UNESCO (2025)',f:'Draft AI literacy framework for primary and secondary education (AILit).',
+ u:'https://education.ec.europa.eu/event/empowering-learners-for-the-age-of-ai-launch-of-the-draft-ai-literacy-framework-and-stakeholder-consultations',
+ p:'ผู้เรียนต้องเข้าใจข้อจำกัดของ AI และยังคงเป็นผู้ตัดสินใจเอง',s:['บันทึกบทสนทนากับโค้ชเป็นหลักฐาน']}
+];
+let rTab='list';
+function openResearch(tab){ rTab=tab||rTab; go('research'); renderResearch(); }
+function renderResearch(){
+  const item=(r,i)=>`<div class="opt" style="cursor:default">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <h4 style="margin:0">${i+1}. ${r.n}</h4><span class="pill">${r.g==='th'?'ในประเทศ':'ต่างประเทศ'}</span></div>
+    <p class="small muted" style="margin:4px 0">${r.f}</p>
+    <p class="small" style="margin:6px 0"><b>ประเด็นที่นำมาใช้:</b> ${r.p}</p>
+    <p class="small muted">รองรับ: ${r.s.map(x=>`<span class="pill">${x}</span>`).join('')}</p>
+    <a class="small" style="color:var(--teal-d)" href="${r.u}" target="_blank" rel="noopener">เปิดแหล่งข้อมูล</a></div>`;
+  const th=RESEARCH.filter(r=>r.g==='th'), inter=RESEARCH.filter(r=>r.g==='int');
+  let body='';
+  if(rTab==='list'){
+    body=`<div class="card"><div class="eyebrow">ในประเทศ</div><h2>งานวิจัยและรายงานของไทย</h2>${th.map(item).join('')}</div>
+      <div class="card"><div class="eyebrow">ต่างประเทศ</div><h2>งานวิจัยและกรอบแนวคิดสากล</h2>${inter.map(item).join('')}</div>`;
+  } else {
+    const comps={}; RESEARCH.forEach(r=>r.s.forEach(x=>{(comps[x]=comps[x]||[]).push(r.n);}));
+    body=`<div class="card"><h2>องค์ประกอบของระบบ มาจากงานวิจัยชิ้นไหน</h2>
+      <p class="small muted">ใช้ตอบกรรมการเวลาถูกถามว่าทำไมออกแบบแบบนี้</p>
+      ${Object.entries(comps).map(([k,v])=>`<div class="opt" style="cursor:default"><h4>${k}</h4>
+        <p class="small muted">${v.join(' · ')}</p></div>`).join('')}</div>
+      <div class="card"><h2>งานวิจัย ไปสู่ องค์ประกอบ</h2>
+      <table><thead><tr><th>งานวิจัย</th><th>ประเด็นที่นำมาใช้</th><th>องค์ประกอบที่รองรับ</th></tr></thead><tbody>
+      ${RESEARCH.map(r=>`<tr><td><a href="${r.u}" target="_blank" rel="noopener" style="color:var(--teal-d)">${r.n}</a></td>
+        <td class="small">${r.p}</td><td class="small">${r.s.join(' · ')}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  }
+  $('v-research').innerHTML=`<div class="card">
+    <div class="eyebrow">Research Base</div>
+    <h1>งานวิจัยที่รองรับการออกแบบ</h1>
+    <p class="muted">ทุกองค์ประกอบของระบบนี้มาจากข้อค้นพบของงานวิจัย ${RESEARCH.length} รายการ ไม่ได้ออกแบบจากความชอบส่วนตัว</p>
+    <div class="row" style="margin-top:12px">
+      <button class="${rTab==='list'?'primary':''}" onclick="openResearch('list')">รายการอ้างอิง</button>
+      <button class="${rTab==='map'?'primary':''}" onclick="openResearch('map')">ตารางจับคู่กับระบบ</button>
+    </div></div>${body}
+    <div class="row" style="margin-bottom:26px"><button onclick="go('home')">กลับหน้าแรก</button></div>`;
+}
 
 /* ---------- pick student ---------- */
 function renderPick(){
@@ -434,7 +614,7 @@ function renderMission(){
   go('mission');
   const fn=[stU,stP,stT,stO,stG,stR,stOpt,stW][s.step];
   $('v-mission').innerHTML=stepBar()+'<div id="body"></div>';
-  fn(); save();
+  fn(); mountChips(); save();
 }
 function nextStep(){ s.step++; save(true); if(s.step>=STEPS.length){s.phase='post';save();renderTest();return;} renderMission(); }
 
@@ -479,7 +659,7 @@ function stT(){
   const box=$('alts');
   [0,1,2].forEach(i=>{
     const a=p.alt[i];
-    box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:#0F1B27">
+    box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:var(--soft)">
       <div class="eyebrow">ทางเลือกที่ ${i+1}${i===2?' (ไม่บังคับ)':''}</div>
       <label for="a${i}n">ใช้เงินทำอะไร</label><input id="a${i}n" value="${esc(a.n||'')}">
       <div class="grid2">
@@ -522,7 +702,7 @@ function stO(){
   ['why','lose','own'].forEach(k=>$(k).oninput=e=>{p[k]=e.target.value;});
   renderCoach();
 }
-function pickAlt(i){ if(s.plan.choice!==undefined&&s.plan.choice!==i){s.plan.changed=(s.plan.changed||0)+1;logEv('change','เปลี่ยนทางเลือกเป็นที่ '+(i+1));} s.plan.choice=i; stO(); }
+function pickAlt(i){ /* re-render */ if(s.plan.choice!==undefined&&s.plan.choice!==i){s.plan.changed=(s.plan.changed||0)+1;logEv('change','เปลี่ยนทางเลือกเป็นที่ '+(i+1));} s.plan.choice=i; stO(); mountChips(); }
 function okO(){
   if(s.plan.choice===undefined){toast('เลือกทางเลือก 1 ทางก่อน');return;}
   if((s.plan.why||'').length<10){bad('why','เขียนเหตุผลของการเลือก โดยอ้างอิงตัวเลขหรือข้อเท็จจริง');return;}
@@ -546,7 +726,7 @@ function stG(){
   const box=$('evs');
   EVENTS.forEach((ev,i)=>{
     d[i]=d[i]||{};
-    box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:#0F1B27;margin-top:12px">
+    box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:var(--soft);margin-top:12px">
       <div class="eyebrow">เหตุการณ์ที่ ${i+1}</div><h3>${ev.t}</h3><p class="small">${ev.b}</p>
       <div id="ev${i}"></div>
       <label for="er${i}">เหตุผลของการตัดสินใจนี้</label><input id="er${i}" value="${esc(d[i].r||'')}">
@@ -558,7 +738,7 @@ function stG(){
     $('er'+i).oninput=e=>{d[i].r=e.target.value;};
   });
 }
-function pickEv(i,j){ const d=s.decisions[i]; if(d.pick!==undefined&&d.pick!==j){d.ch=(d.ch||0)+1;} d.pick=j; stG(); }
+function pickEv(i,j){ const d=s.decisions[i]; if(d.pick!==undefined&&d.pick!==j){d.ch=(d.ch||0)+1;} d.pick=j; stG(); mountChips(); }
 function okG(){
   const n=Object.values(s.decisions).filter(d=>d.pick!==undefined&&(d.r||'').length>4).length;
   if(n<EVENTS.length){toast('ตอบให้ครบทั้ง '+EVENTS.length+' เหตุการณ์ พร้อมเหตุผลสั้น ๆ');return;}
@@ -591,7 +771,7 @@ function stOpt(){
        <b class="mono">${i+1}</b> ${['เริ่มต้น','กำลังพัฒนา','สามารถ','เชี่ยวชาญ'][i]} — <span class="small muted">${t}</span></div>`).join('')}</div>`).join('');
   $('fix').oninput=e=>{s.fix=e.target.value;};
 }
-function setSelf(k,v){ s.self[k]=v; stOpt(); }
+function setSelf(k,v){ s.self[k]=v; stOpt(); mountChips(); }
 function okOpt(){ if(Object.keys(s.self).length<4){toast('ประเมินตนเองให้ครบทั้ง 4 ด้าน');return;}
   if((s.fix||'').length<5){bad('fix','เขียนสิ่งที่จะปรับอย่างน้อย 1 อย่าง');return;} logEv('Opt','ประเมินตนเองและระบุสิ่งที่จะปรับ'); nextStep(); }
 
