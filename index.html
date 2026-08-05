@@ -147,6 +147,8 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
     <div class="row" style="margin-top:16px">
       <button onclick="openTeacher()">ครู · Dashboard และผลก่อน–หลัง</button>
       <button onclick="go('semester');renderSemester()">ภาพรวมภาคเรียน</button>
+      <button onclick="openQuick()">ภารกิจด่วนรายวัน (ครู)</button>
+      <button onclick="qStart()">ทำภารกิจด่วน (นักเรียน)</button>
       <button onclick="openResearch()">ฐานงานวิจัยอ้างอิง</button>
     </div>
   </div>
@@ -176,6 +178,9 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 <section id="v-teacher" class="hide"></section>
 <section id="v-research" class="hide"></section>
 <section id="v-semester" class="hide"></section>
+<section id="v-quick" class="hide"></section>
+<section id="v-qstudent" class="hide"></section>
+<section id="v-qdash" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -419,7 +424,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   if(v==='home') renderMissionList();}
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
@@ -1335,6 +1340,326 @@ function exportCSV(){
   const csv='\uFEFF'+[head,...body].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='uptogrow_m4-4_week'+MIS().week+'_scores.csv';a.click();
+}
+
+
+/* ================= ภารกิจด่วนรายวัน (Quick Mission) =================
+   ครูพิมพ์หัวข้อ -> AI สร้างสถานการณ์ ตัวเลือก คำถามสะท้อนคิด และเกณฑ์ประเมิน
+   โดยผูกกับฐานงานวิจัยในระบบ ครูตรวจและอนุมัติก่อนเปิดให้นักเรียนทำ
+   ==================================================================== */
+let QDEF=null;            // นิยามภารกิจด่วนที่กำลังใช้
+let QCODE='';             // รหัสห้องของภารกิจด่วน
+const qKey=(code,idx)=>'lc:q:'+code+':'+idx;
+const qDefKey=code=>'lc:qdef:'+code;
+const QDIMS={
+  think:{n:'การคิดแก้ปัญหาและตัดสินใจ',res:['OECD (2021)','OECD (2025)','Pearson (2025)']},
+  self:{n:'การจัดการตนเองและความรับผิดชอบ',res:['Sangwanglao (2024)','Defining and assessing AI competencies (2025)']},
+  comm:{n:'การสื่อสารและทำงานร่วมกัน',res:['Pimdee et al. (2024)','การเปรียบเทียบสมรรถนะการแก้ปัญหา (2567)']},
+  civic:{n:'ความเป็นพลเมืองดีและประโยชน์ส่วนรวม',res:['OECD (2025)','UNESCO (2024)','European Commission and UNESCO (2025)']},
+  digital:{n:'การรู้เท่าทันสื่อและพลเมืองดิจิทัล',res:['European Commission and UNESCO (2025)','สมรรถนะดิจิทัลกับการเรียนรู้ตลอดชีวิต (2567)']}
+};
+
+/* ---------- ตัวสร้างสำรอง ใช้เมื่อ AI ไม่พร้อม เพื่อให้ครูใช้งานได้เสมอ ---------- */
+function qFallback(topic,dim){
+  const d=QDIMS[dim];
+  return {
+    situation:'สถานการณ์: '+topic+' เกิดขึ้นในห้องเรียนของเราวันนี้ นักเรียนต้องตัดสินใจว่าจะทำอย่างไร โดยคำนึงถึงผลที่จะเกิดกับตัวเองและกับผู้อื่นในห้อง สถานการณ์นี้ไม่มีคำตอบที่ถูกเพียงข้อเดียว',
+    options:[
+      {t:'ทำตามความรู้สึกของตัวเองในตอนนั้นทันที',level:1},
+      {t:'ทำตามที่เพื่อนส่วนใหญ่ทำ เพราะไม่อยากแตกต่าง',level:2},
+      {t:'หยุดคิดก่อน หาข้อมูลเพิ่ม แล้วจึงตัดสินใจด้วยเหตุผล',level:3},
+      {t:'หาข้อมูลเพิ่ม คิดถึงผู้ที่ได้รับผลกระทบ ตัดสินใจ และเตรียมรับผิดชอบผลที่ตามมา',level:4}
+    ],
+    probe:[
+      'ถ้าเลือกแบบนี้ ใครได้ประโยชน์ และใครอาจเสียประโยชน์',
+      'ข้อมูลที่ใช้ตัดสินใจนี้ ตรวจสอบได้จากที่ไหน',
+      'ถ้าผลออกมาไม่เป็นอย่างที่คิด จะรับผิดชอบอย่างไร'
+    ],
+    reflect:[
+      'ฉันตัดสินใจแบบนี้เพราะอะไร',
+      'ถ้าเกิดเหตุการณ์นี้จริง ฉันจะทำเหมือนเดิมหรือไม่ เพราะอะไร'
+    ],
+    rubricName:d.n,
+    rubric:[
+      'ตัดสินใจจากความรู้สึก ไม่อธิบายเหตุผล',
+      'อธิบายเหตุผลได้บ้าง แต่ยังไม่คำนึงถึงผู้อื่น',
+      'อธิบายเหตุผลด้วยข้อมูล และคำนึงถึงผู้ได้รับผลกระทบ',
+      'อธิบายด้วยข้อมูล คำนึงถึงผู้อื่น และระบุวิธีรับผิดชอบผลได้'
+    ],
+    research:d.res,
+    byAI:false
+  };
+}
+
+/* ---------- เรียก AI ให้สร้างภารกิจ โดยบังคับให้อ้างอิงฐานงานวิจัย ---------- */
+async function qGenerate(){
+  const topic=($('qTopic')||{}).value?.trim()||'';
+  const dim=($('qDim')||{}).value||'think';
+  if(topic.length<5){ bad('qTopic','พิมพ์หัวข้อสถานการณ์ให้ชัดเจนก่อน เช่น มีนักเรียนถ่ายคลิปเพื่อนไปโพสต์ในกลุ่ม'); return; }
+  const btn=$('qGenBtn'); if(btn){btn.disabled=true;btn.textContent='กำลังให้ AI ร่างภารกิจ…';}
+  const resList=RESEARCH.map(r=>r.n+' — '+r.p).join('\n');
+  const sys=`คุณเป็นผู้ช่วยครูไทยออกแบบภารกิจสถานการณ์สั้นสำหรับคาบโฮมรูม ระดับมัธยมศึกษาปีที่ 4
+ตอบกลับเป็น JSON เท่านั้น ห้ามมีข้อความอื่นนอก JSON ห้ามใส่ markdown หรือ backtick
+โครงสร้าง JSON ที่ต้องการ
+{"situation":"...","options":[{"t":"...","level":1},{"t":"...","level":2},{"t":"...","level":3},{"t":"...","level":4}],"probe":["...","...","..."],"reflect":["...","..."],"rubricName":"...","rubric":["ระดับ1","ระดับ2","ระดับ3","ระดับ4"],"research":["ชื่องานวิจัยที่ใช้อ้างอิง"]}
+กฎเหล็ก
+1 situation ต้องเป็นสถานการณ์ที่ไม่มีคำตอบถูกเพียงข้อเดียว มีข้อจำกัดจริง ยาวไม่เกิน 4 บรรทัด ภาษาไทยที่นักเรียน ม.4 เข้าใจ
+2 options ต้องมี 4 ข้อ เรียงจากพฤติกรรมระดับ 1 ถึง 4 ตามเกณฑ์ โดยห้ามให้ข้อใดดูถูกชัดเจนจนเดาได้ทันที ทุกข้อต้องเป็นสิ่งที่นักเรียนจริงอาจเลือก
+3 probe คือคำถามกระตุ้นคิด 3 ข้อ ห้ามเป็นคำถามที่มีคำตอบถูกผิด
+4 rubric 4 ระดับ ต้องเป็นพฤติกรรมที่ครูสังเกตได้จริง ไม่ใช่ความรู้สึก
+5 research ต้องเลือกจากรายการที่ให้มาเท่านั้น 2 ถึง 3 รายการ ห้ามสร้างชื่องานวิจัยขึ้นเอง`;
+  const prompt=`หัวข้อที่ครูกำหนด: ${topic}
+สมรรถนะเป้าหมาย: ${QDIMS[dim].n}
+รายการงานวิจัยที่เลือกอ้างอิงได้ (ห้ามใช้ชื่ออื่นนอกรายการนี้):
+${resList}`;
+  let def=null;
+  try{
+    const j=await apiCall({action:'coach',system:sys,prompt});
+    let txt=(j.reply||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    const s=txt.indexOf('{'), e=txt.lastIndexOf('}');
+    if(s>=0&&e>s) txt=txt.slice(s,e+1);
+    const o=JSON.parse(txt);
+    if(o.situation&&Array.isArray(o.options)&&o.options.length===4&&Array.isArray(o.rubric)&&o.rubric.length===4){
+      const valid=RESEARCH.map(r=>r.n);
+      def={situation:o.situation,
+        options:o.options.map((x,i)=>({t:String(x.t||x),level:x.level||i+1})),
+        probe:(o.probe||[]).slice(0,3),
+        reflect:(o.reflect||[]).slice(0,2),
+        rubricName:o.rubricName||QDIMS[dim].n,
+        rubric:o.rubric.map(String),
+        research:(o.research||[]).filter(r=>valid.some(v=>String(r).includes(v.split(' (')[0]))).slice(0,3),
+        byAI:true};
+      if(!def.research.length) def.research=QDIMS[dim].res;
+      if(def.probe.length<3) def.probe=qFallback(topic,dim).probe;
+      if(def.reflect.length<2) def.reflect=qFallback(topic,dim).reflect;
+    }
+  }catch(e){ def=null; }
+  if(!def){ def=qFallback(topic,dim); toast('AI ไม่พร้อมใช้งาน ระบบใช้โครงร่างสำรองแทน ครูแก้ไขข้อความได้ทุกช่องก่อนเปิดใช้'); }
+  QDEF=Object.assign({topic,dim,created:Date.now()},def);
+  if(btn){btn.disabled=false;btn.textContent='ให้ AI ร่างภารกิจใหม่';}
+  renderQuick();
+}
+
+/* ---------- หน้าครู: สร้างและตรวจภารกิจด่วน ---------- */
+function openQuick(){ go('quick'); renderQuick(); }
+function renderQuick(){
+  const dimOpts=Object.entries(QDIMS).map(([k,v])=>`<option value="${k}" ${QDEF&&QDEF.dim===k?'selected':''}>${v.n}</option>`).join('');
+  let editor='';
+  if(QDEF){
+    editor=`
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">ร่างภารกิจ ตรวจและแก้ไขได้ทุกช่อง</h2>
+        <span class="pill">${QDEF.byAI?'ร่างโดย AI':'โครงร่างสำรอง'}</span></div>
+      <p class="small muted">ครูเป็นผู้ตรวจสอบและอนุมัติก่อนเปิดให้นักเรียนทำเสมอ ระบบจะไม่ส่งข้อความของ AI ถึงนักเรียนโดยตรง</p>
+      <label for="qSit">สถานการณ์</label><textarea id="qSit" style="min-height:110px">${esc(QDEF.situation)}</textarea>
+      <h3 style="font-size:15px;margin-top:14px">ตัวเลือก 4 ระดับ</h3>
+      ${QDEF.options.map((o,i)=>`<label for="qo${i}">ตัวเลือกที่ ${i+1} (ระดับ ${o.level})</label><input id="qo${i}" value="${esc(o.t)}">`).join('')}
+      <h3 style="font-size:15px;margin-top:14px">คำถามกระตุ้นคิด</h3>
+      ${QDEF.probe.map((q,i)=>`<label for="qp${i}">คำถามที่ ${i+1}</label><input id="qp${i}" value="${esc(q)}">`).join('')}
+      <h3 style="font-size:15px;margin-top:14px">คำถามสะท้อนคิด</h3>
+      ${QDEF.reflect.map((q,i)=>`<label for="qr${i}">ข้อที่ ${i+1}</label><input id="qr${i}" value="${esc(q)}">`).join('')}
+      <h3 style="font-size:15px;margin-top:14px">เกณฑ์ประเมิน ${esc(QDEF.rubricName)}</h3>
+      ${QDEF.rubric.map((r,i)=>`<label for="qb${i}">ระดับ ${i+1}</label><input id="qb${i}" value="${esc(r)}">`).join('')}
+      <div class="notice good" style="margin-top:14px">
+        <b>ฐานงานวิจัยที่รองรับเกณฑ์นี้</b><br>
+        ${QDEF.research.map(r=>`<span class="pill">${esc(r)}</span>`).join('')}
+        <div class="small" style="margin-top:6px">ระบบเลือกจากฐานงานวิจัย ${RESEARCH.length} รายการในโปรแกรม ไม่ได้สร้างชื่อขึ้นเอง</div>
+      </div>
+      <div class="row" style="margin-top:16px">
+        <button class="primary" onclick="qApprove()">อนุมัติและเปิดให้นักเรียนทำ</button>
+        <button onclick="qGenerate()" id="qGenBtn">ให้ AI ร่างภารกิจใหม่</button>
+      </div>
+    </div>`;
+  }
+  $('v-quick').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">ภารกิจด่วนรายวัน</div>
+    <h1>ประเมินสถานการณ์เร่งด่วน</h1>
+    <p class="muted" style="max-width:64ch">ใช้เมื่อเกิดเหตุการณ์ในห้องเรียนแล้วครูอยากรู้ทันทีว่านักเรียนจะรับมืออย่างไร ครูพิมพ์หัวข้อ ระบบจะร่างสถานการณ์ ตัวเลือก คำถาม และเกณฑ์ประเมินให้ ใช้เวลาทำประมาณ 10 นาที</p>
+    <label for="qTopic">หัวข้อสถานการณ์ที่ต้องการประเมิน</label>
+    <input id="qTopic" placeholder="เช่น มีนักเรียนถ่ายคลิปเพื่อนขณะล้มแล้วโพสต์ลงกลุ่มห้อง" value="${QDEF?esc(QDEF.topic):''}">
+    <label for="qDim">สมรรถนะเป้าหมาย</label>
+    <select id="qDim">${dimOpts}</select>
+    ${QDEF?'':'<div class="row" style="margin-top:16px"><button class="primary" id="qGenBtn" onclick="qGenerate()">ให้ AI ร่างภารกิจ</button></div>'}
+  </div>
+  ${editor}
+  <div class="row" style="margin-bottom:26px"><button onclick="go('home')">กลับหน้าแรก</button>
+    <button onclick="openQDash()">ดูผลภารกิจด่วนที่เปิดไว้</button></div>`;
+}
+
+/* ---------- อนุมัติและเปิดใช้ ---------- */
+async function qApprove(){
+  if(!QDEF) return;
+  QDEF.situation=($('qSit')||{}).value||QDEF.situation;
+  QDEF.options=QDEF.options.map((o,i)=>({t:($('qo'+i)||{}).value||o.t,level:o.level}));
+  QDEF.probe=QDEF.probe.map((q,i)=>($('qp'+i)||{}).value||q);
+  QDEF.reflect=QDEF.reflect.map((q,i)=>($('qr'+i)||{}).value||q);
+  QDEF.rubric=QDEF.rubric.map((r,i)=>($('qb'+i)||{}).value||r);
+  if(QDEF.situation.trim().length<20){ bad('qSit','สถานการณ์สั้นเกินไป ควรอธิบายให้นักเรียนเห็นภาพและมีข้อจำกัดชัดเจน'); return; }
+  QCODE=QDEF.code||('Q'+String(Date.now()).slice(-5));
+  QDEF.code=QCODE; QDEF.approvedAt=Date.now();
+  LS.set(qDefKey(QCODE),JSON.stringify(QDEF));
+  LS.set('lc:qlast',QCODE);
+  queueRemote(qDefKey(QCODE),'ภารกิจด่วน '+QDEF.topic,JSON.stringify(QDEF));
+  await flushRemote(true);
+  toast('เปิดใช้ภารกิจด่วนแล้ว รหัส '+QCODE,1);
+  openQDash();
+}
+
+/* ---------- หน้านักเรียนทำภารกิจด่วน ---------- */
+let QS=null;
+async function qStart(){
+  const code=(LS.get('lc:qlast')||'');
+  if(!code){ toast('ยังไม่มีภารกิจด่วนที่ครูเปิดไว้'); return; }
+  const raw=await S.get(qDefKey(code),true);
+  if(!raw){ toast('ไม่พบภารกิจด่วน ให้ครูเปิดภารกิจก่อน'); return; }
+  QDEF=JSON.parse(raw); QCODE=code;
+  go('qstudent'); renderQPick();
+}
+function renderQPick(){
+  $('v-qstudent').innerHTML=`<div class="card">
+    <div class="eyebrow">ภารกิจด่วน · ${esc(QDEF.topic)}</div>
+    <h2>แตะชื่อของตัวเอง</h2>
+    <div class="roster">${ROSTER.map((n,i)=>
+      `<div class="rcard" onclick="qOpen(${i})"><div class="no">${i+1}</div><div><div class="nm">${n}</div></div></div>`).join('')}</div>
+    <div class="row" style="margin-top:16px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
+}
+async function qOpen(i){
+  const raw=await S.get(qKey(QCODE,i),true);
+  QS=raw?JSON.parse(raw):{idx:i,name:ROSTER[i],code:QCODE,topic:QDEF.topic,at:Date.now(),pick:null,reason:'',r0:'',r1:'',teacher:{level:0,note:''}};
+  renderQForm();
+}
+function renderQForm(){
+  $('v-qstudent').innerHTML=`<div class="card">
+    <div class="eyebrow">ภารกิจด่วน · ${esc(QS.name)}</div>
+    <h2>${esc(QDEF.topic)}</h2>
+    <p style="white-space:pre-wrap">${esc(QDEF.situation)}</p>
+    <h3 style="font-size:15px;margin-top:14px">ถ้าเกิดเหตุการณ์นี้ นักเรียนจะทำอย่างไร</h3>
+    <p class="small muted">เลือกข้อที่ตรงกับสิ่งที่จะทำจริงมากที่สุด ไม่มีข้อที่ถูกหรือผิด และไม่มีผลต่อคะแนนเก็บ</p>
+    <div id="qOpts"></div>
+    <label for="qReason">เพราะอะไรจึงเลือกข้อนี้</label>
+    <textarea id="qReason">${esc(QS.reason)}</textarea>
+    <div class="coach"><div class="who">Coach</div>
+      <div class="small">${QDEF.probe.map(q=>'• '+esc(q)).join('<br>')}</div></div>
+    <label for="qr0">${esc(QDEF.reflect[0]||'')}</label><textarea id="qr0">${esc(QS.r0)}</textarea>
+    <label for="qr1">${esc(QDEF.reflect[1]||'')}</label><textarea id="qr1">${esc(QS.r1)}</textarea>
+    <div class="row navrow"><button onclick="renderQPick()">ย้อนกลับ</button>
+      <button class="primary" onclick="qSubmit()">ส่งคำตอบ</button></div></div>`;
+  const box=$('qOpts');
+  QDEF.options.forEach((o,j)=>box.insertAdjacentHTML('beforeend',
+    `<div class="opt ${QS.pick===j?'sel':''}" id="qop${j}" onclick="qPick(${j})" style="padding:14px">${esc(o.t)}</div>`));
+  $('qReason').oninput=e=>{QS.reason=e.target.value;};
+  $('qr0').oninput=e=>{QS.r0=e.target.value;};
+  $('qr1').oninput=e=>{QS.r1=e.target.value;};
+}
+function qPick(j){ QS.pick=j; QDEF.options.forEach((o,k)=>$('qop'+k).classList.toggle('sel',k===j)); }
+async function qSubmit(){
+  if(QS.pick===null){ toast('เลือกคำตอบ 1 ข้อก่อน'); return; }
+  if((QS.reason||'').trim().length<8){ bad('qReason','เขียนเหตุผลสั้น ๆ อย่างน้อย 1 ประโยค เพราะเหตุผลคือสิ่งที่ครูใช้ประเมิน'); return; }
+  QS.done=true; QS.at=Date.now();
+  const j=JSON.stringify(QS);
+  LS.set(qKey(QCODE,QS.idx),j); queueRemote(qKey(QCODE,QS.idx),QS.name,j);
+  const ok=await flushRemote(true);
+  toast(ok?'ส่งคำตอบเรียบร้อย ขอบคุณครับ':'บันทึกในเครื่องแล้ว จะส่งขึ้นระบบเมื่อเน็ตกลับมา',ok);
+  renderQPick();
+}
+
+/* ---------- แดชบอร์ดภารกิจด่วนสำหรับครู ---------- */
+async function openQDash(){
+  const code=QCODE||LS.get('lc:qlast')||'';
+  if(!code){ toast('ยังไม่มีภารกิจด่วน'); openQuick(); return; }
+  QCODE=code;
+  go('qdash');
+  $('v-qdash').innerHTML=`<div class="card"><h2>กำลังโหลดผล…</h2></div>`;
+  await pullAll();
+  if(!QDEF||QDEF.code!==code){ const r=await S.get(qDefKey(code),true); if(r) QDEF=JSON.parse(r); }
+  if(!QDEF){ $('v-qdash').innerHTML='<div class="card"><h2>ไม่พบภารกิจด่วน</h2></div>'; return; }
+  const rows=[];
+  for(let i=0;i<ROSTER.length;i++){
+    const raw=await S.get(qKey(code,i),true);
+    rows.push(raw?JSON.parse(raw):null);
+  }
+  window._q=rows;
+  const done=rows.filter(x=>x&&x.done);
+  const counts=QDEF.options.map((o,j)=>done.filter(d=>d.pick===j).length);
+  const c=CPAL();
+  const lvAvg=done.length?(done.reduce((a,d)=>a+(QDEF.options[d.pick]?.level||0),0)/done.length):0;
+  const tLv=[0,0,0,0]; done.forEach(d=>{const v=d.teacher&&d.teacher.level; if(v) tLv[v-1]++;});
+  $('v-qdash').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · ภารกิจด่วน ${esc(QDEF.topic)}</div>
+  <div class="card">
+    <div class="eyebrow">ภารกิจด่วน · รหัส ${esc(code)}</div>
+    <h1>${esc(QDEF.topic)}</h1>
+    <p class="muted small">สมรรถนะเป้าหมาย ${esc(QDIMS[QDEF.dim]?.n||QDEF.rubricName)} · เปิดใช้เมื่อ ${fmtDT(QDEF.approvedAt)}</p>
+    <p style="white-space:pre-wrap;margin-top:10px">${esc(QDEF.situation)}</p>
+    <div class="grid3" style="margin-top:14px">
+      <div class="card tight"><div class="eyebrow">ตอบแล้ว</div><div class="bignum">${done.length}/${ROSTER.length}</div></div>
+      <div class="card tight"><div class="eyebrow">ระดับเฉลี่ยจากตัวเลือก</div><div class="bignum ${lvAvg>=3?'ok':lvAvg&&lvAvg<2?'bad':''}">${lvAvg?lvAvg.toFixed(2):'-'}</div><div class="small muted">จาก 4</div></div>
+      <div class="card tight"><div class="eyebrow">ครูประเมินแล้ว</div><div class="bignum">${done.filter(d=>d.teacher&&d.teacher.level).length}/${done.length||0}</div></div>
+    </div>
+    <div class="row noprint" style="margin-top:12px">
+      <button onclick="openQDash()">รีเฟรช</button>
+      <button onclick="qExport()">ส่งออก CSV</button>
+      <button onclick="window.print()">พิมพ์รายงาน</button>
+      <button onclick="openQuick()">สร้างภารกิจด่วนใหม่</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>
+
+  <div class="card"><h2>นักเรียนเลือกอะไรบ้าง</h2>
+    <p class="small muted">ใช้ดูทันทีในคาบว่าห้องส่วนใหญ่จะรับมือกับสถานการณ์นี้อย่างไร</p>
+    ${svgDonut(QDEF.options.map((o,j)=>'ระดับ '+o.level+' ('+counts[j]+' คน)'),counts,[c.red,c.amber,c.tealSoft,c.teal])}
+    <table style="margin-top:10px"><thead><tr><th>ตัวเลือก</th><th>ระดับ</th><th>จำนวน</th></tr></thead><tbody>
+    ${QDEF.options.map((o,j)=>`<tr><td class="small">${esc(o.t)}</td><td class="mono">${o.level}</td><td class="mono">${counts[j]} คน</td></tr>`).join('')}
+    </tbody></table>
+  </div>
+
+  <div class="card"><h2>คำตอบรายบุคคล</h2>
+    <table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>เลือก</th><th>เหตุผล</th><th>ครูให้ระดับ</th></tr></thead><tbody>
+    ${ROSTER.map((n,i)=>{const d=rows[i];
+      if(!d||!d.done) return `<tr><td class="mono">${i+1}</td><td>${n}</td><td colspan="3" class="muted small">ยังไม่ตอบ</td></tr>`;
+      return `<tr><td class="mono">${i+1}</td><td>${n}</td>
+        <td class="mono">ระดับ ${QDEF.options[d.pick]?.level||'-'}</td>
+        <td class="small">${esc(d.reason)}</td>
+        <td class="noprint">${[1,2,3,4].map(v=>`<button class="small" style="padding:4px 8px;${d.teacher&&d.teacher.level===v?'background:var(--teal);color:#fff;border-color:var(--teal)':''}" onclick="qSetLevel(${i},${v})">${v}</button>`).join(' ')}</td></tr>`;}).join('')}
+    </tbody></table>
+    ${done.filter(d=>!(d.teacher&&d.teacher.level)).length?`<div class="notice">เหลือ ${done.filter(d=>!(d.teacher&&d.teacher.level)).length} คนที่ครูยังไม่ให้ระดับ</div>`:''}
+  </div>
+
+  <div class="card"><h2>เกณฑ์ประเมินที่ใช้กับภารกิจนี้</h2>
+    <table><thead><tr><th>ระดับ</th><th>พฤติกรรมที่สังเกตได้</th><th>จำนวนที่ครูให้</th></tr></thead><tbody>
+    ${QDEF.rubric.map((r,i)=>`<tr><td class="mono">${i+1}</td><td class="small">${esc(r)}</td><td class="mono">${tLv[i]} คน</td></tr>`).join('')}
+    </tbody></table>
+    <div class="notice good" style="margin-top:12px"><b>ฐานงานวิจัยที่รองรับเกณฑ์นี้</b><br>
+      ${(QDEF.research||[]).map(r=>`<span class="pill">${esc(r)}</span>`).join('')}
+      <div class="small" style="margin-top:6px">อ้างอิงจากฐานงานวิจัย ${RESEARCH.length} รายการในระบบ ดูรายละเอียดได้ที่เมนูฐานงานวิจัยอ้างอิง</div></div>
+  </div>
+
+  <div class="card"><h2>คำสะท้อนคิดของนักเรียน</h2>
+    ${done.length?done.map(d=>`<div class="opt" style="cursor:default"><h4 style="margin:0 0 4px">${esc(d.name)}</h4>
+      <p class="small"><b>${esc(QDEF.reflect[0]||'')}</b><br>${esc(d.r0||'—')}</p>
+      <p class="small"><b>${esc(QDEF.reflect[1]||'')}</b><br>${esc(d.r1||'—')}</p></div>`).join('')
+      :'<p class="muted small">ยังไม่มีนักเรียนส่งคำตอบ</p>'}
+  </div>`;
+}
+async function qSetLevel(i,v){
+  const rows=window._q||[]; const d=rows[i]; if(!d) return;
+  d.teacher=d.teacher||{}; d.teacher.level=v;
+  const j=JSON.stringify(d);
+  LS.set(qKey(QCODE,i),j); queueRemote(qKey(QCODE,i),d.name,j);
+  await flushRemote(true);
+  openQDash();
+}
+function qExport(){
+  const rows=window._q||[];
+  const head=['ที่','ชื่อ-สกุล','ห้อง','หัวข้อภารกิจด่วน','วันเวลาที่ตอบ','ตัวเลือกที่เลือก','ระดับจากตัวเลือก','เหตุผล','สะท้อนคิด1','สะท้อนคิด2','ครูให้ระดับ'];
+  const body=ROSTER.map((n,i)=>{const d=rows[i];
+    if(!d||!d.done) return [i+1,n,'ม.4/4',QDEF.topic,'','','','','','',''];
+    return [i+1,n,'ม.4/4',QDEF.topic,fmtDT(d.at),QDEF.options[d.pick]?.t||'',QDEF.options[d.pick]?.level||'',
+      d.reason||'',d.r0||'',d.r1||'',(d.teacher&&d.teacher.level)||''];});
+  const csv='\uFEFF'+[head,...body].map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='quickmission_'+QCODE+'.csv';a.click();
 }
 
 /* ---------- boot ---------- */
