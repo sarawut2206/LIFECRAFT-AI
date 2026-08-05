@@ -129,7 +129,7 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 <div class="wrap">
 <header class="top noprint">
   <div><div class="logo">Life Competency <span>UP TO GROW</span></div>
-  <div class="tagline">LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · ม.4/4</div></div>
+  <div class="tagline" id="tagRoom">LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี</div></div>
   <div class="spacer"></div>
   <div class="badge" id="whoami">ยังไม่ได้เลือกชื่อ</div>
   <span class="saved" id="savedTag">บันทึกในเครื่อง</span>
@@ -149,6 +149,7 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
       <button onclick="go('semester');renderSemester()">ภาพรวมภาคเรียน</button>
       <button onclick="openQuick()">ภารกิจด่วนรายวัน (ครู)</button>
       <button onclick="qStart()">ทำภารกิจด่วน (นักเรียน)</button>
+      <button onclick="openSetup()">ตั้งค่าห้องเรียน / คลังภารกิจ</button>
       <button onclick="openResearch()">ฐานงานวิจัยอ้างอิง</button>
     </div>
   </div>
@@ -181,16 +182,28 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 <section id="v-quick" class="hide"></section>
 <section id="v-qstudent" class="hide"></section>
 <section id="v-qdash" class="hide"></section>
+<section id="v-setup2" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
 <div id="toast"></div>
 
 <script>
-const ROSTER = ["นายกำชัย กนกวรกาญจน์","นายกิตติศักดิ์ อุทะกะ","นายชนกันต์ วิวัฒน์ชัยตระกูล",
+/* รายชื่อและชื่อห้องตั้งต้น ครูแก้ไขได้เองที่หน้าตั้งค่า โดยไม่ต้องแก้โค้ด */
+const ROSTER_DEFAULT = ["นายกำชัย กนกวรกาญจน์","นายกิตติศักดิ์ อุทะกะ","นายชนกันต์ วิวัฒน์ชัยตระกูล",
 "นายติณณภพ บุญแก้ว","นายธนโชติ มะนุ","นายธนวัฒน์ ตะกรุดทอง","นายธนวิชญ์ สุดาจันทร์",
 "นายธีรภัทร เจตนะเสน","นายนิปุณ ผลผักแว่น","นายบุณยกร โห้รอด","นายพาณิชย์ บุตรสุวรรณ์",
 "นายสหัสทัย รักษาธรรม","นายก้องฟ้า แจ้งวิถี","นายธิติคุณ ศรีสุระ","นายวรวิทย์ เดชจินดา"];
+const ROOM_DEFAULT = 'ม.4/4';
+let ROSTER = ROSTER_DEFAULT.slice();
+let ROOM = ROOM_DEFAULT;
+function loadClassConfig(){
+  try{
+    const r=localStorage.getItem('lc:cfg:roster'); if(r){const a=JSON.parse(r); if(Array.isArray(a)&&a.length) ROSTER=a;}
+    const m=localStorage.getItem('lc:cfg:room'); if(m) ROOM=m;
+  }catch(e){}
+}
+loadClassConfig();
 
 const DIMS = {
   self:{n:'การจัดการตนเอง',g:'life'}, think:{n:'การคิดและแก้ปัญหา',g:'life'},
@@ -298,7 +311,7 @@ const EVENTS_M2 = [
 
 const MISSIONS=[
  {id:0,week:1,enabled:true,title:'เงินส่วนรวมของห้อง 1,500 บาท',theme:'ความรับผิดชอบและประโยชน์ส่วนรวม',
-  scenario:'ห้อง ม.4/4 ได้รับงบส่วนกลาง <b>1,500 บาท</b> เพื่อใช้ให้เกิดประโยชน์กับสมาชิกในห้อง เงินก้อนนี้ไม่ใช่ของใครคนใดคนหนึ่ง และใช้ได้ครั้งเดียว',
+  scenario:'ห้อง '+ROOM+' ได้รับงบส่วนกลาง <b>1,500 บาท</b> เพื่อใช้ให้เกิดประโยชน์กับสมาชิกในห้อง เงินก้อนนี้ไม่ใช่ของใครคนใดคนหนึ่ง และใช้ได้ครั้งเดียว',
   consider:'ต้องคำนึงถึง ความจำเป็น · ความคุ้มค่า · ความเท่าเทียม · ประโยชน์ส่วนรวม · ความโปร่งใส · ความรับผิดชอบ',
   knowLabel:'ข้อมูลที่ฉันมีอยู่แล้วเกี่ยวกับความต้องการของเพื่อนในห้อง',
   factLabel:'ข้อเท็จจริงที่ตรวจสอบได้ (เช่น จำนวนเงิน จำนวนคน ราคา)',
@@ -308,7 +321,7 @@ const MISSIONS=[
   altNameLabel:'ใช้เงินทำอะไร',costLabel:'ใช้เงินประมาณ (บาท)',
   events:EVENTS_M1,sug:{}},
  {id:1,week:2,enabled:true,title:'ข่าวลวงในกลุ่มไลน์ห้อง',theme:'การคิดอย่างมีวิจารณญาณและพลเมืองดิจิทัล',
-  scenario:'มีข้อความแชร์เข้ากลุ่มไลน์ห้อง ม.4/4 ว่า “โรงเรียนแจกทุนการศึกษา 5,000 บาท ให้นักเรียนที่กรอกข้อมูลภายในคืนนี้” พร้อมลิงก์แนบมา เพื่อนหลายคนกำลังจะกดแชร์ต่อและกรอกข้อมูลโดยยังไม่ได้ตรวจสอบ',
+  scenario:'มีข้อความแชร์เข้ากลุ่มไลน์ห้อง '+ROOM+' ว่า “โรงเรียนแจกทุนการศึกษา 5,000 บาท ให้นักเรียนที่กรอกข้อมูลภายในคืนนี้” พร้อมลิงก์แนบมา เพื่อนหลายคนกำลังจะกดแชร์ต่อและกรอกข้อมูลโดยยังไม่ได้ตรวจสอบ',
   consider:'ต้องคำนึงถึง การตรวจสอบข้อเท็จจริง · ความปลอดภัยของข้อมูลส่วนตัว · ผลกระทบต่อเพื่อนที่หลงเชื่อ · การสื่อสารที่ไม่ทำร้ายใคร',
   knowLabel:'ข้อมูลที่ฉันมีอยู่แล้วเกี่ยวกับความน่าเชื่อถือของข้อความนี้',
   factLabel:'ข้อเท็จจริงที่ตรวจสอบได้ (เช่น แหล่งที่มาของลิงก์ วันเวลาที่โพสต์ ประกาศทางการของโรงเรียน)',
@@ -424,7 +437,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   if(v==='home') renderMissionList();}
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
@@ -478,7 +491,7 @@ async function save(force){if(!s)return;const j=JSON.stringify(s);const key=mKey
   LS.set(key,j);LS.set('lc:last',s.missionId+':'+s.idx);
   queueRemote(key,s.name,j); if(force) await flushRemote(true); flagSaved();}
 
-function blank(idx){return{idx,missionId:curMission,name:ROSTER[idx],room:'ม.4/4',started:Date.now(),
+function blank(idx){return{idx,missionId:curMission,name:ROSTER[idx],room:ROOM,started:Date.now(),
  pre:{},post:{},phase:'pre',step:0,qi:0,role:'',plan:{},decisions:{},reflect:{},self:{},action:{},
  coachLog:[],log:[],teacher:{score:{},note:''},done:false};}
 function logEv(t,d){s.log.push({t:Date.now(),type:t,detail:d});}
@@ -778,7 +791,7 @@ function renderPick(){
   $('v-pick').innerHTML=`<div class="card">
   <div class="eyebrow">ภารกิจที่ ${mi.week} · ${mi.title}</div>
   <h2>แตะชื่อของตัวเอง</h2>
-  <p class="muted small">นักเรียนชั้น ม.4/4 จำนวน ${ROSTER.length} คน · ถ้าเคยทำค้างไว้ ระบบจะพากลับไปที่เดิมให้</p>
+  <p class="muted small">นักเรียนชั้น ${ROOM} จำนวน ${ROSTER.length} คน · ถ้าเคยทำค้างไว้ ระบบจะพากลับไปที่เดิมให้</p>
   <input id="rsearch" placeholder="พิมพ์ชื่อเพื่อค้นหา" style="margin:12px 0 14px" oninput="filterRoster(this.value)">
   <div class="roster" id="roster"></div>
   <div class="row" style="margin-top:16px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
@@ -1199,8 +1212,8 @@ async function openTeacher(){
 
   const wasAuto=!!_auto;
   $('v-teacher').innerHTML=`
-  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานสรุปทั้งห้อง ม.4/4 · ${mi.title}</div>
-  <div class="card"><div class="eyebrow">Teacher Dashboard · ม.4/4 · สัปดาห์ ${mi.week}</div>
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานสรุปทั้งห้อง ${ROOM} · ${mi.title}</div>
+  <div class="card"><div class="eyebrow">Teacher Dashboard · ${ROOM} · สัปดาห์ ${mi.week}</div>
     <h2>${mi.title}</h2>
     <p class="muted small">${mi.theme}</p>
     <div class="row noprint" style="margin-top:10px">
@@ -1328,9 +1341,9 @@ function exportCSV(){
   const all=window._all||[];
   const head=['ที่','ชื่อ-สกุล','ห้อง','ภารกิจ','วันที่ทำ','เวลาเริ่ม','เวลาส่ง','ระยะห่างก่อน-หลัง(นาที)','คะแนนก่อน(40)','คะแนนหลัง(40)','ผลต่าง','ทักษะชีวิตก่อน','ทักษะชีวิตหลัง','พลเมืองดีก่อน','พลเมืองดีหลัง','บทบาท','เปลี่ยนใจ(ครั้ง)','ครู-คิด','ครู-จัดการตน','ครู-สื่อสาร','ครู-พลเมืองดี'];
   const body=ROSTER.map((n,i)=>{const d=all[i];
-    if(!d)return [i+1,n,'ม.4/4',MIS().title,'','','','','','','','','','','','','','','','',''];
+    if(!d)return [i+1,n,ROOM,MIS().title,'','','','','','','','','','','','','','','','',''];
     const ts=d.teacher?.score||{};
-    return [i+1,n,'ม.4/4',(MISSIONS[d.missionId||0]||{}).title||'',
+    return [i+1,n,ROOM,(MISSIONS[d.missionId||0]||{}).title||'',
       fmtD(d.finished||d.started),fmtDT(d.started),fmtDT(d.finished),
       gapMin(d.preAt||d.started,d.postAt||d.finished)??'',
       total(d.pre),d.done?total(d.post):'',d.done?total(d.post)-total(d.pre):'',
@@ -1654,12 +1667,199 @@ function qExport(){
   const rows=window._q||[];
   const head=['ที่','ชื่อ-สกุล','ห้อง','หัวข้อภารกิจด่วน','วันเวลาที่ตอบ','ตัวเลือกที่เลือก','ระดับจากตัวเลือก','เหตุผล','สะท้อนคิด1','สะท้อนคิด2','ครูให้ระดับ'];
   const body=ROSTER.map((n,i)=>{const d=rows[i];
-    if(!d||!d.done) return [i+1,n,'ม.4/4',QDEF.topic,'','','','','','',''];
-    return [i+1,n,'ม.4/4',QDEF.topic,fmtDT(d.at),QDEF.options[d.pick]?.t||'',QDEF.options[d.pick]?.level||'',
+    if(!d||!d.done) return [i+1,n,ROOM,QDEF.topic,'','','','','','',''];
+    return [i+1,n,ROOM,QDEF.topic,fmtDT(d.at),QDEF.options[d.pick]?.t||'',QDEF.options[d.pick]?.level||'',
       d.reason||'',d.r0||'',d.r1||'',(d.teacher&&d.teacher.level)||''];});
   const csv='\uFEFF'+[head,...body].map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='quickmission_'+QCODE+'.csv';a.click();
+}
+
+
+/* ================= ตั้งค่าห้องเรียน และคลังภารกิจเครือข่าย =================
+   1. ครูพิมพ์รายชื่อนักเรียนและชื่อห้องเองได้ ไม่ต้องแก้โค้ด
+   2. ส่งออก/นำเข้าภารกิจเป็นไฟล์ เพื่อแลกเปลี่ยนระหว่างครูต่างห้องต่างโรงเรียน
+   ========================================================================= */
+function openSetup(){ go('setup2'); renderSetup(); }
+function renderSetup(){
+  $('v-setup2').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">ตั้งค่าห้องเรียน</div>
+    <h1>ตั้งค่าก่อนใช้กับห้องของคุณ</h1>
+    <p class="muted" style="max-width:64ch">ครูท่านอื่นที่นำระบบนี้ไปใช้ ให้แก้ที่หน้านี้เท่านั้น ไม่ต้องแก้โค้ดในไฟล์ ข้อมูลจะถูกจำไว้ในเครื่องนี้</p>
+    <label for="cfgRoom">ชื่อชั้นเรียน</label>
+    <input id="cfgRoom" value="${esc(ROOM)}" placeholder="เช่น ม.4/4">
+    <label for="cfgRoster">รายชื่อนักเรียน พิมพ์บรรทัดละ 1 ชื่อ</label>
+    <textarea id="cfgRoster" style="min-height:280px">${esc(ROSTER.join('\n'))}</textarea>
+    <p class="small muted">ขณะนี้มี ${ROSTER.length} คน · การเปลี่ยนรายชื่อจะไม่ลบข้อมูลเดิมที่บันทึกไว้ แต่ลำดับที่ของนักเรียนจะเปลี่ยนตามรายชื่อใหม่ ควรตั้งค่าให้เสร็จก่อนเริ่มเก็บข้อมูลจริง</p>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" onclick="saveClassConfig()">บันทึกการตั้งค่า</button>
+      <button onclick="resetClassConfig()">คืนค่าเริ่มต้น</button>
+      <button onclick="go('home')">กลับหน้าแรก</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Network · คลังภารกิจ</div>
+    <h2>แลกเปลี่ยนภารกิจกับครูท่านอื่น</h2>
+    <p class="muted small">ส่งออกภารกิจที่ออกแบบไว้เป็นไฟล์ แล้วส่งให้ครูโรงเรียนอื่นนำเข้าไปใช้ต่อได้ทันที นี่คือกลไกเครือข่ายของนวัตกรรม</p>
+
+    <h3 style="font-size:15px;margin-top:14px">ส่งออกภารกิจของฉัน</h3>
+    <div id="expList"></div>
+
+    <h3 style="font-size:15px;margin-top:18px">นำเข้าภารกิจจากครูท่านอื่น</h3>
+    <input type="file" id="impFile" accept="application/json,.json" onchange="importMission(this)">
+    <p class="small muted">รองรับไฟล์ที่ส่งออกจากระบบ LIFECRAFT AI เท่านั้น ระบบจะให้ตรวจสอบเนื้อหาก่อนเปิดใช้เสมอ</p>
+    <div id="impResult"></div>
+
+    <h3 style="font-size:15px;margin-top:18px">ภารกิจที่นำเข้ามาแล้ว</h3>
+    <div id="impList"></div>
+  </div>`;
+  renderExportList(); renderImportedList();
+}
+
+function saveClassConfig(){
+  const room=($('cfgRoom')||{}).value?.trim()||'';
+  const lines=(($('cfgRoster')||{}).value||'').split('\n').map(x=>x.trim()).filter(x=>x);
+  if(!room){ bad('cfgRoom','กรอกชื่อชั้นเรียน เช่น ม.4/4'); return; }
+  if(lines.length<1){ bad('cfgRoster','ต้องมีรายชื่อนักเรียนอย่างน้อย 1 คน'); return; }
+  if(lines.length>60){ bad('cfgRoster','รายชื่อเกิน 60 คน ระบบออกแบบสำหรับ 1 ห้องเรียน'); return; }
+  const dup=lines.filter((x,i)=>lines.indexOf(x)!==i);
+  if(dup.length){ bad('cfgRoster','มีชื่อซ้ำกัน: '+dup[0]+' กรุณาแก้ให้ไม่ซ้ำ เพราะระบบใช้ชื่อแยกข้อมูลรายคน'); return; }
+  ROOM=room; ROSTER=lines;
+  try{
+    localStorage.setItem('lc:cfg:room',ROOM);
+    localStorage.setItem('lc:cfg:roster',JSON.stringify(ROSTER));
+  }catch(e){}
+  toast('บันทึกแล้ว ห้อง '+ROOM+' จำนวน '+ROSTER.length+' คน',1);
+  renderSetup(); renderMissionList();
+}
+function resetClassConfig(){
+  if(!confirm('คืนค่ารายชื่อและชื่อห้องกลับเป็นค่าเริ่มต้นหรือไม่ ข้อมูลคำตอบของนักเรียนจะไม่ถูกลบ')) return;
+  ROOM=ROOM_DEFAULT; ROSTER=ROSTER_DEFAULT.slice();
+  try{ localStorage.removeItem('lc:cfg:room'); localStorage.removeItem('lc:cfg:roster'); }catch(e){}
+  toast('คืนค่าเริ่มต้นแล้ว',1); renderSetup();
+}
+
+/* ---------- ส่งออกภารกิจ ---------- */
+function renderExportList(){
+  const el=$('expList'); if(!el) return;
+  let html=MISSIONS.filter(m=>m.enabled).map(m=>`
+    <div class="opt" style="cursor:default">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div><h4 style="margin:0">สัปดาห์ ${m.week} · ${esc(m.title)}</h4>
+          <p class="small muted" style="margin:2px 0 0">${esc(m.theme)}</p></div>
+        <button class="small" onclick="exportMission(${m.id})">ส่งออกไฟล์</button></div>
+    </div>`).join('');
+  const qcode=LS.get('lc:qlast');
+  if(qcode) html+=`<div class="opt" style="cursor:default">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div><h4 style="margin:0">ภารกิจด่วนล่าสุด</h4>
+          <p class="small muted" style="margin:2px 0 0">รหัส ${esc(qcode)}</p></div>
+        <button class="small" onclick="exportQuick()">ส่งออกไฟล์</button></div></div>`;
+  el.innerHTML=html;
+}
+function dlJSON(obj,name){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}));
+  a.download=name; a.click();
+}
+function exportMission(id){
+  const m=MISSIONS[id]; if(!m) return;
+  dlJSON({format:'lifecraft-mission',version:1,exportedAt:Date.now(),exportedBy:ROOM,
+    mission:{title:m.title,theme:m.theme,scenario:m.scenario,consider:m.consider,
+      knowLabel:m.knowLabel,factLabel:m.factLabel,opLabel:m.opLabel,whoLabel:m.whoLabel,
+      altHint:m.altHint,altNameLabel:m.altNameLabel,costLabel:m.costLabel,
+      events:m.events,sug:m.sug||{}}},
+    'lifecraft_mission_week'+m.week+'.json');
+  toast('ส่งออกภารกิจแล้ว ส่งไฟล์นี้ให้ครูท่านอื่นนำเข้าได้',1);
+}
+function exportQuick(){
+  const code=LS.get('lc:qlast'); const raw=code?LS.get(qDefKey(code)):null;
+  if(!raw){ toast('ยังไม่มีภารกิจด่วนที่บันทึกไว้'); return; }
+  const d=JSON.parse(raw);
+  dlJSON({format:'lifecraft-quick',version:1,exportedAt:Date.now(),exportedBy:ROOM,quick:d},
+    'lifecraft_quick_'+code+'.json');
+  toast('ส่งออกภารกิจด่วนแล้ว',1);
+}
+
+/* ---------- นำเข้าภารกิจ ---------- */
+function importMission(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    let o=null;
+    try{ o=JSON.parse(rd.result); }catch(e){ o=null; }
+    const box=$('impResult');
+    if(!o||(o.format!=='lifecraft-mission'&&o.format!=='lifecraft-quick')){
+      box.innerHTML='<div class="notice">ไฟล์นี้ไม่ใช่ไฟล์ภารกิจของ LIFECRAFT AI หรือไฟล์เสียหาย</div>';
+      input.value=''; return;
+    }
+    if(o.format==='lifecraft-quick'){
+      const q=o.quick||{};
+      box.innerHTML=`<div class="notice good">
+        <b>ภารกิจด่วนที่จะนำเข้า</b><br>หัวข้อ ${esc(q.topic||'-')}<br>
+        <span class="small">จากห้อง ${esc(o.exportedBy||'-')} · ตรวจสอบเนื้อหาก่อนเปิดใช้</span><br>
+        <button class="small primary" style="margin-top:8px" onclick='confirmImportQuick(${JSON.stringify(JSON.stringify(q))})'>ยืนยันนำเข้าและเปิดหน้าตรวจสอบ</button></div>`;
+    }else{
+      const m=o.mission||{};
+      const evn=(m.events||[]).length;
+      box.innerHTML=`<div class="notice good">
+        <b>ภารกิจที่จะนำเข้า</b><br>${esc(m.title||'-')}<br>
+        <span class="small">${esc(m.theme||'')} · มีเหตุการณ์เปลี่ยนแปลง ${evn} เหตุการณ์ · จากห้อง ${esc(o.exportedBy||'-')}</span><br>
+        <button class="small primary" style="margin-top:8px" onclick='confirmImportMission(${JSON.stringify(JSON.stringify(m))})'>ยืนยันนำเข้า</button></div>`;
+    }
+    input.value='';
+  };
+  rd.readAsText(f);
+}
+function confirmImportMission(str){
+  let m=null; try{ m=JSON.parse(str); }catch(e){ toast('ไฟล์เสียหาย'); return; }
+  if(!m.title||!m.scenario||!Array.isArray(m.events)||!m.events.length){
+    toast('ไฟล์ภารกิจไม่สมบูรณ์ ต้องมีชื่อ สถานการณ์ และเหตุการณ์อย่างน้อย 1 เหตุการณ์'); return; }
+  const id=MISSIONS.length;
+  MISSIONS.push({id,week:MISSIONS.length+1,enabled:true,title:m.title,theme:m.theme||'นำเข้าจากครูท่านอื่น',
+    scenario:m.scenario,consider:m.consider||'',knowLabel:m.knowLabel||'ข้อมูลที่ฉันมีอยู่แล้ว',
+    factLabel:m.factLabel||'ข้อเท็จจริงที่ตรวจสอบได้',opLabel:m.opLabel||'ความคิดเห็นหรือการคาดเดา',
+    whoLabel:m.whoLabel||'ใครได้รับผลกระทบบ้าง',altHint:m.altHint||'ระบุผู้ได้และผู้เสียประโยชน์',
+    altNameLabel:m.altNameLabel||'จะทำอย่างไร',costLabel:m.costLabel||'ทรัพยากรที่ใช้',
+    events:m.events,sug:m.sug||{},imported:true});
+  try{
+    const list=JSON.parse(localStorage.getItem('lc:imported')||'[]');
+    list.push(m); localStorage.setItem('lc:imported',JSON.stringify(list));
+  }catch(e){}
+  toast('นำเข้าภารกิจ "'+m.title+'" แล้ว เปิดใช้ได้จากหน้าแรก',1);
+  renderSetup(); renderMissionList();
+}
+function confirmImportQuick(str){
+  let q=null; try{ q=JSON.parse(str); }catch(e){ toast('ไฟล์เสียหาย'); return; }
+  QDEF=q; QDEF.code=null; QDEF.byAI=false;
+  toast('นำเข้าภารกิจด่วนแล้ว ตรวจสอบและอนุมัติก่อนเปิดให้นักเรียนทำ',1);
+  openQuick();
+}
+function renderImportedList(){
+  const el=$('impList'); if(!el) return;
+  const im=MISSIONS.filter(m=>m.imported);
+  el.innerHTML=im.length?im.map(m=>`<div class="opt" style="cursor:default">
+      <h4 style="margin:0">${esc(m.title)}</h4>
+      <p class="small muted" style="margin:2px 0 0">${esc(m.theme)} · พร้อมใช้งานจากหน้าแรก</p></div>`).join('')
+    :'<p class="small muted">ยังไม่มีภารกิจที่นำเข้า</p>';
+}
+/* โหลดภารกิจที่เคยนำเข้าไว้ตอนเปิดโปรแกรม */
+function loadImportedMissions(){
+  try{
+    const list=JSON.parse(localStorage.getItem('lc:imported')||'[]');
+    list.forEach(m=>{
+      if(!m||!m.title||!Array.isArray(m.events)) return;
+      const id=MISSIONS.length;
+      MISSIONS.push({id,week:MISSIONS.length+1,enabled:true,title:m.title,theme:m.theme||'นำเข้าจากครูท่านอื่น',
+        scenario:m.scenario,consider:m.consider||'',knowLabel:m.knowLabel||'ข้อมูลที่ฉันมีอยู่แล้ว',
+        factLabel:m.factLabel||'ข้อเท็จจริงที่ตรวจสอบได้',opLabel:m.opLabel||'ความคิดเห็นหรือการคาดเดา',
+        whoLabel:m.whoLabel||'ใครได้รับผลกระทบบ้าง',altHint:m.altHint||'ระบุผู้ได้และผู้เสียประโยชน์',
+        altNameLabel:m.altNameLabel||'จะทำอย่างไร',costLabel:m.costLabel||'ทรัพยากรที่ใช้',
+        events:m.events,sug:m.sug||{},imported:true});
+    });
+  }catch(e){}
 }
 
 /* ---------- boot ---------- */
@@ -1672,5 +1872,7 @@ async function checkResume(){
   el.innerHTML=`<div class="notice good" style="margin:0">มีงานที่ทำค้างไว้ของ ${esc(d.name)} · ${(MISSIONS[lastMid]||{}).title||''}
     <button class="small" style="margin-left:10px" onclick="curMission=${lastMid};startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
 }
+loadImportedMissions();
+const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
 renderMissionList(); renderPick(); checkResume();
 </script>
