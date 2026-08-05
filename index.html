@@ -168,7 +168,7 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
     <div class="card tight"><div class="eyebrow">Teacher in the loop</div><h3>AI ถาม ครูตัดสิน</h3>
       <p class="small muted">AI ห้ามให้คำตอบและห้ามให้คะแนนขั้นสุดท้าย ครูเป็นผู้ยืนยันระดับสมรรถนะทุกครั้ง</p></div>
   </div>
-  <p class="small muted" style="text-align:center">ออกแบบจากงานวิจัย 22 รายการทั้งในและต่างประเทศ ·
+  <p class="small muted" style="text-align:center">ออกแบบจากงานวิจัย 28 รายการทั้งในและต่างประเทศ ·
     <a href="#" onclick="openResearch('list');return false" style="color:var(--teal-d)">ดูฐานอ้างอิง</a></p>
 </section>
 
@@ -183,6 +183,7 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 <section id="v-qstudent" class="hide"></section>
 <section id="v-qdash" class="hide"></section>
 <section id="v-setup2" class="hide"></section>
+<section id="v-interview" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -437,7 +438,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   if(v==='home') renderMissionList();}
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
@@ -496,8 +497,9 @@ function blank(idx){return{idx,missionId:curMission,name:ROSTER[idx],room:ROOM,s
  coachLog:[],log:[],teacher:{score:{},note:''},done:false};}
 function logEv(t,d){s.log.push({t:Date.now(),type:t,detail:d});}
 function bad(id,msg){ toast(msg); const e=$(id); if(!e)return;
-  e.classList.add('bad-field'); e.scrollIntoView({behavior:'smooth',block:'center'});
-  setTimeout(()=>e.focus({preventScroll:true}),350);
+  e.classList.add('bad-field');
+  try{ if(e.scrollIntoView) e.scrollIntoView({behavior:'smooth',block:'center'}); }catch(_){}
+  setTimeout(()=>{ try{ e.focus({preventScroll:true}); }catch(_){ try{e.focus();}catch(__){} } },350);
   e.addEventListener('input',()=>e.classList.remove('bad-field'),{once:true}); }
 
 
@@ -511,6 +513,9 @@ const SUG={
  er1:['กันงบส่วนหนึ่งไว้ให้กลุ่มที่ยังไม่ได้ประโยชน์','เชิญเขามาร่วมออกแบบแผนใหม่ เพราะเขาเป็นเจ้าของเงินเท่ากัน','อธิบายเหตุผลของเสียงส่วนใหญ่ แล้วขอความเห็นเพิ่ม'],
  er2:['เลือกของที่มีมาตรฐาน เพราะเป็นเรื่องความปลอดภัยของทุกคน','หาข้อมูลเพิ่มและถามครูก่อน เพราะยังมีข้อมูลไม่พอ','เลือกของถูกเพราะได้จำนวนมากกว่า แต่ต้องตรวจสอบก่อนใช้'],
  er3:['ทำบัญชีพร้อมใบเสร็จติดหน้าห้อง เพื่อให้ทุกคนตรวจสอบได้เท่ากัน','แจ้งด้วยวาจาในคาบโฮมรูม เพราะรวดเร็วและทุกคนอยู่ครบ','ให้เฉพาะคนที่ขอดู เพราะไม่อยากให้เป็นเรื่องใหญ่'],
+ pv1:['จะเลือกแบบเดิม เพราะเชื่อว่าถูกต้องไม่ว่าจะมีใครเห็นหรือไม่','อาจเปลี่ยน เพราะถ้าไม่มีใครรู้ก็คงเลือกทางที่ง่ายกว่า','ไม่แน่ใจ ต้องดูสถานการณ์ตอนนั้น'],
+ pv2:['เคยเจอ และตอนนั้นทำเหมือนที่เลือกไว้','เคยเจอ แต่ตอนนั้นทำต่างจากที่เลือกไว้ตอนนี้','ยังไม่เคยเจอเรื่องแบบนี้มาก่อน'],
+ pv3:['จะอธิบายเหตุผลของตัวเองให้เพื่อนฟังก่อน','จะฟังเหตุผลของเพื่อนแล้วพิจารณาใหม่','จะยอมตามเสียงส่วนใหญ่เพราะไม่อยากมีปัญหา'],
  feel:['กดดัน เพราะเป็นเงินของทุกคน','ตื่นเต้นที่ได้ตัดสินใจเอง','กลัวเลือกผิดแล้วเพื่อนไม่พอใจ','เฉย ๆ แต่อยากให้จบเร็ว','อยากให้ทุกคนได้ใช้เท่ากัน'],
  know:['รู้ว่าเพื่อนส่วนใหญ่อยากได้อะไร','รู้ว่าห้องขาดของใช้อะไรบ้าง','รู้ว่ามีเพื่อนบางกลุ่มไม่ค่อยได้ใช้ของส่วนกลาง','รู้ราคาของที่จะซื้อคร่าว ๆ','เคยเห็นห้องอื่นใช้งบแบบไหน'],
  need:['ยังไม่รู้ว่าเพื่อนทุกคนคิดเหมือนกันไหม','ยังไม่รู้ราคาจริงและร้านที่ถูกที่สุด','ยังไม่รู้ว่าของที่จะซื้อใช้ได้นานแค่ไหน','ยังไม่รู้ว่ามีใครเดือดร้อนเป็นพิเศษหรือไม่','ยังไม่รู้ว่าครูอนุญาตให้ซื้ออะไรได้บ้าง'],
@@ -745,7 +750,31 @@ const RESEARCH=[
  p:'AI ต้องเสริมการเรียนรู้โดยมีมนุษย์เป็นศูนย์กลาง และครูเป็นผู้ตัดสินผลสุดท้าย',s:['AI ห้ามตัดสินใจแทนผู้เรียน','Teacher in the loop']},
 {g:'int',n:'European Commission and UNESCO (2025)',f:'Draft AI literacy framework for primary and secondary education (AILit).',
  u:'https://education.ec.europa.eu/event/empowering-learners-for-the-age-of-ai-launch-of-the-draft-ai-literacy-framework-and-stakeholder-consultations',
- p:'ผู้เรียนต้องเข้าใจข้อจำกัดของ AI และยังคงเป็นผู้ตัดสินใจเอง',s:['บันทึกบทสนทนากับโค้ชเป็นหลักฐาน']}
+ p:'ผู้เรียนต้องเข้าใจข้อจำกัดของ AI และยังคงเป็นผู้ตัดสินใจเอง',s:['บันทึกบทสนทนากับโค้ชเป็นหลักฐาน']},
+{g:'int',n:'Situational judgment tests: review and meta-analysis (2020)',f:'Systematic review and meta-analysis of SJT validity.',
+ u:'https://pubmed.ncbi.nlm.nih.gov/32353895/',
+ p:'แบบวัดเชิงสถานการณ์มีความตรงเชิงพยากรณ์ดีกว่าการถามตรง ๆ ว่าควรทำอะไร',
+ s:['แบบวัดเชิงสถานการณ์ 10 ข้อ','ภารกิจจำลองแทนข้อสอบ']},
+{g:'int',n:'Exploring social desirability in situational judgment tests (2025)',f:'Personality and Individual Differences.',
+ u:'https://www.sciencedirect.com/science/article/abs/pii/S0191886925003861',
+ p:'ผู้ตอบอาจเลือกคำตอบที่สังคมมองว่าดี มากกว่าสิ่งที่ตนจะทำจริง จึงต้องมีกลไกตรวจสอบเพิ่ม',
+ s:['คำถามตรวจสอบความตรง','คำถามเมื่อไม่มีใครรู้','สัญญาณที่ครูควรตรวจสอบ']},
+{g:'int',n:'Response process validity and cognitive interviewing (2021)',f:'Validity evidence based on response processes.',
+ u:'https://pubmed.ncbi.nlm.nih.gov/33317517/',
+ p:'ต้องตรวจว่าผู้ตอบใช้กระบวนการคิดแบบที่ผู้ออกแบบตั้งใจจริงหรือไม่ ไม่ใช่ดูแค่คำตอบ',
+ s:['การสัมภาษณ์เชิงกระบวนการคิด','คำถามขยายเหตุผล']},
+{g:'int',n:'Think-aloud and cognitive interviewing (PISA validation)',f:'Using cognitive interviewing to validate assessment.',
+ u:'https://discovery.ucl.ac.uk/id/eprint/10025529/8/Hodgen_Think%20aloud%20using%20cognitive%20interviewing%20to%20validate%20the%20PISA%20assessment%20of%20student%20self%20efficacy%20in%20mathematics.pdf',
+ p:'การให้ผู้เรียนเล่าวิธีคิดออกมา ช่วยยืนยันความหมายที่แท้จริงของคำตอบ',
+ s:['โมดูลสัมภาษณ์สั้นรายบุคคล']},
+{g:'int',n:'Behavioral signatures in situational judgment tests',f:'Evaluating predictive validity of behavioral signatures.',
+ u:'https://researchportal.vub.be/en/publications/evaluating-the-predictive-validity-of-behavioral-signatures-in-si/',
+ p:'ควรดูรูปแบบการตอบข้ามหลายสถานการณ์ ไม่ใช่ตัดสินจากคำตอบข้อเดียว',
+ s:['การเทียบพฤติกรรมข้ามภารกิจ','รายงานพัฒนาการสะสม']},
+{g:'int',n:'Open-response situational judgment tests (2025)',f:'Educational Assessment.',
+ u:'https://www.tandfonline.com/doi/full/10.1080/10627197.2025.2576228',
+ p:'คำตอบปลายเปิดพร้อมเหตุผล วัดได้ลึกกว่าการเลือกตัวเลือกอย่างเดียว',
+ s:['ช่องเขียนเหตุผลบังคับ','Decision Board']}
 ];
 let rTab='list';
 function openResearch(tab){ rTab=tab||rTab; go('research'); renderResearch(); }
@@ -974,6 +1003,19 @@ function stO(){
   <label for="why">เลือกทางนี้เพราะอะไร (อ้างอิงข้อเท็จจริงหรือตัวเลข)</label><textarea id="why">${esc(p.why||'')}</textarea>
   <label for="lose">ใครอาจเสียประโยชน์จากการตัดสินใจนี้ และฉันจะดูแลเขาอย่างไร</label><textarea id="lose">${esc(p.lose||'')}</textarea>
   <label for="own">ถ้าผลออกมาไม่ดี ฉันจะรับผิดชอบอย่างไร</label><textarea id="own">${esc(p.own||'')}</textarea>
+
+  <div class="card tight" style="margin-top:14px;background:var(--soft)">
+    <div class="eyebrow">คำถามตรวจสอบความตรง</div>
+    <h3 style="font-size:15px">ตอบตามความจริง ไม่ต้องตอบให้ครูพอใจ</h3>
+    <p class="small muted">คำถามชุดนี้ไม่มีคำตอบถูกผิด และไม่มีผลต่อคะแนน แต่ช่วยให้ครูเข้าใจว่าสิ่งที่คิดกับสิ่งที่ทำจริงตรงกันแค่ไหน การตอบตามจริงมีประโยชน์กว่าการตอบให้ดูดี</p>
+    <label for="pv1">ถ้าไม่มีครูอยู่ และไม่มีใครรู้ว่านักเรียนเลือกอะไร จะยังเลือกแบบเดิมไหม เพราะอะไร</label>
+    <textarea id="pv1">${esc(p.pv1||'')}</textarea>
+    <label for="pv2">ในชีวิตจริง เคยเจอเรื่องคล้ายแบบนี้ไหม ตอนนั้นทำจริงว่าอย่างไร</label>
+    <textarea id="pv2">${esc(p.pv2||'')}</textarea>
+    <label for="pv3">ถ้าเพื่อนส่วนใหญ่ในห้องไม่เห็นด้วยกับนักเรียน จะทำอย่างไร</label>
+    <textarea id="pv3">${esc(p.pv3||'')}</textarea>
+  </div>
+
   <div class="card tight" style="margin-top:14px"><div class="eyebrow">AI Life Coach</div>
     <div id="coachBox"></div>
     <div class="row" style="margin-top:8px"><input id="coachIn" placeholder="พิมพ์ความคิดของนักเรียนให้โค้ชช่วยตั้งคำถามต่อ" style="flex:1;min-width:200px">
@@ -985,7 +1027,7 @@ function stO(){
       <h4>ทางเลือกที่ ${i+1} · ${esc(a.n)}</h4>
       <span class="pill">${esc(a.c||'-')}</span><span class="pill">ได้ประโยชน์: ${esc(a.g||'-')}</span></div>`);
   });
-  ['why','lose','own'].forEach(k=>$(k).oninput=e=>{p[k]=e.target.value;});
+  ['why','lose','own','pv1','pv2','pv3'].forEach(k=>{const el=$(k); if(el) el.oninput=e=>{p[k]=e.target.value;};});
   renderCoach();
 }
 function pickAlt(i){ /* re-render */ if(s.plan.choice!==undefined&&s.plan.choice!==i){s.plan.changed=(s.plan.changed||0)+1;logEv('change','เปลี่ยนทางเลือกเป็นที่ '+(i+1));} s.plan.choice=i; stO(); mountChips(); }
@@ -994,7 +1036,9 @@ function okO(){
   if((s.plan.why||'').length<10){bad('why','เขียนเหตุผลของการเลือก โดยอ้างอิงตัวเลขหรือข้อเท็จจริง');return;}
   if((s.plan.lose||'').length<5){bad('lose','ระบุผู้ที่อาจเสียประโยชน์ และวิธีดูแลเขา นี่คือหัวใจของความเป็นพลเมืองดี');return;}
   if((s.plan.own||'').length<5){bad('own','เขียนว่าจะรับผิดชอบอย่างไรถ้าผลออกมาไม่ดี');return;}
-  logEv('O','ตัดสินใจและระบุความรับผิดชอบ'); nextStep();
+  if((s.plan.pv1||'').trim().length<5){bad('pv1','ตอบคำถามตรวจสอบความตรงตามความจริง ไม่มีคำตอบถูกผิดและไม่มีผลต่อคะแนน');return;}
+  if((s.plan.pv2||'').trim().length<5){bad('pv2','เล่าสั้น ๆ ว่าในชีวิตจริงเคยทำอย่างไร ถ้าไม่เคยเจอ ให้เขียนว่าไม่เคยเจอ');return;}
+  logEv('O','ตัดสินใจ ระบุความรับผิดชอบ และตอบคำถามตรวจสอบความตรง'); nextStep();
 }
 
 function stG(){
@@ -1153,6 +1197,9 @@ function showReport(st,tv){
     <p class="small"><b>ผู้เสียประโยชน์และการดูแล:</b> ${esc(st.plan.lose||'-')}</p>
     <p class="small"><b>การรับผิดชอบผล:</b> ${esc(st.plan.own||'-')}</p>
     <p class="small"><b>บทบาทและสิ่งที่ทำจริง:</b> ${esc(st.contrib||'-')}</p>
+    <p class="small"><b>ถ้าไม่มีใครรู้ จะเลือกแบบเดิมไหม:</b> ${esc((st.plan||{}).pv1||'—')}</p>
+    <p class="small"><b>ในชีวิตจริงเคยทำอย่างไร:</b> ${esc((st.plan||{}).pv2||'—')}</p>
+    <p class="small"><b>เมื่อเพื่อนส่วนใหญ่ไม่เห็นด้วย:</b> ${esc((st.plan||{}).pv3||'—')}</p>
     <p class="small"><b>ข้อตกลงที่เสนอต่อห้อง:</b> ${esc((st.action||{}).w1||'-')}</p>
     <p class="small"><b>สิ่งที่จะลงมือทำเอง:</b> ${esc((st.action||{}).w2||'-')}</p>
     <p class="small muted">เปลี่ยนการตัดสินใจหลังทบทวน ${(st.plan.changed||0)} ครั้ง · สนทนากับโค้ช ${(st.coachLog||[]).filter(c=>c.role==='me').length} ครั้ง</p>
@@ -1166,6 +1213,9 @@ function showReport(st,tv){
       <td class="mono">${st.teacher.score[k]?st.teacher.score[k]+' — '+r.l[st.teacher.score[k]-1]:'ยังไม่ประเมิน'}</td></tr>`).join('')}
     </tbody></table>
     ${st.teacher.note?`<p class="small" style="margin-top:8px"><b>ข้อเสนอแนะจากครู:</b> ${esc(st.teacher.note)}</p>`:''}
+    ${st.interview&&st.interview.at?`<div class="notice good" style="margin-top:10px"><b>ผลการสัมภาษณ์เชิงกระบวนการคิด</b><br>
+      <span class="small">ข้อสรุปของครู: ${esc(st.interview.consistent)} · ผู้สัมภาษณ์ ${esc(st.interview.by)} · ${fmtDT(st.interview.at)}</span>
+      ${st.interview.notes.filter(x=>x).map((n,i)=>`<p class="small" style="margin:6px 0 0"><b>${i+1}.</b> ${esc(n)}</p>`).join('')}</div>`:''}
     ${tv?`<div id="tScore" class="noprint" style="margin-top:14px"></div>`:''}</div>
   <div class="row noprint" style="margin-bottom:26px">
     <button onclick="window.print()">พิมพ์ / บันทึก PDF</button>
@@ -1278,9 +1328,9 @@ async function openTeacher(){
 
   <div class="card"><h2>ตารางคะแนนดิบรายบุคคล</h2>
     <p class="small muted noprint">ตารางนี้คือภาคผนวก ก และเป็นฐานของบทที่ 4 กดปุ่มด้านล่างเพื่อส่งออกเป็นไฟล์</p>
-    <table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>วันที่ทำ</th><th>ใช้เวลา</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th><th>ครูประเมิน</th><th>รายงาน</th></tr></thead><tbody>
+    <table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>วันที่ทำ</th><th>ใช้เวลา</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th><th>ครูประเมิน</th><th>ความตรง</th><th>รายงาน</th></tr></thead><tbody>
     ${ROSTER.map((n,i)=>{const d=all[i];
-      if(!d)return `<tr><td class="mono">${i+1}</td><td>${n}</td><td colspan="7" class="muted small">ยังไม่มีข้อมูล</td></tr>`;
+      if(!d)return `<tr><td class="mono">${i+1}</td><td>${n}</td><td colspan="8" class="muted small">ยังไม่มีข้อมูล</td></tr>`;
       const p=total(d.pre),q=total(d.post),ok=d.done;
       const gm=gapMin(d.preAt||d.started,d.postAt||d.finished);
       const scored=Object.keys(d.teacher&&d.teacher.score||{}).length===4;
@@ -1291,7 +1341,12 @@ async function openTeacher(){
         <td class="mono">${p||'-'}</td><td class="mono">${ok?q:'-'}</td>
         <td class="mono ${ok&&q-p>0?'ok':ok&&q-p<0?'bad':''}">${ok?((q-p>=0?'+':'')+(q-p)):'-'}</td>
         <td class="small">${scored?'<span class="ok">✓ ครบ</span>':'<span class="muted">ยังไม่ครบ</span>'}</td>
-        <td class="noprint"><button class="small" onclick="showReport(window._all[${i}],true)">ดูรายคน</button></td></tr>`;}).join('')}
+        <td class="small">${(()=>{const sg=validitySignals(d);
+          if(!sg.length) return '<span class="muted">—</span>';
+          return '<span style="color:var(--gold)">ควรตรวจสอบ '+sg.length+'</span>';})()}
+          ${d.interview&&d.interview.at?'<br><span class="ok small">สัมภาษณ์แล้ว: '+esc(d.interview.consistent)+'</span>':''}</td>
+        <td class="noprint"><button class="small" onclick="showReport(window._all[${i}],true)">ดูรายคน</button>
+          <button class="small" onclick="openInterview(${i})">สัมภาษณ์</button></td></tr>`;}).join('')}
     </tbody></table>
     ${(()=>{const short=all.filter(d=>d&&d.done&&gapMin(d.preAt||d.started,d.postAt||d.finished)!==null&&gapMin(d.preAt||d.started,d.postAt||d.finished)<30);
       return short.length?`<div class="notice">มีนักเรียน ${short.length} คนที่ทำแบบวัดก่อนและหลังห่างกันน้อยกว่า 30 นาที ซึ่งอาจถูกตั้งคำถามว่าวัดพัฒนาการได้จริงหรือไม่ ควรตรวจสอบว่ามีกิจกรรมคั่นกลางครบถ้วน</div>`:'';})()}
@@ -1312,6 +1367,28 @@ async function openTeacher(){
       return `<tr><td>${DIMS[k].n}</td><td class="mono">${a.toFixed(2)}</td><td class="mono">${b.toFixed(2)}</td>
         <td class="mono ${b-a>0?'ok':''}">${(b-a>=0?'+':'')+(b-a).toFixed(2)}</td></tr>`;}).join('')}
     </tbody></table></div>
+
+  <div class="card"><h2>ความตรงของคำตอบ และการสัมภาษณ์เชิงกระบวนการคิด</h2>
+    <p class="small muted">งานวิจัยชี้ว่าแบบวัดที่ให้นักเรียนตอบเอง อาจได้คำตอบที่ดูดีตามบรรทัดฐานสังคมมากกว่าพฤติกรรมจริง (Exploring social desirability in situational judgment tests, 2025) ระบบจึงเพิ่มคำถามตรวจสอบความตรง และชี้จุดที่ครูควรไปพูดคุยด้วยตนเอง</p>
+    <div class="notice good"><b>ระบบไม่ตัดสินว่านักเรียนคนใดไม่ซื่อสัตย์</b><br>
+      <span class="small">สัญญาณด้านล่างจำนวนมากเกิดจากการที่นักเรียนตอบตามความจริงอย่างตรงไปตรงมา เช่น ยอมรับว่าอาจทำต่างออกไปเมื่อไม่มีใครเห็น ซึ่งเป็นคำตอบที่มีคุณค่าต่อการพัฒนามากกว่าคำตอบที่ดูดี ครูเป็นผู้สรุปหลังพูดคุยเสมอ</span></div>
+    ${(()=>{
+      const rows=done.map((d,i)=>({d,sg:validitySignals(d)})).filter(x=>x.sg.length);
+      if(!rows.length) return '<p class="small muted" style="margin-top:10px">ยังไม่พบสัญญาณที่ต้องตรวจสอบ หรือยังไม่มีข้อมูลเพียงพอ</p>';
+      return '<table style="margin-top:12px"><thead><tr><th>ชื่อ</th><th>สิ่งที่ควรตรวจสอบ</th><th class="noprint">สัมภาษณ์</th></tr></thead><tbody>'
+        + rows.map(x=>{const idx=all.indexOf(x.d);
+          return `<tr><td>${esc(x.d.name)}</td><td class="small">${x.sg.map(s=>esc(s.t)).join('<br>')}</td>
+            <td class="noprint"><button class="small" onclick="openInterview(${idx})">เปิดแบบสัมภาษณ์</button></td></tr>`;}).join('')
+        + '</tbody></table>';})()}
+    <div class="row noprint" style="margin-top:12px">
+      <button onclick="pickInterviewSample()">สุ่มเลือก 3 คนเพื่อสัมภาษณ์</button>
+    </div>
+    ${(()=>{const iv=done.filter(d=>d.interview&&d.interview.at);
+      if(!iv.length) return '<p class="small muted" style="margin-top:10px">ยังไม่มีบันทึกการสัมภาษณ์ แนะนำให้สัมภาษณ์อย่างน้อย 3 คนต่อภารกิจ เพื่อเป็นหลักฐานความตรงของกระบวนการตอบในภาคผนวก</p>';
+      const cnt={};iv.forEach(d=>{cnt[d.interview.consistent]=(cnt[d.interview.consistent]||0)+1;});
+      return `<div class="notice good" style="margin-top:12px"><b>สัมภาษณ์แล้ว ${iv.length} คน</b><br>
+        <span class="small">${Object.entries(cnt).map(([k,v])=>k+' '+v+' คน').join(' · ')}</span></div>`;})()}
+  </div>
 
   <div class="card"><h2>นักเรียนที่ควรได้รับการดูแลก่อน</h2>
     ${(()=>{const w=[];done.forEach(d=>{const r=[];
@@ -1339,9 +1416,9 @@ function toggleAuto(on){ clearInterval(_auto);
 
 function exportCSV(){
   const all=window._all||[];
-  const head=['ที่','ชื่อ-สกุล','ห้อง','ภารกิจ','วันที่ทำ','เวลาเริ่ม','เวลาส่ง','ระยะห่างก่อน-หลัง(นาที)','คะแนนก่อน(40)','คะแนนหลัง(40)','ผลต่าง','ทักษะชีวิตก่อน','ทักษะชีวิตหลัง','พลเมืองดีก่อน','พลเมืองดีหลัง','บทบาท','เปลี่ยนใจ(ครั้ง)','ครู-คิด','ครู-จัดการตน','ครู-สื่อสาร','ครู-พลเมืองดี'];
+  const head=['ที่','ชื่อ-สกุล','ห้อง','ภารกิจ','วันที่ทำ','เวลาเริ่ม','เวลาส่ง','ระยะห่างก่อน-หลัง(นาที)','คะแนนก่อน(40)','คะแนนหลัง(40)','ผลต่าง','ทักษะชีวิตก่อน','ทักษะชีวิตหลัง','พลเมืองดีก่อน','พลเมืองดีหลัง','บทบาท','เปลี่ยนใจ(ครั้ง)','ถ้าไม่มีใครรู้','ชีวิตจริงเคยทำ','เมื่อเพื่อนไม่เห็นด้วย','สัญญาณที่ควรตรวจสอบ','ผลสัมภาษณ์','ครู-คิด','ครู-จัดการตน','ครู-สื่อสาร','ครู-พลเมืองดี'];
   const body=ROSTER.map((n,i)=>{const d=all[i];
-    if(!d)return [i+1,n,ROOM,MIS().title,'','','','','','','','','','','','','','','','',''];
+    if(!d)return [i+1,n,ROOM,MIS().title,'','','','','','','','','','','','','','','','','','','','',''];
     const ts=d.teacher?.score||{};
     return [i+1,n,ROOM,(MISSIONS[d.missionId||0]||{}).title||'',
       fmtD(d.finished||d.started),fmtDT(d.started),fmtDT(d.finished),
@@ -1349,7 +1426,11 @@ function exportCSV(){
       total(d.pre),d.done?total(d.post):'',d.done?total(d.post)-total(d.pre):'',
       groupScore(d.pre,'life').toFixed(2),d.done?groupScore(d.post,'life').toFixed(2):'',
       groupScore(d.pre,'civic').toFixed(2),d.done?groupScore(d.post,'civic').toFixed(2):'',
-      d.role||'',d.plan.changed||0,ts.think||'',ts.self||'',ts.comm||'',ts.civic||''];});
+      d.role||'',d.plan.changed||0,
+      (d.plan||{}).pv1||'',(d.plan||{}).pv2||'',(d.plan||{}).pv3||'',
+      validitySignals(d).map(s=>s.t).join(' | '),
+      (d.interview&&d.interview.at)?(d.interview.consistent+' โดย '+d.interview.by):'',
+      ts.think||'',ts.self||'',ts.comm||'',ts.civic||''];});
   const csv='\uFEFF'+[head,...body].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='uptogrow_m4-4_week'+MIS().week+'_scores.csv';a.click();
@@ -1860,6 +1941,151 @@ function loadImportedMissions(){
         events:m.events,sug:m.sug||{},imported:true});
     });
   }catch(e){}
+}
+
+
+/* ============ ความตรงของคำตอบ และการสัมภาษณ์เชิงกระบวนการคิด ============
+   ฐานงานวิจัย: social desirability bias, response process validity,
+   think-aloud / cognitive interview, behavioral signatures
+   หลักการ: ระบบไม่ตัดสินว่านักเรียนคนใดไม่ซื่อสัตย์
+   ระบบเพียงชี้ "จุดที่ครูควรไปตรวจสอบด้วยตัวเอง" ครูเป็นผู้สรุปเสมอ
+   ===================================================================== */
+
+/* คำที่บ่งชี้ว่าเหตุผลอ้างอิงข้อมูลหรือผู้อื่น ใช้เป็นสัญญาณอย่างหยาบเท่านั้น */
+const REF_OTHER=['เพื่อน','ทุกคน','ห้อง','คนอื่น','ส่วนรวม','ผู้ปกครอง','ครู','สมาชิก','กลุ่ม','น้อง','รุ่น'];
+const REF_DATA=['บาท','คน','ราคา','เปอร์เซ็นต์','ร้อยละ','ข้อมูล','ตรวจสอบ','หลักฐาน','สถิติ','จำนวน','%'];
+
+function validitySignals(d){
+  if(!d) return [];
+  const sig=[];
+  const p=d.plan||{};
+  const why=(p.why||'').trim();
+  const lvl=(p.choice!==undefined&&p.alt&&p.alt[p.choice])?null:null;
+
+  // 1. เหตุผลสั้นผิดปกติเมื่อเทียบกับความยาวคำตอบอื่น
+  if(why.length>0&&why.length<25) sig.push({k:'reason-short',t:'เหตุผลสั้นมาก อาจตอบให้ผ่าน',lv:'warn'});
+
+  // 2. เหตุผลไม่อ้างถึงข้อมูลหรือผู้อื่นเลย
+  const hasOther=REF_OTHER.some(w=>why.includes(w));
+  const hasData=REF_DATA.some(w=>why.includes(w));
+  if(why.length>0&&!hasOther&&!hasData) sig.push({k:'reason-vague',t:'เหตุผลไม่อ้างถึงข้อมูลหรือผู้ได้รับผลกระทบ',lv:'warn'});
+
+  // 3. บอกเองว่าจะเปลี่ยนพฤติกรรมเมื่อไม่มีใครรู้ (สัญญาณสำคัญที่สุด และเป็นความซื่อสัตย์ของเด็ก)
+  const pv1=(p.pv1||'');
+  if(/เปลี่ยน|ไม่แน่ใจ|คงเลือกทางที่ง่าย|อาจจะไม่|ไม่ทำ/.test(pv1)&&pv1.length>3)
+    sig.push({k:'context-shift',t:'นักเรียนระบุเองว่าอาจเลือกต่างไปเมื่อไม่มีใครเห็น',lv:'check'});
+
+  // 4. บอกเองว่าชีวิตจริงทำต่างจากที่เลือก
+  const pv2=(p.pv2||'');
+  if(/ต่างจาก|ไม่เหมือน|ตอนนั้นทำ.*ต่าง/.test(pv2))
+    sig.push({k:'real-gap',t:'นักเรียนระบุเองว่าชีวิตจริงเคยทำต่างจากคำตอบนี้',lv:'check'});
+
+  // 5. ยอมตามเสียงส่วนใหญ่เมื่อถูกกดดัน
+  const pv3=(p.pv3||'');
+  if(/ยอมตาม|ไม่อยากมีปัญหา|เงียบ/.test(pv3))
+    sig.push({k:'peer-pressure',t:'มีแนวโน้มยอมตามกลุ่มเมื่อถูกกดดัน',lv:'check'});
+
+  // 6. คะแนนพุ่งสูงผิดปกติในเวลาสั้น
+  const gm=gapMin(d.preAt||d.started,d.postAt||d.finished);
+  const diff=total(d.post)-total(d.pre);
+  if(d.done&&diff>=12&&gm!==null&&gm<60)
+    sig.push({k:'jump',t:'คะแนนเพิ่มขึ้น '+diff+' ในเวลา '+gm+' นาที ควรตรวจสอบด้วยการสัมภาษณ์',lv:'check'});
+
+  // 7. เลือกคำตอบระดับสูงทุกข้อในแบบวัดหลัง (ตอบเต็มทุกข้อ)
+  if(d.done){
+    const allMax=Object.values(d.post||{}).every(v=>v===4);
+    if(allMax&&Object.keys(d.post||{}).length>=10)
+      sig.push({k:'all-max',t:'เลือกระดับสูงสุดทุกข้อในแบบวัดหลัง ควรยืนยันด้วยการสัมภาษณ์',lv:'check'});
+  }
+  return sig;
+}
+
+/* ---------- โมดูลสัมภาษณ์เชิงกระบวนการคิด ---------- */
+const TA_Q=[
+ 'ตอนที่เลือกคำตอบนั้น นักเรียนคิดถึงอะไรเป็นอย่างแรก',
+ 'มีตัวเลือกไหนที่เกือบเลือกแต่ตัดทิ้งไป เพราะอะไร',
+ 'ถ้าเรื่องนี้เกิดขึ้นจริงพรุ่งนี้ นักเรียนคิดว่าตัวเองจะทำแบบที่ตอบไว้จริงไหม',
+ 'มีอะไรที่ทำให้ตอบแบบหนึ่ง แต่ในใจคิดอีกแบบหนึ่งหรือไม่'
+];
+function openInterview(idx){
+  const d=(window._all||[])[idx]; if(!d){ toast('ยังไม่มีข้อมูลของนักเรียนคนนี้'); return; }
+  window._ta=d; d.interview=d.interview||{notes:['','','',''],by:'',at:0,consistent:''};
+  go('interview'); renderInterview();
+}
+function renderInterview(){
+  const d=window._ta; const iv=d.interview;
+  const sig=validitySignals(d);
+  $('v-interview').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · บันทึกการสัมภาษณ์เชิงกระบวนการคิด</div>
+  <div class="card">
+    <div class="eyebrow">การสัมภาษณ์เชิงกระบวนการคิด (Think-aloud)</div>
+    <h1>${esc(d.name)}</h1>
+    <p class="muted small">${esc(d.room||ROOM)} · ${esc((MISSIONS[d.missionId||0]||{}).title||'')} · ใช้เวลาประมาณ 3-5 นาที</p>
+    <div class="notice good"><b>เหตุผลที่ต้องสัมภาษณ์</b><br>
+      <span class="small">งานวิจัยด้านความตรงของกระบวนการตอบ ระบุว่าคำตอบที่เลือกอาจไม่สะท้อนกระบวนการคิดจริง การสัมภาษณ์สั้นช่วยยืนยันความหมายของคำตอบ (Response process validity, 2021; Think-aloud cognitive interviewing)</span></div>
+    ${sig.length?`<div class="notice"><b>สัญญาณที่ควรตรวจสอบกับนักเรียนคนนี้</b><ul style="margin:6px 0 0 18px">
+      ${sig.map(x=>`<li class="small">${esc(x.t)}</li>`).join('')}</ul>
+      <div class="small" style="margin-top:6px">สัญญาณเหล่านี้ไม่ได้แปลว่านักเรียนไม่ซื่อสัตย์ หลายข้อเกิดจากการที่นักเรียนตอบตามความจริงอย่างตรงไปตรงมา ครูเป็นผู้ตัดสินหลังพูดคุย</div></div>`
+      :'<div class="notice good">ไม่พบสัญญาณที่ต้องตรวจสอบเป็นพิเศษ สัมภาษณ์ได้ตามปกติ</div>'}
+  </div>
+
+  <div class="card">
+    <h2>สิ่งที่นักเรียนตอบไว้</h2>
+    <p class="small"><b>ทางเลือกที่เลือก:</b> ${esc(((d.plan||{}).alt||[])[(d.plan||{}).choice]?.n||'-')}</p>
+    <p class="small"><b>เหตุผล:</b> ${esc((d.plan||{}).why||'-')}</p>
+    <p class="small"><b>ถ้าไม่มีใครรู้:</b> ${esc((d.plan||{}).pv1||'—')}</p>
+    <p class="small"><b>ชีวิตจริงเคยทำ:</b> ${esc((d.plan||{}).pv2||'—')}</p>
+    <p class="small"><b>เมื่อเพื่อนไม่เห็นด้วย:</b> ${esc((d.plan||{}).pv3||'—')}</p>
+  </div>
+
+  <div class="card">
+    <h2>คำถามสัมภาษณ์และบันทึกของครู</h2>
+    ${TA_Q.map((q,i)=>`<label for="ta${i}">${i+1}. ${q}</label>
+      <textarea id="ta${i}" placeholder="บันทึกคำตอบของนักเรียนโดยย่อ">${esc(iv.notes[i]||'')}</textarea>`).join('')}
+    <label for="taC">สรุปของครู คำตอบในระบบสอดคล้องกับกระบวนการคิดจริงหรือไม่</label>
+    <div id="taCons"></div>
+    <label for="taBy">ผู้สัมภาษณ์</label>
+    <input id="taBy" value="${esc(iv.by||'')}" placeholder="ชื่อครูผู้สัมภาษณ์">
+    <div class="row" style="margin-top:14px">
+      <button class="primary" onclick="saveInterview()">บันทึกการสัมภาษณ์</button>
+      <button onclick="window.print()">พิมพ์เป็นหลักฐาน</button>
+      <button onclick="openTeacher()">กลับหน้าครู</button>
+    </div>
+  </div>`;
+  const box=$('taCons');
+  const opts=[['ตรงกัน','คำตอบในระบบสอดคล้องกับที่เล่าในการสัมภาษณ์'],
+              ['ตรงบางส่วน','สอดคล้องบางประเด็น แต่มีบางส่วนต่างออกไป'],
+              ['ไม่ตรงกัน','สิ่งที่เล่าต่างจากคำตอบในระบบอย่างชัดเจน']];
+  box.innerHTML=opts.map(([k,desc])=>
+    `<div class="opt ${iv.consistent===k?'sel':''}" onclick="setCons('${k}')"><b>${k}</b> <span class="small muted">${desc}</span></div>`).join('');
+  TA_Q.forEach((q,i)=>{ $('ta'+i).oninput=e=>{iv.notes[i]=e.target.value;}; });
+  $('taBy').oninput=e=>{iv.by=e.target.value;};
+}
+function setCons(k){ window._ta.interview.consistent=k; renderInterview(); }
+async function saveInterview(){
+  const d=window._ta; const iv=d.interview;
+  if(!iv.consistent){ toast('เลือกข้อสรุปของครูก่อนบันทึก'); return; }
+  if(!(iv.by||'').trim()){ bad('taBy','กรอกชื่อผู้สัมภาษณ์ เพื่อให้เป็นหลักฐานที่ตรวจสอบได้'); return; }
+  iv.at=Date.now();
+  const j=JSON.stringify(d); const key=mKey(d.idx,d.missionId);
+  LS.set(key,j); queueRemote(key,d.name,j);
+  const ok=await flushRemote(true);
+  toast(ok?'บันทึกการสัมภาษณ์เรียบร้อย':'บันทึกในเครื่องแล้ว จะส่งขึ้นระบบเมื่อเน็ตกลับมา',ok);
+}
+
+/* ---------- สุ่มเลือกนักเรียนเพื่อสัมภาษณ์ ---------- */
+function pickInterviewSample(){
+  const all=window._all||[];
+  const done=all.map((d,i)=>({d,i})).filter(x=>x.d&&x.d.done);
+  if(!done.length){ toast('ยังไม่มีนักเรียนที่ทำครบ'); return; }
+  // ให้ความสำคัญกับคนที่มีสัญญาณต้องตรวจสอบก่อน แล้วจึงสุ่มเพิ่มให้ครบ 3 คน
+  const flagged=done.filter(x=>validitySignals(x.d).some(s=>s.lv==='check'));
+  const rest=done.filter(x=>!flagged.includes(x));
+  for(let i=rest.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[rest[i],rest[j]]=[rest[j],rest[i]];}
+  const sample=flagged.concat(rest).slice(0,3);
+  window._sample=sample.map(x=>x.i);
+  toast('เลือกนักเรียน '+sample.length+' คนสำหรับสัมภาษณ์แล้ว');
+  openTeacher();
 }
 
 /* ---------- boot ---------- */
