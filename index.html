@@ -140,21 +140,28 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 
 <section id="v-home">
   <div class="card">
-    <div class="eyebrow">กิจกรรมโฮมรูม · ภารกิจที่ 1</div>
-    <h1>เงินส่วนรวมของห้อง 1,500 บาท<br>จะใช้อย่างไรให้เกิดประโยชน์ต่อทุกคน</h1>
-    <p class="muted" style="max-width:62ch">นักเรียนต้องตัดสินใจแทนห้อง ไม่ใช่แทนตัวเอง ทุกทางเลือกมีคนได้และคนเสีย ระบบไม่บอกว่าคำตอบไหนถูก แต่จะถามกลับว่าใครได้ประโยชน์ ใครเสียประโยชน์ และจะรับผิดชอบอย่างไร</p>
+    <div class="eyebrow">Life Competency UP TO GROW</div>
+    <h1>ชุดภารกิจตลอดภาคเรียน<br>เพื่อพัฒนาทักษะชีวิตและความเป็นพลเมืองดี</h1>
+    <p class="muted" style="max-width:62ch">แต่ละสัปดาห์คือภารกิจสถานการณ์ 1 เรื่อง ใช้เครื่องมือวัดชุดเดียวกันทุกภารกิจ เพื่อติดตามพัฒนาการต่อเนื่องรายเดือนและรายภาคเรียน ไม่ใช่ภารกิจเดียวจบ</p>
     <div id="resumeBox" style="margin-top:14px"></div>
     <div class="row" style="margin-top:16px">
-      <button class="primary" onclick="go('pick')">นักเรียนเข้าสู่กิจกรรม</button>
       <button onclick="openTeacher()">ครู · Dashboard และผลก่อน–หลัง</button>
+      <button onclick="go('semester');renderSemester()">ภาพรวมภาคเรียน</button>
       <button onclick="openResearch()">ฐานงานวิจัยอ้างอิง</button>
     </div>
   </div>
+
+  <div class="card">
+    <h2>เลือกภารกิจ</h2>
+    <p class="small muted">แตะภารกิจที่พร้อมใช้งานเพื่อเริ่ม ภารกิจที่ยังไม่เปิดใช้จะแสดงเป็นแผนในภาพรวมภาคเรียน</p>
+    <div id="missionList"></div>
+  </div>
+
   <div class="grid3">
     <div class="card tight"><div class="eyebrow">Process</div><h3>UP TO GROW 8 ขั้น</h3>
-      <p class="small muted">Understand · Perceive · Think · Own · Group · Reflect · Optimize · Work for the common good</p></div>
+      <p class="small muted">Understand · Perceive · Think · Own · Group · Reflect · Optimize · Work for the common good · ใช้ซ้ำได้ทุกภารกิจ</p></div>
     <div class="card tight"><div class="eyebrow">Input / Output</div><h3>วัดก่อนและหลังจริง</h3>
-      <p class="small muted">แบบวัดสถานการณ์ 10 ข้อ ชุดเดียวกัน ใช้ทั้งก่อนและหลังกิจกรรม ระบบคำนวณค่าเฉลี่ยและร้อยละพัฒนาการให้</p></div>
+      <p class="small muted">แบบวัดสถานการณ์ 10 ข้อ ชุดเดียวกันทุกภารกิจ ทำให้เทียบพัฒนาการข้ามภารกิจได้</p></div>
     <div class="card tight"><div class="eyebrow">Teacher in the loop</div><h3>AI ถาม ครูตัดสิน</h3>
       <p class="small muted">AI ห้ามให้คำตอบและห้ามให้คะแนนขั้นสุดท้าย ครูเป็นผู้ยืนยันระดับสมรรถนะทุกครั้ง</p></div>
   </div>
@@ -168,6 +175,7 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 <section id="v-report" class="hide"></section>
 <section id="v-teacher" class="hide"></section>
 <section id="v-research" class="hide"></section>
+<section id="v-semester" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -219,7 +227,7 @@ const ITEMS = [
      'ทักท้วงว่ายังมีคนอีกหลายคนที่ไม่ได้ประโยชน์','เสนอข้อมูลว่าใครได้และไม่ได้ประโยชน์ ขอให้ทบทวนทางเลือกอื่น และเสนอวิธีใช้งบที่ทุกคนได้ร่วมใช้']}
 ];
 
-const EVENTS = [
+const EVENTS_M1 = [
  {t:'งบประมาณถูกตัดเหลือ 1,200 บาท',
   b:'ทางโรงเรียนแจ้งว่างบส่วนกลางของห้องถูกปรับลดลง 300 บาท แผนที่วางไว้ต้องเปลี่ยน',
   o:['ตัดรายการที่คนใช้น้อยที่สุดออก','ลดจำนวนของทุกอย่างลงเท่า ๆ กัน','เปิดให้ห้องโหวตใหม่ทั้งหมด'],
@@ -262,6 +270,84 @@ const RUBRICS = {
 };
 
 const ROLES = ['ผู้รวบรวมข้อมูล','ผู้วิเคราะห์ผลกระทบ','ผู้ตรวจสอบความเป็นธรรม','ผู้จัดทำแผนและงบ','ผู้นำเสนอ'];
+
+
+const EVENTS_M2 = [
+ {t:'เพื่อนกดแชร์ข้อความไปแล้วก่อนตรวจสอบ',
+  b:'เพื่อนในห้องอีกคนหนึ่งกดแชร์ข้อความทุนการศึกษาไปในกลุ่มไลน์ผู้ปกครองแล้ว โดยยังไม่ได้ตรวจสอบว่าจริงหรือไม่',
+  o:['ปล่อยไว้เฉย ๆ เพราะเพื่อนแชร์ไปแล้ว','บอกเพื่อนให้ลบข้อความและแจ้งเตือนในกลุ่มว่าอาจเป็นข่าวลวง','เงียบไว้ก่อน รอดูว่าจะมีปัญหาไหม'],
+  c:['ถ้าไม่บอกเพื่อน จะเกิดผลอะไรตามมาถ้าข้อมูลไม่จริง','การบอกให้ลบข้อความ ต่างจากการตำหนิเพื่อนอย่างไร','เงียบไว้เท่ากับยอมรับความเสี่ยงแทนใคร']},
+ {t:'มีคนในห้องกรอกข้อมูลส่วนตัวไปแล้ว',
+  b:'เพื่อนอีกกลุ่มบอกว่าได้กรอกชื่อ เลขบัตรประชาชน และเบอร์โทรในลิงก์ไปแล้ว เพราะกลัวพลาดโอกาส',
+  o:['แนะนำให้เปลี่ยนรหัสผ่านและแจ้งผู้ปกครองทันที','บอกว่าคงไม่เป็นไร เพราะเป็นแค่ข้อมูลทั่วไป','ให้ครูที่ปรึกษาช่วยตรวจสอบกับทางโรงเรียนอย่างเป็นทางการ'],
+  c:['ข้อมูลส่วนตัวที่กรอกไป เอาไปใช้ทำอะไรได้บ้างถ้าตกไปอยู่ในมือคนไม่หวังดี','ทำไมการแจ้งผู้ปกครองจึงสำคัญในสถานการณ์นี้','การขอความช่วยเหลือจากครู ต่างจากการแก้ปัญหาเองอย่างไร']},
+ {t:'มีคนโต้แย้งว่าเป็นเรื่องจริง เพราะเพจดังแชร์ต่อ',
+  b:'เพื่อนบางคนยืนยันว่าข่าวนี้จริงแน่นอน เพราะเห็นเพจข่าวที่มีผู้ติดตามเยอะแชร์ต่อไปแล้ว',
+  o:['เชื่อตามเพราะเพจใหญ่คงไม่ปล่อยข่าวปลอม','ตรวจสอบกับเว็บไซต์ทางการของโรงเรียนหรือหน่วยงานต้นเรื่องก่อน','เลิกพูดเรื่องนี้เพราะเริ่มมีความเห็นขัดแย้งกันในห้อง'],
+  c:['จำนวนผู้ติดตามหรือยอดแชร์ เป็นเครื่องยืนยันความจริงได้จริงหรือไม่','จะตรวจสอบต้นตอของข่าวได้จากที่ไหนบ้าง','การหลีกเลี่ยงความขัดแย้ง กับการปล่อยให้ข้อมูลผิดแพร่ต่อ อย่างไหนเสี่ยงกว่ากัน']},
+ {t:'ต้องตัดสินใจว่าจะแจ้งเตือนทั้งห้องอย่างไร',
+  b:'ห้องต้องตัดสินใจว่าจะสื่อสารเรื่องนี้กับเพื่อนทั้งห้องอย่างไร โดยไม่ทำให้ใครรู้สึกถูกตำหนิ',
+  o:['ประกาศชื่อคนที่แชร์ผิดให้เป็นตัวอย่าง','แจ้งข้อเท็จจริงในกลุ่มโดยไม่ระบุชื่อใคร พร้อมแนะวิธีตรวจสอบข่าวครั้งต่อไป','ปล่อยผ่านไม่พูดถึงอีก เพื่อไม่ให้กระทบใจใคร'],
+  c:['การประกาศชื่อเพื่อน จะส่งผลต่อความสัมพันธ์ในห้องอย่างไร','ข้อความแจ้งเตือนที่ดีควรมีอะไรบ้างเพื่อช่วยเพื่อนโดยไม่ทำร้ายใคร','การไม่พูดถึงอีกเลย จะทำให้เหตุการณ์แบบนี้เกิดซ้ำได้ไหม']}
+];
+
+const MISSIONS=[
+ {id:0,week:1,enabled:true,title:'เงินส่วนรวมของห้อง 1,500 บาท',theme:'ความรับผิดชอบและประโยชน์ส่วนรวม',
+  scenario:'ห้อง ม.4/4 ได้รับงบส่วนกลาง <b>1,500 บาท</b> เพื่อใช้ให้เกิดประโยชน์กับสมาชิกในห้อง เงินก้อนนี้ไม่ใช่ของใครคนใดคนหนึ่ง และใช้ได้ครั้งเดียว',
+  consider:'ต้องคำนึงถึง ความจำเป็น · ความคุ้มค่า · ความเท่าเทียม · ประโยชน์ส่วนรวม · ความโปร่งใส · ความรับผิดชอบ',
+  knowLabel:'ข้อมูลที่ฉันมีอยู่แล้วเกี่ยวกับความต้องการของเพื่อนในห้อง',
+  factLabel:'ข้อเท็จจริงที่ตรวจสอบได้ (เช่น จำนวนเงิน จำนวนคน ราคา)',
+  opLabel:'ความคิดเห็นหรือการคาดเดา (เช่น คิดว่าเพื่อนน่าจะอยากได้...)',
+  whoLabel:'ใครได้รับผลกระทบจากการใช้เงินก้อนนี้บ้าง และแต่ละคนได้รับต่างกันอย่างไร',
+  altHint:'แต่ละทางเลือกต้องบอกได้ว่าใช้เงินเท่าไร ใครได้ประโยชน์ และใครอาจเสียประโยชน์',
+  altNameLabel:'ใช้เงินทำอะไร',costLabel:'ใช้เงินประมาณ (บาท)',
+  events:EVENTS_M1,sug:{}},
+ {id:1,week:2,enabled:true,title:'ข่าวลวงในกลุ่มไลน์ห้อง',theme:'การคิดอย่างมีวิจารณญาณและพลเมืองดิจิทัล',
+  scenario:'มีข้อความแชร์เข้ากลุ่มไลน์ห้อง ม.4/4 ว่า “โรงเรียนแจกทุนการศึกษา 5,000 บาท ให้นักเรียนที่กรอกข้อมูลภายในคืนนี้” พร้อมลิงก์แนบมา เพื่อนหลายคนกำลังจะกดแชร์ต่อและกรอกข้อมูลโดยยังไม่ได้ตรวจสอบ',
+  consider:'ต้องคำนึงถึง การตรวจสอบข้อเท็จจริง · ความปลอดภัยของข้อมูลส่วนตัว · ผลกระทบต่อเพื่อนที่หลงเชื่อ · การสื่อสารที่ไม่ทำร้ายใคร',
+  knowLabel:'ข้อมูลที่ฉันมีอยู่แล้วเกี่ยวกับความน่าเชื่อถือของข้อความนี้',
+  factLabel:'ข้อเท็จจริงที่ตรวจสอบได้ (เช่น แหล่งที่มาของลิงก์ วันเวลาที่โพสต์ ประกาศทางการของโรงเรียน)',
+  opLabel:'ความคิดเห็นหรือการคาดเดา (เช่น คิดว่าเพื่อนคงไม่หลอกกัน)',
+  whoLabel:'ใครได้รับผลกระทบจากการแชร์หรือไม่แชร์ข้อความนี้ และแต่ละคนได้รับผลต่างกันอย่างไร',
+  altHint:'แต่ละทางเลือกต้องบอกได้ว่าใครได้ประโยชน์ และใครอาจเสียประโยชน์',
+  altNameLabel:'จะจัดการกับข้อความนี้อย่างไร',costLabel:'เวลาที่ใช้ตรวจสอบก่อนตัดสินใจ (นาที)',
+  events:EVENTS_M2,
+  sug:{
+   feel:['กังวลว่าเพื่อนจะเสียข้อมูลส่วนตัวไปแล้ว','เฉย ๆ เพราะคิดว่าไม่เกี่ยวกับตัวเอง','อยากช่วยแต่กลัวเพื่อนไม่พอใจถ้าไปเตือน','รำคาญที่มีข่าวแบบนี้เข้ามาบ่อย'],
+   know:['รู้ว่าโรงเรียนไม่เคยแจ้งเรื่องทุนนี้ในช่องทางทางการ','เคยเห็นข่าวลวงลักษณะนี้มาก่อน','รู้ว่าเพื่อนบางคนกำลังจะกรอกข้อมูลแล้ว','ไม่รู้ว่าลิงก์นี้มาจากที่ไหน'],
+   need:['ยังไม่รู้ว่าใครเป็นคนโพสต์ข้อความต้นทาง','ยังไม่รู้ว่ามีใครกรอกข้อมูลไปแล้วกี่คน','ยังไม่รู้ว่าโรงเรียนมีประกาศเรื่องนี้จริงหรือไม่','ยังไม่รู้ว่าลิงก์นี้ปลอดภัยหรือไม่'],
+   fact:['ข้อความไม่มีตราโรงเรียนหรือช่องทางทางการกำกับ','ไม่มีประกาศเรื่องนี้ในเว็บไซต์หรือเพจทางการของโรงเรียน','ลิงก์ที่แนบมาไม่ใช่โดเมนของโรงเรียน','มีเวลาจำกัดบีบให้ตัดสินใจเร็ว ซึ่งเป็นลักษณะของข่าวลวง'],
+   op:['คิดว่าเพื่อนที่แชร์มาคงไม่หลอกกันเอง','คิดว่าเสียเวลาตรวจสอบก็ไม่ทันแล้ว','คิดว่าไม่น่าจะมีใครกล้าทำข่าวปลอมเรื่องทุนการศึกษา','คิดว่าลองกรอกดูก่อนก็ได้ไม่เสียหาย'],
+   who:['เพื่อนที่กำลังจะกรอกข้อมูลส่วนตัว','ผู้ปกครองที่อาจถูกส่งต่อข้อความไปด้วย','โรงเรียนที่อาจถูกเข้าใจผิดว่าเป็นผู้ส่งข่าวนี้','คนที่เผลอแชร์ต่อโดยไม่ตั้งใจ'],
+   a0n:['ตรวจสอบกับเว็บไซต์หรือเพจทางการของโรงเรียนก่อน','แจ้งครูที่ปรึกษาให้ช่วยตรวจสอบ','ส่งข้อความถามตรง ๆ ไปที่ฝ่ายทะเบียนของโรงเรียน'],
+   a1n:['เตือนในกลุ่มว่าอาจเป็นข่าวลวง พร้อมเหตุผล','ขอให้เพื่อนที่แชร์ไปแล้วลบข้อความออก','แชร์วิธีสังเกตข่าวลวงให้เพื่อนในห้อง'],
+   a2n:['ปล่อยผ่านไม่พูดอะไร','เชื่อไปก่อนแล้วค่อยดูทีหลัง','บอกต่อให้คนอื่นในห้องอื่นด้วยโดยยังไม่ตรวจสอบ'],
+   er0:['ปล่อยไว้เฉย ๆ เพราะเพื่อนแชร์ไปแล้ว','บอกเพื่อนให้ลบข้อความและแจ้งเตือนว่าอาจเป็นข่าวลวง','เงียบไว้ก่อน รอดูว่าจะมีปัญหาไหม'],
+   er1:['แนะนำให้เปลี่ยนรหัสผ่านและแจ้งผู้ปกครองทันที','บอกว่าคงไม่เป็นไร เพราะเป็นแค่ข้อมูลทั่วไป','ให้ครูที่ปรึกษาช่วยตรวจสอบกับโรงเรียนอย่างเป็นทางการ'],
+   er2:['เชื่อตามเพราะเพจใหญ่คงไม่ปล่อยข่าวปลอม','ตรวจสอบกับเว็บไซต์ทางการของโรงเรียนก่อน','เลิกพูดเรื่องนี้เพราะเริ่มมีความเห็นขัดแย้งกัน'],
+   er3:['ประกาศชื่อคนที่แชร์ผิดให้เป็นตัวอย่าง','แจ้งข้อเท็จจริงโดยไม่ระบุชื่อใคร พร้อมแนะวิธีตรวจสอบข่าว','ปล่อยผ่านไม่พูดถึงอีก'],
+   why:['เพราะตรวจสอบกับแหล่งทางการแล้วไม่พบข้อมูลนี้จริง','เพราะการเตือนเพื่อนช่วยลดความเสียหายได้มากกว่าการเงียบ','เพราะข้อมูลส่วนตัวที่หลุดไปแล้วเรียกคืนไม่ได้ ต้องรีบแจ้ง','เพราะเพื่อนควรรู้วิธีสังเกตข่าวลวงไว้ใช้ครั้งต่อไป'],
+   lose:['เพื่อนที่แชร์ไปแล้วอาจรู้สึกอายที่ถูกจับผิด ผมจะเตือนแบบไม่ระบุชื่อ','เพื่อนที่เชื่อข่าวอาจไม่พอใจที่ถูกทักท้วง ผมจะอธิบายด้วยเหตุผลไม่ใช่ตำหนิ','อาจไม่มีใครเสียประโยชน์ชัดเจน แต่ต้องระวังความรู้สึกของเพื่อน'],
+   own:['ถ้าเตือนผิดพลาด ผมจะขอโทษและตรวจสอบให้รอบคอบขึ้นครั้งหน้า','ผมจะติดตามว่าเพื่อนที่กรอกข้อมูลไปแล้วปลอดภัยหรือไม่','ผมจะช่วยแจ้งครูหากสถานการณ์ลุกลาม ไม่ปล่อยให้เพื่อนรับมือคนเดียว'],
+   contrib:['ตรวจสอบแหล่งที่มาของข่าวให้ทีม','รวบรวมความเห็นของเพื่อนว่าใครกรอกข้อมูลไปแล้วบ้าง','ร่างข้อความแจ้งเตือนให้ทีมใช้ในกลุ่ม','เตือนเพื่อนที่ยังไม่รู้เรื่องนี้'],
+   fix:['จะตรวจสอบแหล่งข่าวก่อนเชื่อทุกครั้ง','จะไม่กดแชร์จนกว่าจะมั่นใจว่าจริง','จะกล้าเตือนเพื่อนมากขึ้นแม้จะรู้สึกเกรงใจ','จะสังเกตสัญญาณของข่าวลวงให้ไวขึ้น'],
+   w1:['ก่อนแชร์ข่าวในกลุ่มห้อง ต้องตรวจสอบแหล่งที่มาก่อนทุกครั้ง','ถ้าใครเจอข่าวน่าสงสัย ให้ถามในกลุ่มก่อนแชร์ต่อ','ตั้งเพื่อนอาสาช่วยตรวจสอบข่าวประจำห้อง'],
+   w2:['จะเช็กประกาศทางการก่อนเชื่อข่าวทุกครั้ง','จะแชร์วิธีสังเกตข่าวลวงให้เพื่อนในห้อง','จะช่วยเป็นคนตรวจสอบข่าวให้กลุ่มเพื่อน'],
+   w3:['ดูว่ามีคนหลงเชื่อข่าวลวงในห้องลดลงหรือไม่','ถามเพื่อนว่ากล้าตรวจสอบก่อนแชร์มากขึ้นหรือไม่','นับจำนวนครั้งที่มีคนช่วยกันเตือนข่าวน่าสงสัยในกลุ่ม'],
+   r0:['ฉันรู้ว่าตัวเองเชื่อข่าวง่ายถ้ามาจากคนที่รู้จัก','ฉันกล้าตรวจสอบข้อมูลมากขึ้นก่อนเชื่อ','ฉันไม่ค่อยกล้าเตือนเพื่อนตรง ๆ เวลาเห็นเพื่อนทำผิด'],
+   r1:['ทำให้เพื่อนบางคนรู้ตัวและหยุดกรอกข้อมูลทัน','ทำให้ห้องระวังข่าวลวงมากขึ้น','อาจทำให้เพื่อนที่แชร์ไปแล้วรู้สึกไม่ดี'],
+   r2:['รับฟังตอนเพื่อนอธิบายว่าทำไมถึงเชื่อข่าวนี้','ยังฟังน้อยไปเพราะรีบเตือนก่อนถามเหตุผลเพื่อน','รับฟังและช่วยกันหาวิธีตรวจสอบร่วมกัน'],
+   r3:['จะทำเหมือนเดิม เพราะช่วยป้องกันความเสียหายได้จริง','จะเปลี่ยน เพราะจะพูดกับเพื่อนเป็นการส่วนตัวแทนในกลุ่มใหญ่','จะเปลี่ยน เพราะจะตรวจสอบให้แน่ใจก่อนเตือนใคร'],
+   r4:['จะตรวจสอบแหล่งข่าวก่อนเชื่อทุกครั้ง','จะกล้าเตือนเพื่อนมากขึ้นแม้จะเกรงใจ','จะฟังเหตุผลของเพื่อนก่อนตัดสิน','จะแชร์ความรู้เรื่องข่าวลวงให้คนอื่นด้วย']
+  }},
+ {id:2,week:3,enabled:false,title:'เมื่อเพื่อนถูกกีดกัน',theme:'ความเห็นอกเห็นใจ การสื่อสาร และสิทธิของผู้อื่น'},
+ {id:3,week:4,enabled:false,title:'ห้องเรียนใช้ทรัพยากรสิ้นเปลือง',theme:'การทำงานร่วมกันและความยั่งยืน'}
+];
+let curMission=0;
+function MIS(){ return MISSIONS[curMission]; }
+function mKey(idx,mid){ mid=(mid===undefined||mid===null)?curMission:mid; return mid===0?'lc:'+idx:'lc:m'+mid+':'+idx; }
+function sugFor(id){ const m=MIS(); if(m&&m.sug&&m.sug[id]) return m.sug[id]; return SUG[id]; }
+
 
 /* ================= CONFIG =================
    วางลิงก์ Web app ของ Google Apps Script ตรงนี้ (ลงท้ายด้วย /exec)
@@ -333,12 +419,61 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research'];
-function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);}
-async function save(force){if(!s)return;const j=JSON.stringify(s);LS.set('lc:'+s.idx,j);LS.set('lc:last',String(s.idx));
-  queueRemote('lc:'+s.idx,s.name,j); if(force) await flushRemote(true); flagSaved();}
+const views=['home','pick','test','mission','report','teacher','research','semester'];
+function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
+  if(v==='home') renderMissionList();}
+function enterMission(id){ curMission=id; go('pick'); renderPick(); }
+function renderMissionList(){
+  const el=$('missionList'); if(!el) return;
+  el.innerHTML = MISSIONS.map(m=>`
+    <div class="opt" style="cursor:${m.enabled?'pointer':'default'}" ${m.enabled?`onclick="enterMission(${m.id})"`:''}>
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <h4 style="margin:0">สัปดาห์ ${m.week} · ${m.title}</h4>
+        <span class="pill">${m.enabled?'พร้อมใช้งาน':'อยู่ระหว่างเตรียมการ'}</span></div>
+      <p class="small muted" style="margin:4px 0 0">${m.theme}</p></div>`).join('');
+}
+async function renderSemester(){
+  $('v-semester').innerHTML=`<div class="card"><h2>กำลังตรวจสอบข้อมูล...</h2></div>`;
+  const summary=[];
+  for(const m of MISSIONS){
+    if(!m.enabled){ summary.push({m,done:[],avail:false}); continue; }
+    const mid=m.id; const arr=[];
+    for(let i=0;i<ROSTER.length;i++){
+      const raw=await S.get(mKey(i,mid),true);
+      if(raw){ try{const d=JSON.parse(raw); if(d.done) arr.push(d);}catch(e){} }
+    }
+    summary.push({m,done:arr,avail:true});
+  }
+  const tot=a=>Object.values(a).reduce((x,y)=>x+y,0);
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+  $('v-semester').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">โครงสร้างเวลา</div>
+    <h1>ภาพรวมภาคเรียน</h1>
+    <p class="muted" style="max-width:64ch">ภารกิจรายสัปดาห์คือแกนหลักของระบบ ใช้เครื่องมือวัดชุดเดียวกันทุกภารกิจเพื่อให้เทียบพัฒนาการข้ามช่วงเวลาได้ การสังเกตพฤติกรรมรายวันเป็นบทบาทของครูระหว่างทำภารกิจ ไม่ใช่ระบบแยกต่างหาก ส่วนรายเดือนและรายภาคเรียนคือจุดตรวจสอบพัฒนาการสะสมจากภารกิจที่ทำมาแล้ว แนวทางนี้สอดคล้องกับงานวิจัยที่ชี้ว่าการเผชิญสถานการณ์ซ้ำหลายครั้งช่วยพัฒนาทักษะที่ไม่ใช่การรู้คิดได้ดีกว่าการทำครั้งเดียว (Social life simulation for non-cognitive skills learning, 2024) และการสะท้อนคิดต่อเนื่องช่วยพัฒนาความสามารถในการแก้ปัญหา (Pimdee et al., 2024)</p>
+    <table style="margin-top:14px"><thead><tr><th>ระดับเวลา</th><th>กลไก</th><th>สิ่งที่เก็บ</th></tr></thead><tbody>
+      <tr><td>รายวัน</td><td>ครูสังเกตพฤติกรรมระหว่างทำภารกิจ บันทึกสั้น ๆ</td><td>ข้อสังเกตประกอบการให้รูบริก</td></tr>
+      <tr><td>รายสัปดาห์</td><td>ภารกิจสถานการณ์ 1 เรื่อง ผ่านขั้น UP TO GROW ทั้ง 8 ขั้น</td><td>แบบวัดก่อน–หลัง หลักฐานการตัดสินใจ</td></tr>
+      <tr><td>รายเดือน</td><td>สรุปผลของภารกิจในเดือนนั้น</td><td>คะแนนเฉลี่ยและระดับรูบริกของเดือน</td></tr>
+      <tr><td>รายภาคเรียน</td><td>รวมผลทุกภารกิจที่ทำแล้ว</td><td>แนวโน้มพัฒนาการสะสม และพอร์ตโฟลิโอ</td></tr>
+    </tbody></table>
+  </div>
+  <div class="card"><h2>สถานะภารกิจทั้ง 4</h2>
+    <table><thead><tr><th>สัปดาห์</th><th>ภารกิจ</th><th>สมรรถนะเด่น</th><th>สถานะ</th><th>ค่าเฉลี่ยก่อน</th><th>ค่าเฉลี่ยหลัง</th></tr></thead><tbody>
+    ${summary.map(x=>`<tr><td class="mono">${x.m.week}</td><td>${x.m.title}</td><td class="small">${x.m.theme}</td>
+      <td class="small">${!x.m.enabled?'<span class="muted">อยู่ระหว่างเตรียมการ</span>':x.done.length?'<span class="ok">มีข้อมูลจริง '+x.done.length+' คน</span>':'<span class="muted">ยังไม่มีนักเรียนทำครบ</span>'}</td>
+      <td class="mono">${x.done.length?avg(x.done.map(d=>tot(d.pre))).toFixed(1):'-'}</td>
+      <td class="mono">${x.done.length?avg(x.done.map(d=>tot(d.post))).toFixed(1):'-'}</td></tr>`).join('')}
+    </tbody></table>
+    <p class="small muted" style="margin-top:8px">ตัวเลขในตารางนี้คำนวณจากข้อมูลจริงที่มีอยู่เท่านั้น ภารกิจที่ยังไม่เริ่มจะไม่แสดงตัวเลขสมมติ</p>
+  </div>
+  <div class="row noprint" style="margin-bottom:26px"><button onclick="window.print()">พิมพ์หน้านี้</button><button onclick="go('home')">กลับหน้าแรก</button></div>`;
+}
+async function save(force){if(!s)return;const j=JSON.stringify(s);const key=mKey(s.idx,s.missionId);
+  LS.set(key,j);LS.set('lc:last',s.missionId+':'+s.idx);
+  queueRemote(key,s.name,j); if(force) await flushRemote(true); flagSaved();}
 
-function blank(idx){return{idx,name:ROSTER[idx],room:'ม.4/4',started:Date.now(),
+function blank(idx){return{idx,missionId:curMission,name:ROSTER[idx],room:'ม.4/4',started:Date.now(),
  pre:{},post:{},phase:'pre',step:0,qi:0,role:'',plan:{},decisions:{},reflect:{},self:{},action:{},
  coachLog:[],log:[],teacher:{score:{},note:''},done:false};}
 function logEv(t,d){s.log.push({t:Date.now(),type:t,detail:d});}
@@ -406,20 +541,124 @@ function chipTap(id,i,btn){
 }
 
 
-/* ---------- Chart.js loader ---------- */
-function loadChartJS(){
-  return new Promise(res=>{
-    if(window.Chart){res();return;}
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js';
-    s.onload=()=>res(); s.onerror=()=>res();
-    document.head.appendChild(s);
-  });
-}
-window._charts=window._charts||{};
-function killChart(id){ if(window._charts[id]){ try{window._charts[id].destroy();}catch(e){} delete window._charts[id]; } }
-const CPAL=()=>({teal:'#0E9F8C',tealSoft:'#8FE0CE',amber:'#F0A500',violet:'#6C63C7',red:'#D94F3D',grid:'#DCEFE6',text:'#123029'});
+/* ---------- กราฟ SVG ที่วาดเอง ไม่พึ่ง CDN ทำงานได้แม้ไม่มีอินเทอร์เน็ต ---------- */
+const CPAL=()=>({teal:'#0E9F8C',tealSoft:'#8FE0CE',amber:'#F0A500',violet:'#6C63C7',red:'#D94F3D',grid:'#DCEFE6',text:'#123029',muted:'#5C7C73'});
+const fmtDT=ts=>ts?new Date(ts).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'}):'-';
+const fmtD=ts=>ts?new Date(ts).toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'}):'-';
+const gapMin=(a,b)=>(a&&b)?Math.round((b-a)/60000):null;
+const dayKey=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const esq=x=>String(x??'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 
+/* แผนภูมิแท่งเปรียบเทียบ ก่อน-หลัง */
+function svgBar(labels,before,after,opt){
+  opt=opt||{}; const c=CPAL(); const max=opt.max||4;
+  const W=760,H=300,padL=48,padB=86,padT=16,padR=10;
+  const iw=W-padL-padR, ih=H-padT-padB;
+  const n=labels.length, gw=iw/n, bw=Math.min(20,gw/3.2);
+  let g='';
+  for(let i=0;i<=4;i++){ const y=padT+ih-(ih*i/4); const v=(max*i/4).toFixed(1);
+    g+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${c.grid}" stroke-width="1"/>`+
+       `<text x="${padL-8}" y="${y+4}" text-anchor="end" font-size="11" fill="${c.muted}">${v}</text>`; }
+  labels.forEach((lb,i)=>{
+    const cx=padL+gw*i+gw/2;
+    const hb=ih*Math.max(0,before[i]||0)/max, ha=ih*Math.max(0,after[i]||0)/max;
+    g+=`<rect x="${cx-bw-2}" y="${padT+ih-hb}" width="${bw}" height="${hb}" fill="${c.amber}" rx="2"/>`;
+    g+=`<rect x="${cx+2}" y="${padT+ih-ha}" width="${bw}" height="${ha}" fill="${c.teal}" rx="2"/>`;
+    const words=String(lb).split(' ');
+    let line1=lb, line2='';
+    if(lb.length>12){ const mid=Math.ceil(lb.length/2); let cut=lb.lastIndexOf(' ',mid); if(cut<3)cut=mid;
+      line1=lb.slice(0,cut); line2=lb.slice(cut).trim(); }
+    g+=`<text x="${cx}" y="${padT+ih+16}" text-anchor="middle" font-size="10.5" fill="${c.text}">${esq(line1)}</text>`;
+    if(line2) g+=`<text x="${cx}" y="${padT+ih+29}" text-anchor="middle" font-size="10.5" fill="${c.text}">${esq(line2)}</text>`;
+    const dv=(after[i]||0)-(before[i]||0);
+    if(opt.showDiff!==false) g+=`<text x="${cx}" y="${padT+ih+45}" text-anchor="middle" font-size="10" fill="${dv>0?c.teal:dv<0?c.red:c.muted}">${dv>=0?'+':''}${dv.toFixed(2)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img">${g}</svg>
+   <div class="chartlegend"><span><i style="background:${c.amber}"></i>ก่อน</span><span><i style="background:${c.teal}"></i>หลัง</span></div>`;
+}
+
+/* แผนภูมิวงกลมแบบโดนัท */
+function svgDonut(labels,values,colors){
+  const c=CPAL(); const tot=values.reduce((a,b)=>a+b,0);
+  const W=300,H=250,cx=110,cy=115,R=82,r=48;
+  let g='',ang=-Math.PI/2;
+  if(tot===0){
+    g+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#EFF5F2"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="#fff"/>`;
+    g+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="12" fill="${c.muted}">ยังไม่มีข้อมูล</text>`;
+  }else{
+    values.forEach((v,i)=>{
+      if(v<=0) return;
+      const a2=ang+(v/tot)*Math.PI*2, big=(a2-ang)>Math.PI?1:0;
+      const x1=cx+R*Math.cos(ang),y1=cy+R*Math.sin(ang),x2=cx+R*Math.cos(a2),y2=cy+R*Math.sin(a2);
+      const x3=cx+r*Math.cos(a2),y3=cy+r*Math.sin(a2),x4=cx+r*Math.cos(ang),y4=cy+r*Math.sin(ang);
+      g+=`<path d="M${x1} ${y1} A${R} ${R} 0 ${big} 1 ${x2} ${y2} L${x3} ${y3} A${r} ${r} 0 ${big} 0 ${x4} ${y4} Z" fill="${colors[i]}"/>`;
+      ang=a2;
+    });
+    g+=`<text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="20" font-weight="600" fill="${c.text}">${tot}</text>`;
+    g+=`<text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="11" fill="${c.muted}">รายการ</text>`;
+  }
+  labels.forEach((lb,i)=>{
+    const y=34+i*24;
+    g+=`<rect x="212" y="${y-9}" width="11" height="11" rx="2" fill="${colors[i]}"/>`;
+    g+=`<text x="229" y="${y}" font-size="10.5" fill="${c.text}">${esq(lb)}</text>`;
+    g+=`<text x="229" y="${y+12}" font-size="10" fill="${c.muted}">${values[i]} คน</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img">${g}</svg>`;
+}
+
+/* กราฟเส้นคะแนนรายบุคคล */
+function svgLine(names,before,after){
+  const c=CPAL(); const W=760,H=300,padL=42,padB=92,padT=16,padR=12,max=40;
+  const iw=W-padL-padR, ih=H-padT-padB, n=names.length;
+  if(n===0) return `<p class="small muted">ยังไม่มีนักเรียนที่ทำครบทั้งก่อนและหลัง</p>`;
+  const xx=i=>n===1?padL+iw/2:padL+iw*i/(n-1);
+  const yy=v=>padT+ih-ih*Math.max(0,Math.min(max,v))/max;
+  let g='';
+  for(let i=0;i<=4;i++){ const y=padT+ih-(ih*i/4);
+    g+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="${c.grid}"/>`+
+       `<text x="${padL-6}" y="${y+4}" text-anchor="end" font-size="11" fill="${c.muted}">${max*i/4}</text>`; }
+  const path=(arr,col)=>{
+    let d=arr.map((v,i)=>`${i?'L':'M'}${xx(i)} ${yy(v)}`).join(' ');
+    let s=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2"/>`;
+    arr.forEach((v,i)=>{ s+=`<circle cx="${xx(i)}" cy="${yy(v)}" r="3.5" fill="${col}"/>`; });
+    return s; };
+  g+=path(before,c.amber)+path(after,c.teal);
+  names.forEach((nm,i)=>{
+    const x=xx(i), short=nm.length>9?nm.slice(0,9):nm;
+    g+=`<text x="${x}" y="${padT+ih+14}" font-size="9.5" fill="${c.text}" transform="rotate(55 ${x} ${padT+ih+14})">${esq(short)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img">${g}</svg>
+   <div class="chartlegend"><span><i style="background:${c.amber}"></i>ก่อน</span><span><i style="background:${c.teal}"></i>หลัง</span></div>`;
+}
+
+/* แผนภูมิเรดาร์รายบุคคล */
+function svgRadar(labels,before,after){
+  const c=CPAL(); const W=560,H=380,cx=280,cy=185,R=118,max=4,n=labels.length;
+  const pt=(i,v)=>{ const a=-Math.PI/2+i*2*Math.PI/n, rr=R*Math.max(0,Math.min(max,v))/max;
+    return [cx+rr*Math.cos(a), cy+rr*Math.sin(a)]; };
+  let g='';
+  for(let ring=1;ring<=4;ring++){
+    const p=[...Array(n)].map((_,i)=>pt(i,max*ring/4).join(',')).join(' ');
+    g+=`<polygon points="${p}" fill="none" stroke="${c.grid}" stroke-width="1"/>`;
+  }
+  for(let i=0;i<n;i++){ const [x,y]=pt(i,max); g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${c.grid}"/>`; }
+  const poly=(arr,col)=>{ const p=arr.map((v,i)=>pt(i,v).join(',')).join(' ');
+    let s=`<polygon points="${p}" fill="${col}33" stroke="${col}" stroke-width="2"/>`;
+    arr.forEach((v,i)=>{const [x,y]=pt(i,v); s+=`<circle cx="${x}" cy="${y}" r="3" fill="${col}"/>`;});
+    return s; };
+  g+=poly(before,c.amber)+poly(after,c.teal);
+  labels.forEach((lb,i)=>{
+    const a=-Math.PI/2+i*2*Math.PI/n, lx=cx+(R+26)*Math.cos(a), ly=cy+(R+26)*Math.sin(a);
+    const anchor=Math.abs(Math.cos(a))<0.3?'middle':(Math.cos(a)>0?'start':'end');
+    const words=lb.split(' '); let l1=lb,l2='';
+    if(lb.length>13){ const mid=Math.ceil(lb.length/2); let cut=lb.lastIndexOf(' ',mid); if(cut<3)cut=mid;
+      l1=lb.slice(0,cut); l2=lb.slice(cut).trim(); }
+    g+=`<text x="${lx}" y="${ly}" text-anchor="${anchor}" font-size="10.5" fill="${c.text}">${esq(l1)}</text>`;
+    if(l2) g+=`<text x="${lx}" y="${ly+12}" text-anchor="${anchor}" font-size="10.5" fill="${c.text}">${esq(l2)}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;max-height:340px" role="img">${g}</svg>
+   <div class="chartlegend"><span><i style="background:${c.amber}"></i>ก่อน</span><span><i style="background:${c.teal}"></i>หลัง</span></div>`;
+}
 
 /* ---------- ฐานงานวิจัย ---------- */
 const RESEARCH=[
@@ -530,8 +769,9 @@ function renderResearch(){
 
 /* ---------- pick student ---------- */
 function renderPick(){
+  const mi=MIS();
   $('v-pick').innerHTML=`<div class="card">
-  <div class="eyebrow">เริ่มต้น</div>
+  <div class="eyebrow">ภารกิจที่ ${mi.week} · ${mi.title}</div>
   <h2>แตะชื่อของตัวเอง</h2>
   <p class="muted small">นักเรียนชั้น ม.4/4 จำนวน ${ROSTER.length} คน · ถ้าเคยทำค้างไว้ ระบบจะพากลับไปที่เดิมให้</p>
   <input id="rsearch" placeholder="พิมพ์ชื่อเพื่อค้นหา" style="margin:12px 0 14px" oninput="filterRoster(this.value)">
@@ -543,7 +783,7 @@ function renderPick(){
        <div class="no">${i+1}</div>
        <div><div class="nm">${n}</div><div class="st" id="stat${i}">ยังไม่ได้เริ่ม</div></div></div>`));
   ROSTER.forEach(async(n,i)=>{
-    const raw=await S.get('lc:'+i,true); if(!raw)return;
+    const raw=await S.get(mKey(i),true); if(!raw)return;
     try{const d=JSON.parse(raw);const el=$('stat'+i),c=$('rc'+i);if(!el)return;
       if(d.done){el.textContent='ทำครบแล้ว';c.classList.add('done');}
       else{el.textContent='ทำค้างไว้ · '+(d.phase==='pre'?'แบบวัดก่อน':d.phase==='post'?'แบบวัดหลัง':'ขั้นที่ '+(d.step+1));c.classList.add('doing');}
@@ -555,9 +795,9 @@ function filterRoster(q){
   ROSTER.forEach((n,i)=>{const c=$('rc'+i); if(c) c.style.display=(!q||n.includes(q))?'':'none';});
 }
 async function startStudent(i){
-  const raw=await S.get('lc:'+i,true);
-  if(raw){try{s=JSON.parse(raw);}catch(e){s=blank(i);}}else s=blank(i);
-  $('whoami').textContent=s.name;
+  const raw=await S.get(mKey(i),true);
+  if(raw){try{s=JSON.parse(raw);curMission=(s.missionId!==undefined)?s.missionId:curMission;}catch(e){s=blank(i);}}else s=blank(i);
+  $('whoami').textContent=s.name+' · '+MIS().title;
   route();
 }
 function route(){
@@ -607,8 +847,8 @@ function submitTest(){
   const miss=ITEMS.map((x,i)=>i).filter(i=>!ans['q'+i]);
   if(miss.length){ s.qi=miss[0]; renderTest();
     toast('ยังเหลือข้อ '+miss.map(i=>i+1).join(', ')+' ระบบต้องใช้คะแนนครบ 10 ข้อเพื่อเทียบก่อนและหลัง'); return; }
-  if(s.phase==='pre'){s.phase='mission';s.step=0;s.qi=0;logEv('pre','ทำแบบวัดก่อนเสร็จ คะแนน '+total(s.pre));save(true);renderMission();}
-  else{s.done=true;s.finished=Date.now();logEv('post','ทำแบบวัดหลังเสร็จ คะแนน '+total(s.post));save(true);showReport(s,false);toast('ส่งครบแล้ว ขอบคุณครับ',1);}
+  if(s.phase==='pre'){s.phase='mission';s.step=0;s.qi=0;s.preAt=Date.now();logEv('pre','ทำแบบวัดก่อนเสร็จ คะแนน '+total(s.pre));save(true);renderMission();}
+  else{s.done=true;s.finished=Date.now();s.postAt=Date.now();logEv('post','ทำแบบวัดหลังเสร็จ คะแนน '+total(s.post));save(true);showReport(s,false);toast('ส่งครบแล้ว ขอบคุณครับ',1);}
 }
 const total=a=>Object.values(a).reduce((x,y)=>x+y,0);
 function dimScore(a,dim){
@@ -645,13 +885,14 @@ function renderMission(){
 function nextStep(){ s.step++; save(true); if(s.step>=STEPS.length){s.phase='post';save();renderTest();return;} renderMission(); }
 
 function stU(){
-  $('body').innerHTML=`<div class="card"><div class="eyebrow">U — Understand</div>
+  const mi=MIS();
+  $('body').innerHTML=`<div class="card"><div class="eyebrow">U — Understand · ภารกิจที่ ${mi.week}: ${mi.title}</div>
   <h2>สถานการณ์ของห้อง</h2>
-  <p>ห้อง ม.4/4 ได้รับงบส่วนกลาง <b>1,500 บาท</b> เพื่อใช้ให้เกิดประโยชน์กับสมาชิกในห้อง เงินก้อนนี้ไม่ใช่ของใครคนใดคนหนึ่ง และใช้ได้ครั้งเดียว</p>
-  <p class="muted small">ต้องคำนึงถึง ความจำเป็น · ความคุ้มค่า · ความเท่าเทียม · ประโยชน์ส่วนรวม · ความโปร่งใส · ความรับผิดชอบ</p>
-  <label for="feel">ตอนนี้นักเรียนรู้สึกอย่างไรกับการต้องตัดสินใจแทนคนทั้งห้อง</label>
+  <p>${mi.scenario}</p>
+  <p class="muted small">${mi.consider}</p>
+  <label for="feel">ตอนนี้นักเรียนรู้สึกอย่างไรกับสถานการณ์นี้</label>
   <textarea id="feel">${esc(s.plan.feel||'')}</textarea>
-  <label for="know">ข้อมูลที่ฉันมีอยู่แล้วเกี่ยวกับความต้องการของเพื่อนในห้อง</label>
+  <label for="know">${mi.knowLabel}</label>
   <textarea id="know">${esc(s.plan.know||'')}</textarea>
   <label for="need">ข้อมูลที่ฉันยังไม่รู้ และควรรู้ก่อนตัดสินใจ</label>
   <textarea id="need">${esc(s.plan.need||'')}</textarea>
@@ -661,13 +902,14 @@ function stU(){
 function okU(){ if((s.plan.need||'').trim().length<5){bad('need','เขียนข้อมูลที่ยังไม่รู้อย่างน้อย 1 อย่าง การรู้ว่าตัวเองยังไม่รู้อะไร คือจุดเริ่มของการคิดอย่างมีหลักฐาน');return;} logEv('U','ระบุข้อมูลที่ยังขาด'); nextStep(); }
 
 function stP(){
+  const mi=MIS();
   $('body').innerHTML=`<div class="card"><div class="eyebrow">P — Perceive the problem</div>
   <h2>แยกข้อเท็จจริงออกจากความคิดเห็น</h2>
-  <label for="fact">ข้อเท็จจริงที่ตรวจสอบได้ (เช่น จำนวนเงิน จำนวนคน ราคา)</label>
+  <label for="fact">${mi.factLabel}</label>
   <textarea id="fact">${esc(s.plan.fact||'')}</textarea>
-  <label for="op">ความคิดเห็นหรือการคาดเดา (เช่น คิดว่าเพื่อนน่าจะอยากได้...)</label>
+  <label for="op">${mi.opLabel}</label>
   <textarea id="op">${esc(s.plan.op||'')}</textarea>
-  <label for="who">ใครได้รับผลกระทบจากการใช้เงินก้อนนี้บ้าง และแต่ละคนได้รับต่างกันอย่างไร</label>
+  <label for="who">${mi.whoLabel}</label>
   <textarea id="who">${esc(s.plan.who||'')}</textarea>
   <div class="row" style="margin-top:14px"><button onclick="back()">ย้อนกลับ</button><button class="primary" onclick="okP()">ขั้นต่อไป</button></div></div>`;
   ['fact','op','who'].forEach(k=>$(k).oninput=e=>{s.plan[k]=e.target.value;});
@@ -679,7 +921,7 @@ function stT(){
   const p=s.plan; p.alt=p.alt||[{},{},{}];
   $('body').innerHTML=`<div class="card"><div class="eyebrow">T — Think with evidence</div>
   <h2>สร้างทางเลือกอย่างน้อย 2 ทาง แล้ววิเคราะห์</h2>
-  <p class="muted small">แต่ละทางเลือกต้องบอกได้ว่าใช้เงินเท่าไร ใครได้ประโยชน์ และใครอาจเสียประโยชน์</p>
+  <p class="muted small">${MIS().altHint}</p>
   <div id="alts"></div>
   <div class="row" style="margin-top:14px"><button onclick="back()">ย้อนกลับ</button><button class="primary" onclick="okT()">ขั้นต่อไป</button></div></div>`;
   const box=$('alts');
@@ -687,9 +929,9 @@ function stT(){
     const a=p.alt[i];
     box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:var(--soft)">
       <div class="eyebrow">ทางเลือกที่ ${i+1}${i===2?' (ไม่บังคับ)':''}</div>
-      <label for="a${i}n">ใช้เงินทำอะไร</label><input id="a${i}n" value="${esc(a.n||'')}">
+      <label for="a${i}n">${MIS().altNameLabel}</label><input id="a${i}n" value="${esc(a.n||'')}">
       <div class="grid2">
-        <div><label for="a${i}c">ใช้เงินประมาณ (บาท)</label><input id="a${i}c" class="mono" inputmode="numeric" value="${a.c||''}"></div>
+        <div><label for="a${i}c">${MIS().costLabel}</label><input id="a${i}c" class="mono" value="${a.c||''}"></div>
         <div><label for="a${i}g">ใครได้ประโยชน์ กี่คน</label><input id="a${i}g" value="${esc(a.g||'')}"></div>
       </div>
       <label for="a${i}l">ใครอาจไม่ได้ประโยชน์หรือเสียประโยชน์</label><input id="a${i}l" value="${esc(a.l||'')}">
@@ -723,7 +965,7 @@ function stO(){
   p.alt.forEach((a,i)=>{ if(!(a.n||'').trim())return;
     box.insertAdjacentHTML('beforeend',`<div class="opt ${p.choice===i?'sel':''}" onclick="pickAlt(${i})">
       <h4>ทางเลือกที่ ${i+1} · ${esc(a.n)}</h4>
-      <span class="pill">${esc(a.c||'-')} บาท</span><span class="pill">ได้ประโยชน์: ${esc(a.g||'-')}</span></div>`);
+      <span class="pill">${esc(a.c||'-')}</span><span class="pill">ได้ประโยชน์: ${esc(a.g||'-')}</span></div>`);
   });
   ['why','lose','own'].forEach(k=>$(k).oninput=e=>{p[k]=e.target.value;});
   renderCoach();
@@ -750,7 +992,7 @@ function stG(){
   $('role').onchange=e=>{s.role=e.target.value;};
   $('contrib').oninput=e=>{s.contrib=e.target.value;};
   const box=$('evs');
-  EVENTS.forEach((ev,i)=>{
+  MIS().events.forEach((ev,i)=>{
     d[i]=d[i]||{};
     box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:var(--soft);margin-top:12px">
       <div class="eyebrow">เหตุการณ์ที่ ${i+1}</div><h3>${ev.t}</h3><p class="small">${ev.b}</p>
@@ -767,7 +1009,8 @@ function stG(){
 function pickEv(i,j){ const d=s.decisions[i]; if(d.pick!==undefined&&d.pick!==j){d.ch=(d.ch||0)+1;} d.pick=j; stG(); mountChips(); }
 function okG(){
   const n=Object.values(s.decisions).filter(d=>d.pick!==undefined&&(d.r||'').length>4).length;
-  if(n<EVENTS.length){toast('ตอบให้ครบทั้ง '+EVENTS.length+' เหตุการณ์ พร้อมเหตุผลสั้น ๆ');return;}
+  const evn=MIS().events.length;
+  if(n<evn){toast('ตอบให้ครบทั้ง '+evn+' เหตุการณ์ พร้อมเหตุผลสั้น ๆ');return;}
   if(!(s.contrib||'').trim()){bad('contrib','เขียนสิ่งที่ทำจริงในบทบาทของตัวเอง เพื่อให้ครูให้คะแนนรายบุคคลได้');return;}
   logEv('G','ตัดสินใจครบทุกเหตุการณ์ บทบาท: '+s.role); nextStep();
 }
@@ -866,8 +1109,14 @@ function showReport(st,tv){
       <td class="mono ${b-a>0?'ok':b-a<0?'bad':''}">${(b-a>=0?'+':'')+(b-a).toFixed(2)}</td></tr>`;}).join('');
   $('v-report').innerHTML=`
   <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')}</div>
-  <div class="card"><div class="eyebrow">รายงานรายบุคคล · ภารกิจที่ 1</div>
+  <div class="card"><div class="eyebrow">รายงานรายบุคคล · สัปดาห์ ${(MISSIONS[st.missionId||0]||{}).week||1} · ${(MISSIONS[st.missionId||0]||{}).title||''}</div>
     <h1>${esc(st.name)}</h1><p class="muted">${esc(st.room)} · บทบาท ${esc(st.role||'-')}</p>
+    <table style="margin-top:10px"><tbody>
+      <tr><td>เริ่มทำกิจกรรม</td><td class="mono small">${fmtDT(st.started)}</td>
+          <td>ทำแบบวัดก่อนเสร็จ</td><td class="mono small">${fmtDT(st.preAt)}</td></tr>
+      <tr><td>ส่งผลงานเสร็จ</td><td class="mono small">${fmtDT(st.finished)}</td>
+          <td>ระยะห่างก่อน–หลัง</td><td class="mono small">${gapMin(st.preAt||st.started,st.postAt||st.finished)!==null?gapMin(st.preAt||st.started,st.postAt||st.finished)+' นาที':'-'}</td></tr>
+    </tbody></table>
     <div class="grid3" style="margin-top:12px">
       <div class="card tight"><div class="eyebrow">ก่อน</div><div class="bignum">${pre}</div><div class="small muted">จาก 40</div></div>
       <div class="card tight"><div class="eyebrow">หลัง</div><div class="bignum">${post}</div><div class="small muted">จาก 40</div></div>
@@ -876,8 +1125,7 @@ function showReport(st,tv){
     </div>
     <table style="margin-top:14px"><thead><tr><th>ด้าน</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th></tr></thead><tbody>${rows}</tbody></table>
     <p class="small muted" style="margin-top:8px">คะแนนรายด้านเป็นค่าเฉลี่ยระดับพฤติกรรม 1–4</p>
-    <div class="chartwrap tall"><canvas id="radarChart"></canvas></div>
-    <div class="chartlegend"><span><i style="background:${CPAL().amber}"></i>ก่อน</span><span><i style="background:${CPAL().teal}"></i>หลัง</span></div>
+    ${svgRadar(Object.keys(DIMS).map(k=>DIMS[k].n),Object.keys(DIMS).map(k=>dimScore(st.pre,k)),Object.keys(DIMS).map(k=>dimScore(st.post,k)))}
     <p class="small muted" style="margin-top:6px">แผนภูมิเรดาร์ช่วยให้เห็นจุดแข็งจุดอ่อนของนักเรียนคนนี้ในคราวเดียว ยิ่งจุดออกไปไกลจากศูนย์กลาง ยิ่งแสดงระดับสูง</p>
   </div>
   <div class="card"><h2>หลักฐานจากภารกิจ</h2>
@@ -905,50 +1153,40 @@ function showReport(st,tv){
     <button onclick="window.print()">พิมพ์ / บันทึก PDF</button>
     ${tv?`<button onclick="openTeacher()">กลับหน้าครู</button>`:`<button onclick="go('home')">กลับหน้าแรก</button>`}</div>`;
   go('report'); window._r=st; if(tv) tScoreUI(st);
-  loadChartJS().then(()=>drawRadar(st));
-}
-function drawRadar(st){
-  const el=document.getElementById('radarChart'); if(!el||typeof Chart==='undefined')return;
-  killChart('radarChart');
-  const labels=Object.keys(DIMS).map(k=>DIMS[k].n);
-  const before=Object.keys(DIMS).map(k=>dimScore(st.pre,k));
-  const after=Object.keys(DIMS).map(k=>dimScore(st.post,k));
-  const c=CPAL();
-  window._charts.radarChart=new Chart(el,{type:'radar',
-    data:{labels,datasets:[
-      {label:'ก่อน',data:before,borderColor:c.amber,backgroundColor:c.amber+'33',pointBackgroundColor:c.amber},
-      {label:'หลัง',data:after,borderColor:c.teal,backgroundColor:c.teal+'33',pointBackgroundColor:c.teal}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{r:{min:0,max:4,ticks:{stepSize:1,color:c.text,backdropColor:'transparent'},
-        grid:{color:c.grid},angleLines:{color:c.grid},
-        pointLabels:{color:c.text,font:{size:11}}}}}});
 }
 function tScoreUI(st){
   $('tScore').innerHTML=`<h3>ครูให้ระดับสมรรถนะ</h3>`+Object.entries(RUBRICS).map(([k,r])=>
     `<div style="margin:10px 0"><div class="small muted">${r.n}</div>
-     ${r.l.map((t,i)=>`<div class="opt ${st.teacher.score[k]===i+1?'sel':''}" onclick="tSet('${k}',${i+1})"><b class="mono">${i+1}</b> ${t}</div>`).join('')}</div>`).join('')+
+     ${r.l.map((tx,i)=>`<div class="opt ${st.teacher.score[k]===i+1?'sel':''}" onclick="tSet('${k}',${i+1})"><b class="mono">${i+1}</b> ${tx}</div>`).join('')}</div>`).join('')+
     `<label for="tn">ข้อเสนอแนะถึงนักเรียน</label><textarea id="tn">${esc(st.teacher.note||'')}</textarea>
      <div class="row" style="margin-top:10px"><button class="primary" onclick="tSave()">บันทึกผลประเมิน</button></div>`;
   $('tn').oninput=e=>{st.teacher.note=e.target.value;};
 }
 function tSet(k,v){const st=window._r;st.teacher.score[k]=v;tScoreUI(st);}
-async function tSave(){const st=window._r;const j=JSON.stringify(st);LS.set('lc:'+st.idx,j);queueRemote('lc:'+st.idx,st.name,j);
+async function tSave(){const st=window._r;const j=JSON.stringify(st);const key=mKey(st.idx,st.missionId);LS.set(key,j);queueRemote(key,st.name,j);
   const ok=await flushRemote(true);toast(ok?'บันทึกผลประเมินขึ้นระบบแล้ว':'บันทึกในเครื่องแล้ว แต่ยังส่งขึ้น Sheet ไม่ได้ กดปุ่มส่งซ้ำที่มุมบน',ok);}
 
 /* ---------- teacher ---------- */
 async function openTeacher(){
   go('teacher');
   $('v-teacher').innerHTML=`<div class="card"><h2>กำลังดึงข้อมูลจาก Google Sheet…</h2></div>`;
+  const mi=MIS();
   const pulled=await pullAll();
   const all=[];
   for(let i=0;i<ROSTER.length;i++){
-    const raw=await S.get('lc:'+i,true); if(!raw){all.push(null);continue;}
+    const raw=await S.get(mKey(i),true); if(!raw){all.push(null);continue;}
     try{all.push(JSON.parse(raw));}catch(e){all.push(null);}
   }
   window._all=all;
-  const done=all.filter(x=>x&&x.done);
+  const DAYS=[...new Set(all.filter(x=>x&&(x.finished||x.started)).map(x=>fmtD(x.finished||x.started)))];
+  const inRange=d=>{
+    const ts=d.finished||d.started; if(!ts) return true;
+    const k=dayKey(ts);
+    if(FILTER.from && k<FILTER.from) return false;
+    if(FILTER.to && k>FILTER.to) return false;
+    return true;
+  };
+  const done=all.filter(x=>x&&x.done&&inRange(x));
   const pre=done.map(x=>total(x.pre)), post=done.map(x=>total(x.post));
   const m=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
   const sd=a=>{if(a.length<2)return 0;const mu=m(a);return Math.sqrt(a.reduce((x,y)=>x+(y-mu)**2,0)/(a.length-1));};
@@ -956,29 +1194,52 @@ async function openTeacher(){
 
   const wasAuto=!!_auto;
   $('v-teacher').innerHTML=`
-  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานสรุปทั้งห้อง ม.4/4</div>
-  <div class="card"><div class="eyebrow">Teacher Dashboard · ม.4/4</div>
-    <h2>ผลการดำเนินงาน (ข้อมูลสำหรับบทที่ 4)</h2>
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานสรุปทั้งห้อง ม.4/4 · ${mi.title}</div>
+  <div class="card"><div class="eyebrow">Teacher Dashboard · ม.4/4 · สัปดาห์ ${mi.week}</div>
+    <h2>${mi.title}</h2>
+    <p class="muted small">${mi.theme}</p>
+    <div class="row noprint" style="margin-top:10px">
+      ${MISSIONS.filter(m=>m.enabled).map(m=>`<button class="${m.id===curMission?'primary':''}" onclick="curMission=${m.id};openTeacher()">สัปดาห์ ${m.week} · ${m.title}</button>`).join('')}
+      <button onclick="go('semester');renderSemester()">ภาพรวมภาคเรียน</button>
+    </div>
+    <h3 style="margin-top:16px;font-size:15px">ผลการดำเนินงาน (ข้อมูลสำหรับบทที่ 4)</h3>
     <div class="grid3">
       <div class="card tight"><div class="eyebrow">ทำครบแล้ว</div><div class="bignum">${done.length}/${ROSTER.length}</div></div>
       <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยก่อน</div><div class="bignum">${mPre.toFixed(2)}</div><div class="small muted">SD ${sd(pre).toFixed(2)}</div></div>
       <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยหลัง</div><div class="bignum ok">${mPost.toFixed(2)}</div><div class="small muted">SD ${sd(post).toFixed(2)} · +${growth.toFixed(1)}%</div></div>
     </div>
     ${done.length?'':'<div class="notice">ยังไม่มีนักเรียนทำครบทั้งก่อนและหลัง ตัวเลขจะปรากฏเมื่อมีข้อมูลจริง ระบบไม่สร้างข้อมูลสมมติให้</div>'}
+    <div class="noprint" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+      <h3 style="font-size:14px">กรองตามช่วงวันที่ทำกิจกรรม</h3>
+      <div class="row">
+        <div><label for="fFrom" style="margin:0 0 4px">ตั้งแต่วันที่</label><input type="date" id="fFrom" value="${FILTER.from||''}" style="width:auto"></div>
+        <div><label for="fTo" style="margin:0 0 4px">ถึงวันที่</label><input type="date" id="fTo" value="${FILTER.to||''}" style="width:auto"></div>
+        <button class="primary" onclick="applyFilter()" style="align-self:flex-end">กรอง</button>
+        <button onclick="clearFilter()" style="align-self:flex-end">ล้างตัวกรอง</button>
+      </div>
+      ${FILTER.from||FILTER.to?`<p class="small" style="color:var(--teal-d);margin-top:8px">กำลังแสดงเฉพาะนักเรียนที่ทำเสร็จระหว่าง ${FILTER.from||'เริ่มต้น'} ถึง ${FILTER.to||'ปัจจุบัน'} · พบ ${done.length} คน</p>`:'<p class="small muted" style="margin-top:8px">ยังไม่ได้กรอง กำลังแสดงข้อมูลทั้งหมดของภารกิจนี้</p>'}
+      ${DAYS.length?`<p class="small muted">วันที่มีข้อมูลในภารกิจนี้: ${DAYS.join(' · ')}</p>`:''}
+    </div>
   </div>
 
   <div class="card"><h2>ภาพรวมทั้งห้อง</h2>
     <p class="small muted">ใช้ดูผลได้ในคาบเลย ไม่ต้องรอเปิดตารางตัวเลข</p>
     <h3 style="font-size:14px;margin-top:14px">คะแนนเฉลี่ยรายด้าน ก่อน–หลัง (แผนภูมิแท่ง)</h3>
-    <div class="chartwrap"><canvas id="classBar"></canvas></div>
+    ${svgBar(Object.keys(DIMS).map(k=>DIMS[k].n),
+             Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.pre,k)))),
+             Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.post,k)))),{max:4})}
     <div class="chartgrid" style="margin-top:22px">
       <div>
         <h3 style="font-size:14px">สัดส่วนระดับสมรรถนะที่ครูให้ (แผนภูมิวงกลม)</h3>
-        <div class="chartwrap"><canvas id="classDonut"></canvas></div>
+        ${(()=>{const lv=[0,0,0,0];
+          done.forEach(d=>{Object.keys(RUBRICS).forEach(k=>{const v=d.teacher&&d.teacher.score&&d.teacher.score[k]; if(v) lv[v-1]++;});});
+          const cc=CPAL();
+          return svgDonut(['ระดับ 1 เริ่มต้น','ระดับ 2 กำลังพัฒนา','ระดับ 3 สามารถ','ระดับ 4 เชี่ยวชาญ'],lv,[cc.red,cc.amber,cc.tealSoft,cc.teal])
+            + (lv.every(x=>x===0)?'<p class="small muted" style="text-align:center">ยังไม่มีครูให้ระดับสมรรถนะ กราฟจะแสดงสัดส่วนจริงเมื่อเริ่มประเมิน</p>':'');})()}
       </div>
       <div>
         <h3 style="font-size:14px">คะแนนรวมก่อน–หลัง รายบุคคล (กราฟเส้น)</h3>
-        <div class="chartwrap"><canvas id="classLine"></canvas></div>
+        ${svgLine(done.map(x=>x.name.replace('นาย','')),done.map(x=>total(x.pre)),done.map(x=>total(x.post)))}
       </div>
     </div>
     <div class="row noprint" style="margin-top:16px"><button onclick="window.print()">พิมพ์รายงานสรุปทั้งห้อง</button></div>
@@ -999,18 +1260,25 @@ async function openTeacher(){
 
   <div class="card"><h2>ตารางคะแนนดิบรายบุคคล</h2>
     <p class="small muted noprint">ตารางนี้คือภาคผนวก ก และเป็นฐานของบทที่ 4 กดปุ่มด้านล่างเพื่อส่งออกเป็นไฟล์</p>
-    <table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th><th>ทักษะชีวิต<br>ก่อน/หลัง</th><th>พลเมืองดี<br>ก่อน/หลัง</th><th>สถานะ</th></tr></thead><tbody>
+    <table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>วันที่ทำ</th><th>ใช้เวลา</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th><th>ครูประเมิน</th><th>รายงาน</th></tr></thead><tbody>
     ${ROSTER.map((n,i)=>{const d=all[i];
-      if(!d)return `<tr><td class="mono">${i+1}</td><td>${n}</td><td colspan="6" class="muted small">ยังไม่มีข้อมูล</td></tr>`;
+      if(!d)return `<tr><td class="mono">${i+1}</td><td>${n}</td><td colspan="7" class="muted small">ยังไม่มีข้อมูล</td></tr>`;
       const p=total(d.pre),q=total(d.post),ok=d.done;
-      return `<tr class="click" onclick="showReport(window._all[${i}],true)">
+      const gm=gapMin(d.preAt||d.started,d.postAt||d.finished);
+      const scored=Object.keys(d.teacher&&d.teacher.score||{}).length===4;
+      return `<tr>
         <td class="mono">${i+1}</td><td>${n}</td>
+        <td class="small">${fmtD(d.finished||d.started)}</td>
+        <td class="mono small ${gm!==null&&gm<30?'bad':''}">${gm!==null?gm+' นาที':'-'}</td>
         <td class="mono">${p||'-'}</td><td class="mono">${ok?q:'-'}</td>
         <td class="mono ${ok&&q-p>0?'ok':ok&&q-p<0?'bad':''}">${ok?((q-p>=0?'+':'')+(q-p)):'-'}</td>
-        <td class="mono">${groupScore(d.pre,'life').toFixed(2)} / ${ok?groupScore(d.post,'life').toFixed(2):'-'}</td>
-        <td class="mono">${groupScore(d.pre,'civic').toFixed(2)} / ${ok?groupScore(d.post,'civic').toFixed(2):'-'}</td>
-        <td class="small">${ok?'<span class="ok">ครบ</span>':'กำลังทำ'}</td></tr>`;}).join('')}
+        <td class="small">${scored?'<span class="ok">✓ ครบ</span>':'<span class="muted">ยังไม่ครบ</span>'}</td>
+        <td class="noprint"><button class="small" onclick="showReport(window._all[${i}],true)">ดูรายคน</button></td></tr>`;}).join('')}
     </tbody></table>
+    ${(()=>{const short=all.filter(d=>d&&d.done&&gapMin(d.preAt||d.started,d.postAt||d.finished)!==null&&gapMin(d.preAt||d.started,d.postAt||d.finished)<30);
+      return short.length?`<div class="notice">มีนักเรียน ${short.length} คนที่ทำแบบวัดก่อนและหลังห่างกันน้อยกว่า 30 นาที ซึ่งอาจถูกตั้งคำถามว่าวัดพัฒนาการได้จริงหรือไม่ ควรตรวจสอบว่ามีกิจกรรมคั่นกลางครบถ้วน</div>`:'';})()}
+    ${(()=>{const un=all.filter(d=>d&&d.done&&Object.keys(d.teacher&&d.teacher.score||{}).length<4);
+      return un.length?`<div class="notice">เหลือนักเรียน ${un.length} คนที่ครูยังให้ระดับรูบริกไม่ครบ กดปุ่ม ดูรายคน เพื่อประเมินก่อนปิดคาบ</div>`:'';})()}
     ${pulled?'':'<div class="notice">ดึงข้อมูลจาก Google Sheet ไม่สำเร็จ ตารางนี้แสดงเฉพาะข้อมูลที่อยู่ในเครื่องนี้ ให้ตรวจลิงก์ Web app หรือสัญญาณอินเทอร์เน็ต</div>'}
     <div class="row noprint" style="margin-top:14px">
       <button onclick="exportCSV()">ส่งออก CSV</button>
@@ -1037,56 +1305,14 @@ async function openTeacher(){
       :'<p class="muted small">ยังไม่มีข้อมูลเพียงพอ หรือไม่พบสัญญาณที่ต้องดูแลเร่งด่วน</p>';})()}
     <p class="small muted">เป็นการคัดกรองเบื้องต้นจากร่องรอยในระบบ ครูควรพูดคุยกับนักเรียนก่อนสรุป</p></div>`;
   if(wasAuto && $('autoRef')) $('autoRef').checked=true;
-  loadChartJS().then(()=>drawClassCharts(all,done,m));
 }
-function drawClassCharts(all,done,m){
-  const c=CPAL();
-  const labels=Object.keys(DIMS).map(k=>DIMS[k].n);
-  const before=Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.pre,k))));
-  const after=Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.post,k))));
-  const barEl=document.getElementById('classBar');
-  if(barEl&&typeof Chart!=='undefined'){
-    killChart('classBar');
-    window._charts.classBar=new Chart(barEl,{type:'bar',
-      data:{labels,datasets:[
-        {label:'ก่อน',data:before,backgroundColor:c.amber},
-        {label:'หลัง',data:after,backgroundColor:c.teal}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:'bottom',labels:{color:c.text,font:{size:11}}}},
-        scales:{y:{min:0,max:4,ticks:{color:c.text},grid:{color:c.grid}},
-                x:{ticks:{color:c.text,font:{size:10}},grid:{display:false}}}}});
-  }
-  const lv=[0,0,0,0];
-  done.forEach(d=>{Object.keys(RUBRICS).forEach(k=>{const v=(d.teacher&&d.teacher.score&&d.teacher.score[k]); if(v) lv[v-1]++;});});
-  const donutEl=document.getElementById('classDonut');
-  if(donutEl&&typeof Chart!=='undefined'){
-    killChart('classDonut');
-    const hasData=lv.some(x=>x>0);
-    window._charts.classDonut=new Chart(donutEl,{type:'doughnut',
-      data:{labels:['ระดับ 1 เริ่มต้น','ระดับ 2 กำลังพัฒนา','ระดับ 3 สามารถ','ระดับ 4 เชี่ยวชาญ'],
-        datasets:[{data:hasData?lv:[1,1,1,1],
-          backgroundColor:[c.red,c.amber,c.tealSoft,c.teal],borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:'bottom',labels:{color:c.text,font:{size:10},boxWidth:10}},
-          tooltip:{enabled:hasData}},
-        cutout:'62%'}});
-    if(!hasData){ donutEl.parentElement.insertAdjacentHTML('beforeend',
-      '<p class="small muted" style="text-align:center;margin-top:6px">ยังไม่มีครูให้ระดับสมรรถนะ กราฟจะแสดงสัดส่วนจริงเมื่อเริ่มประเมิน</p>'); }
-  }
-  const lineEl=document.getElementById('classLine');
-  if(lineEl&&typeof Chart!=='undefined'){
-    killChart('classLine');
-    const names=done.map(x=>x.name.replace('นาย',''));
-    window._charts.classLine=new Chart(lineEl,{type:'line',
-      data:{labels:names,datasets:[
-        {label:'ก่อน',data:done.map(x=>total(x.pre)),borderColor:c.amber,backgroundColor:c.amber,tension:.25},
-        {label:'หลัง',data:done.map(x=>total(x.post)),borderColor:c.teal,backgroundColor:c.teal,tension:.25}]},
-      options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{position:'bottom',labels:{color:c.text,font:{size:11}}}},
-        scales:{y:{min:0,max:40,ticks:{color:c.text},grid:{color:c.grid}},
-                x:{ticks:{color:c.text,font:{size:9},maxRotation:60,minRotation:40},grid:{display:false}}}}});
-  }
+const FILTER={from:'',to:''};
+function applyFilter(){
+  FILTER.from=($('fFrom')||{}).value||''; FILTER.to=($('fTo')||{}).value||'';
+  if(FILTER.from&&FILTER.to&&FILTER.from>FILTER.to){ toast('วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด'); return; }
+  openTeacher();
 }
+function clearFilter(){ FILTER.from=''; FILTER.to=''; openTeacher(); }
 
 let _auto=null;
 function toggleAuto(on){ clearInterval(_auto);
@@ -1095,27 +1321,31 @@ function toggleAuto(on){ clearInterval(_auto);
 
 function exportCSV(){
   const all=window._all||[];
-  const head=['ที่','ชื่อ-สกุล','ห้อง','คะแนนก่อน(40)','คะแนนหลัง(40)','ผลต่าง','ทักษะชีวิตก่อน','ทักษะชีวิตหลัง','พลเมืองดีก่อน','พลเมืองดีหลัง','บทบาท','เปลี่ยนใจ(ครั้ง)','ครู-คิด','ครู-จัดการตน','ครู-สื่อสาร','ครู-พลเมืองดี'];
+  const head=['ที่','ชื่อ-สกุล','ห้อง','ภารกิจ','วันที่ทำ','เวลาเริ่ม','เวลาส่ง','ระยะห่างก่อน-หลัง(นาที)','คะแนนก่อน(40)','คะแนนหลัง(40)','ผลต่าง','ทักษะชีวิตก่อน','ทักษะชีวิตหลัง','พลเมืองดีก่อน','พลเมืองดีหลัง','บทบาท','เปลี่ยนใจ(ครั้ง)','ครู-คิด','ครู-จัดการตน','ครู-สื่อสาร','ครู-พลเมืองดี'];
   const body=ROSTER.map((n,i)=>{const d=all[i];
-    if(!d)return [i+1,n,'ม.4/4','','','','','','','','','','','','',''];
+    if(!d)return [i+1,n,'ม.4/4',MIS().title,'','','','','','','','','','','','','','','','',''];
     const ts=d.teacher?.score||{};
-    return [i+1,n,'ม.4/4',total(d.pre),d.done?total(d.post):'',d.done?total(d.post)-total(d.pre):'',
+    return [i+1,n,'ม.4/4',(MISSIONS[d.missionId||0]||{}).title||'',
+      fmtD(d.finished||d.started),fmtDT(d.started),fmtDT(d.finished),
+      gapMin(d.preAt||d.started,d.postAt||d.finished)??'',
+      total(d.pre),d.done?total(d.post):'',d.done?total(d.post)-total(d.pre):'',
       groupScore(d.pre,'life').toFixed(2),d.done?groupScore(d.post,'life').toFixed(2):'',
       groupScore(d.pre,'civic').toFixed(2),d.done?groupScore(d.post,'civic').toFixed(2):'',
       d.role||'',d.plan.changed||0,ts.think||'',ts.self||'',ts.comm||'',ts.civic||''];});
   const csv='\uFEFF'+[head,...body].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download='uptogrow_m4-4_scores.csv';a.click();
+  a.download='uptogrow_m4-4_week'+MIS().week+'_scores.csv';a.click();
 }
 
 /* ---------- boot ---------- */
 async function checkResume(){
-  const last=await S.get('lc:last',false); if(last===null)return;
-  const raw=await S.get('lc:'+last,true); if(!raw)return;
+  const lastRaw=await S.get('lc:last',false); if(lastRaw===null)return;
+  const parts=String(lastRaw).split(':'); const lastMid=parts.length>1?parseInt(parts[0]):0; const last=parts.length>1?parts[1]:parts[0];
+  const raw=await S.get(mKey(last,lastMid),true); if(!raw)return;
   let d;try{d=JSON.parse(raw);}catch(e){return;}
   const el=$('resumeBox');if(!el)return;
-  el.innerHTML=`<div class="notice good" style="margin:0">มีงานที่ทำค้างไว้ของ ${esc(d.name)}
-    <button class="small" style="margin-left:10px" onclick="startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
+  el.innerHTML=`<div class="notice good" style="margin:0">มีงานที่ทำค้างไว้ของ ${esc(d.name)} · ${(MISSIONS[lastMid]||{}).title||''}
+    <button class="small" style="margin-left:10px" onclick="curMission=${lastMid};startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
 }
-renderPick(); checkResume();
+renderMissionList(); renderPick(); checkResume();
 </script>
