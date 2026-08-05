@@ -1,0 +1,806 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIFECRAFT AI — Mission 01</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=Sarabun:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#0C1420; --panel:#14212F; --panel2:#1B2E42; --line:#28405A;
+  --gold:#F0B429; --mint:#5FD3A6; --red:#E4572E; --violet:#9B8CFF;
+  --text:#E8F0F7; --muted:#8FA6BC;
+  --r:14px;
+  --display:'Bai Jamjuree','Sarabun',system-ui,sans-serif;
+  --body:'Sarabun',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+   radial-gradient(1100px 600px at 80% -10%, #1B3350 0%, transparent 60%),
+   var(--ink);
+  color:var(--text);font-family:var(--body);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--display);font-weight:700;line-height:1.25;margin:0 0 .4em;letter-spacing:-.01em}
+h1{font-size:clamp(28px,5vw,44px)}
+h2{font-size:clamp(20px,3vw,26px)}
+h3{font-size:17px}
+p{margin:0 0 .8em}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 18px 90px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- header ---------- */
+header.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);padding:14px 0 16px;margin-bottom:22px}
+.logo{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.02em}
+.logo span{color:var(--gold)}
+.tagline{color:var(--muted);font-size:13px}
+.spacer{flex:1}
+.badge{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--muted)}
+
+/* ---------- cards ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.card.tight{padding:14px 16px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ---------- buttons / inputs ---------- */
+button{font-family:var(--body);font-size:15px;cursor:pointer;border-radius:10px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--text);padding:10px 18px;transition:.15s}
+button:hover{border-color:var(--gold)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button.primary{background:var(--gold);color:#231704;border-color:var(--gold);font-weight:600}
+button.primary:hover{filter:brightness(1.08)}
+button.ghost{background:transparent}
+button.small{padding:6px 12px;font-size:13px}
+button[disabled]{opacity:.45;cursor:not-allowed}
+input,textarea,select{width:100%;background:#0F1B27;color:var(--text);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;font-family:var(--body);font-size:15px}
+textarea{min-height:74px;resize:vertical;line-height:1.6}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* ---------- signature: budget bar ---------- */
+.moneybar{height:26px;border-radius:8px;overflow:hidden;display:flex;background:#0F1B27;border:1px solid var(--line)}
+.moneybar i{display:block;height:100%;opacity:.9}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.bignum{font-family:var(--mono);font-size:clamp(30px,6vw,52px);font-weight:600;letter-spacing:-.02em;line-height:1}
+.bignum.neg{color:var(--red)}
+.bignum.ok{color:var(--mint)}
+
+/* ---------- timeline ---------- */
+.timeline{display:flex;gap:6px;margin:6px 0 18px;flex-wrap:wrap}
+.tl{flex:1;min-width:64px;border:1px solid var(--line);border-radius:10px;padding:8px 6px;text-align:center;background:var(--panel)}
+.tl .d{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tl .s{font-size:12px;margin-top:2px}
+.tl.done{border-color:var(--mint)}.tl.done .s{color:var(--mint)}
+.tl.now{border-color:var(--gold);background:var(--panel2)}.tl.now .s{color:var(--gold)}
+
+/* ---------- options ---------- */
+.opt{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:10px;background:#0F1B27}
+.opt.sel{border-color:var(--gold);background:var(--panel2)}
+.opt h4{margin:0 0 4px;font-size:15px}
+.cost{font-family:var(--mono);font-size:13px;color:var(--gold)}
+.pill{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted);margin-right:6px}
+
+/* ---------- coach ---------- */
+.coach{background:linear-gradient(180deg,#1A2A3D,#14212F);border:1px solid var(--line);border-left:3px solid var(--violet);
+  border-radius:12px;padding:14px 16px;margin:12px 0}
+.coach .who{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--violet);text-transform:uppercase}
+.bubble{margin:8px 0;padding:10px 12px;border-radius:10px;background:#0F1B27;border:1px solid var(--line)}
+.bubble.me{background:var(--panel2);border-color:var(--line)}
+.dots::after{content:'…';animation:d 1.2s steps(4,end) infinite}
+@keyframes d{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+
+/* ---------- table ---------- */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+tr.click:hover{background:var(--panel2);cursor:pointer}
+
+/* rubric */
+.rub{display:flex;gap:6px;flex-wrap:wrap}
+.rub button{flex:1;min-width:120px;text-align:left;font-size:13px;padding:9px 11px}
+.rub button.on{border-color:var(--mint);background:#153228}
+
+.hide{display:none}
+.notice{border-left:3px solid var(--red);background:#2A1A16;padding:10px 14px;border-radius:8px;font-size:14px;margin:10px 0}
+.ok{border-left-color:var(--mint);background:#12291F}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:24px 0}
+@media print{body{background:#fff;color:#000}.noprint{display:none!important}.card{border-color:#ccc;background:#fff}}
+</style>
+
+<div class="wrap">
+<header class="top noprint">
+  <div>
+    <div class="logo">LIFECRAFT <span>AI</span></div>
+    <div class="tagline">ห้องทดลองภารกิจชีวิตจริง · CRAFT Learning Model</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="badge" id="whoami">ยังไม่ได้เข้าสู่ภารกิจ</div>
+  <button class="ghost small" id="btnHome">หน้าแรก</button>
+</header>
+
+<!-- ============ HOME ============ -->
+<section id="v-home">
+  <div class="card">
+    <div class="eyebrow">Mission 01</div>
+    <h1>1,500 บาท ต้องอยู่ให้ได้ 7 วัน</h1>
+    <p class="muted" style="max-width:60ch">ภารกิจนี้ไม่มีคำตอบเดียวและไม่มีคะแนนถูก–ผิด สิ่งที่ระบบเก็บคือ นักเรียนใช้ข้อมูลอะไรตัดสินใจ มองเห็นทางเลือกกี่ทาง คาดการณ์ผลกระทบได้ไกลแค่ไหน และปรับแผนอย่างไรเมื่อสถานการณ์เปลี่ยน</p>
+    <div style="margin:22px 0 6px">
+      <div class="bignum">฿1,500</div>
+      <div class="muted small">งบตั้งต้น · 7 วัน · 5 เหตุการณ์ที่คาดไม่ถึง</div>
+    </div>
+    <div class="moneybar" style="margin-top:16px">
+      <i style="width:34%;background:var(--gold)"></i><i style="width:18%;background:var(--mint)"></i>
+      <i style="width:14%;background:var(--violet)"></i><i style="width:12%;background:#4FA3E3"></i>
+      <i style="width:10%;background:var(--red)"></i><i style="width:12%;background:#7C8AA0"></i>
+    </div>
+    <div class="row" style="margin-top:24px">
+      <button class="primary" onclick="go('setup')">เข้าสู่ภารกิจ (นักเรียน)</button>
+      <button onclick="openTeacher()">หน้าครู · Dashboard</button>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="card tight"><div class="eyebrow">C R A F T</div><h3>รูปแบบการเรียนรู้ 5 ขั้น</h3>
+      <p class="small muted">Context เผชิญสถานการณ์ · Research ตรวจข้อมูล · Analyze วิเคราะห์ทางเลือก · Form &amp; Act ตัดสินใจและลงมือ · Transfer สะท้อนคิดและถ่ายทอด</p></div>
+    <div class="card tight"><div class="eyebrow">AI Coach</div><h3>โค้ชที่ไม่ให้คำตอบ</h3>
+      <p class="small muted">AI ตั้งคำถามย้อนกลับเรื่องแหล่งข้อมูล ทางเลือกอื่น ผู้ได้รับผลกระทบ และความเสี่ยง แต่ห้ามเลือกแทนนักเรียน</p></div>
+    <div class="card tight"><div class="eyebrow">Evidence</div><h3>หลักฐาน ไม่ใช่คะแนน</h3>
+      <p class="small muted">ทุกการตัดสินใจ การเปลี่ยนใจ และเหตุผล ถูกบันทึกเป็นหลักฐานเชิงพฤติกรรมให้ครูประเมินด้วย Rubric 4 ระดับ</p></div>
+  </div>
+</section>
+
+<!-- ============ SETUP ============ -->
+<section id="v-setup" class="hide">
+  <div class="card">
+    <div class="eyebrow">ก่อนเริ่ม</div>
+    <h2>บอกให้ครูรู้ว่าใครทำภารกิจนี้</h2>
+    <div class="grid2">
+      <div><label for="fName">ชื่อ–สกุล</label><input id="fName" placeholder="เช่น สมหญิง ใจดี"></div>
+      <div><label for="fRoom">ชั้น/ห้อง</label><input id="fRoom" placeholder="เช่น ม.3/2"></div>
+      <div><label for="fNo">เลขที่</label><input id="fNo" inputmode="numeric" placeholder="เช่น 14"></div>
+      <div><label for="fTeam">ชื่อทีม (ถ้าทำเป็นกลุ่ม)</label><input id="fTeam" placeholder="เช่น ทีมงบรอด"></div>
+    </div>
+    <label for="fRole">บทบาทของฉันในทีม</label>
+    <select id="fRole">
+      <option>ผู้นำทีม</option><option>ผู้ตรวจสอบข้อมูล</option><option>ผู้วิเคราะห์ความเสี่ยง</option>
+      <option>ผู้ดูแลงบประมาณ</option><option>ผู้นำเสนอ</option><option>ทำคนเดียว</option>
+    </select>
+    <div class="row" style="margin-top:18px"><button class="primary" onclick="startMission()">เริ่มภารกิจ</button></div>
+    <p class="small muted" style="margin-top:12px">ข้อมูลนี้ใช้เพื่อออกรายงานรายบุคคลให้ครูเท่านั้น</p>
+  </div>
+</section>
+
+<!-- ============ MISSION ============ -->
+<section id="v-mission" class="hide">
+  <div class="timeline" id="timeline"></div>
+
+  <div class="card tight" id="statusBar">
+    <div class="row" style="justify-content:space-between">
+      <div><div class="eyebrow">เงินคงเหลือ</div><div class="bignum" id="remain">฿1,500</div></div>
+      <div style="flex:1;min-width:260px">
+        <div class="moneybar" id="planBar"></div>
+        <div class="legend" id="planLegend"></div>
+      </div>
+    </div>
+    <div id="warn"></div>
+  </div>
+
+  <div id="stage"></div>
+</section>
+
+<!-- ============ REFLECT ============ -->
+<section id="v-reflect" class="hide">
+  <div class="card">
+    <div class="eyebrow">T — Transfer</div>
+    <h2>สะท้อนคิดหลังจบสัปดาห์</h2>
+    <div id="reflectForm"></div>
+  </div>
+  <div class="card">
+    <div class="eyebrow">ประเมินตนเอง</div>
+    <h2>ฉันอยู่ระดับไหน</h2>
+    <p class="small muted">เลือกระดับที่ตรงกับสิ่งที่ทำจริงในภารกิจนี้ ครูจะประเมินซ้ำอีกครั้งจากหลักฐาน</p>
+    <div id="selfRubric"></div>
+    <div class="row" style="margin-top:18px"><button class="primary" onclick="finish()">ส่งผลงานให้ครู</button></div>
+  </div>
+</section>
+
+<!-- ============ REPORT ============ -->
+<section id="v-report" class="hide"></section>
+
+<!-- ============ TEACHER ============ -->
+<section id="v-teacher" class="hide"></section>
+
+<footer>LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน · CRAFT Learning Model</footer>
+</div>
+
+<script>
+/* =========================================================
+   STORAGE (window.storage with graceful fallback)
+   ========================================================= */
+const mem = {};
+const S = {
+  async set(k,v,shared=false){ try{ if(window.storage) return await window.storage.set(k,v,shared); }catch(e){} mem[k]=v; return {key:k}; },
+  async get(k,shared=false){ try{ if(window.storage){ const r=await window.storage.get(k,shared); return r? r.value : null; } }catch(e){ return mem[k]??null; } return mem[k]??null; },
+  async list(p,shared=false){ try{ if(window.storage){ const r=await window.storage.list(p,shared); return r? r.keys : []; } }catch(e){} return Object.keys(mem).filter(k=>k.startsWith(p)); }
+};
+
+/* =========================================================
+   MISSION DATA
+   ========================================================= */
+const CATS = [
+  {k:'food',   n:'อาหาร',              c:'var(--gold)',   hint:'3 มื้อ × 7 วัน'},
+  {k:'travel', n:'การเดินทาง',          c:'var(--mint)',   hint:'ไป–กลับโรงเรียน'},
+  {k:'phone',  n:'โทรศัพท์/อินเทอร์เน็ต',c:'var(--violet)', hint:'เน็ตรายสัปดาห์'},
+  {k:'study',  n:'อุปกรณ์การเรียน',      c:'#4FA3E3',       hint:'สมุด ปากกา งานกลุ่ม'},
+  {k:'reserve',n:'เงินสำรองฉุกเฉิน',     c:'var(--red)',    hint:'กันไว้สำหรับเหตุไม่คาดคิด'},
+  {k:'family', n:'ช่วยเหลือครอบครัว',    c:'#7C8AA0',       hint:'ถ้าที่บ้านขอความช่วยเหลือ'}
+];
+
+const EVENTS = [
+  { day:2, title:'ค่าเดินทางขึ้น 20%',
+    body:'ตั้งแต่วันนี้ ค่าโดยสารที่นักเรียนใช้ปรับขึ้น 20% จากเดิม ทั้งสัปดาห์ที่เหลือใช้ราคาใหม่',
+    math:s=>`งบเดินทางที่วางไว้ ${money(s.plan.travel)} → ต้องจ่ายเพิ่มอีก ${money(Math.round(s.plan.travel*0.2))} บาท`,
+    options:[
+      {t:'จ่ายเพิ่มตามราคาใหม่ ดึงจากเงินสำรอง',cost:s=>Math.round(s.plan.travel*0.2),tag:'สำรองลด'},
+      {t:'เดินหรือปั่นจักรยานบางวัน ลดค่าเดินทางลงครึ่งหนึ่ง',cost:s=>-Math.round(s.plan.travel*0.3),tag:'ใช้เวลาแลกเงิน'},
+      {t:'ลดงบอาหาร 100 บาทมาชดเชยค่าเดินทาง',cost:s=>Math.round(s.plan.travel*0.2),tag:'กระทบมื้ออาหาร'}
+    ],
+    coach:['ราคาที่เพิ่ม 20% นี้ นักเรียนคิดจากฐานเงินก้อนไหน และคิดถูกหรือยัง','ถ้าเลือกเดินแทน จะแลกอะไรไปบ้างนอกจากเงิน','ทางเลือกนี้ทำได้ทุกวันจนถึงวันที่ 7 จริงไหม']
+  },
+  { day:3, title:'โปรโมชั่นโทรศัพท์ ผ่อน 12 เดือน',
+    body:'ร้านเสนอโทรศัพท์รุ่นใหม่ ราคา 4,200 บาท ผ่อน 0% 12 เดือน เดือนละ 350 บาท งวดแรกจ่ายวันนี้ เพื่อนหลายคนกำลังจะซื้อ',
+    math:()=>'ผ่อนเดือนละ 350 × 12 เดือน = 4,200 บาท ผูกพันไปอีก 1 ปี',
+    options:[
+      {t:'ซื้อ จ่ายงวดแรก 350 บาทวันนี้',cost:()=>350,tag:'ผูกพัน 12 เดือน'},
+      {t:'ไม่ซื้อ ใช้เครื่องเดิมต่อ',cost:()=>0,tag:'งบไม่กระทบ'},
+      {t:'ยังไม่ตัดสินใจ ขอดูเงื่อนไขและถามที่บ้านก่อน',cost:()=>0,tag:'เลื่อนการตัดสินใจ'}
+    ],
+    coach:['เงิน 350 บาทต่อเดือน มาจากงบก้อนไหนในอีก 11 เดือนข้างหน้า','ถ้าเดือนหน้ารายได้ที่บ้านลดลง ภาระนี้จะเป็นอย่างไร','สิ่งที่ต้องการจริง ๆ คือเครื่องใหม่ หรือความรู้สึกไม่อยากตกกระแส']
+  },
+  { day:4, title:'ข้อความแจ้งว่าได้รับรางวัล',
+    body:'มีข้อความเข้ามาว่า “คุณได้รับรางวัล 5,000 บาท กดลิงก์ยืนยันตัวตนและโอนค่าธรรมเนียม 300 บาทภายใน 30 นาที” ผู้ส่งใช้ชื่อคล้ายบริษัทที่รู้จัก',
+    math:()=>'ถ้าโอน 300 บาท และไม่ได้รางวัลจริง = สูญเงิน 300 บาททันที',
+    options:[
+      {t:'โอน 300 บาท เพราะรางวัลคุ้มกว่ามาก',cost:()=>300,tag:'เสี่ยงสูงมาก'},
+      {t:'ไม่โอน ตรวจสอบเบอร์/ลิงก์ และแจ้งผู้ปกครอง',cost:()=>0,tag:'ตรวจสอบก่อน'},
+      {t:'กดลิงก์เข้าไปดูก่อน แต่ยังไม่โอนเงิน',cost:()=>0,tag:'เสี่ยงข้อมูลรั่ว'}
+    ],
+    coach:['อะไรคือสัญญาณที่บอกว่าข้อความนี้น่าเชื่อถือหรือไม่น่าเชื่อถือ','ทำไมข้อความจึงเร่งให้ตัดสินใจภายใน 30 นาที','ถ้าเพื่อนได้รับข้อความแบบเดียวกัน จะอธิบายให้เพื่อนฟังว่าอย่างไร']
+  },
+  { day:5, title:'ที่บ้านต้องใช้เงินฉุกเฉิน 400 บาท',
+    body:'ผู้ปกครองต้องพาน้องไปหาหมอ ขาดเงินอยู่ 400 บาท และถามว่านักเรียนพอมีไหม',
+    math:s=>`เงินสำรองที่วางไว้ตอนต้นสัปดาห์คือ ${money(s.plan.reserve)} บาท`,
+    options:[
+      {t:'ให้ทั้ง 400 บาท แล้วรัดเข็มขัดสองวันที่เหลือ',cost:()=>400,tag:'ครอบครัวมาก่อน'},
+      {t:'ให้ 200 บาท แล้วช่วยหาทางอื่นเพิ่ม',cost:()=>200,tag:'แบ่งภาระ'},
+      {t:'ยังไม่ให้ ขอเวลาคำนวณและเสนอทางเลือกอื่นให้ที่บ้าน',cost:()=>0,tag:'ต้องสื่อสารดี'}
+    ],
+    coach:['ถ้าให้เงินก้อนนี้ไป สองวันที่เหลือจะใช้อะไรเป็นค่าอาหาร','นอกจากเงินของตัวเอง ยังมีทางเลือกอื่นที่ช่วยที่บ้านได้อีกไหม','จะอธิบายกับที่บ้านอย่างไรให้เข้าใจข้อจำกัดของเรา โดยไม่ทำให้เขาเสียใจ']
+  },
+  { day:6, title:'เพื่อนเสนอให้ยืมเงิน แต่คิดดอกเบี้ย',
+    body:'เพื่อนเสนอให้ยืม 300 บาท คืนสัปดาห์หน้า 330 บาท ไม่มีสัญญา คิดจากความไว้ใจ',
+    math:()=>'ดอกเบี้ย 30 บาทจากเงินต้น 300 บาทใน 1 สัปดาห์ = 10% ต่อสัปดาห์',
+    options:[
+      {t:'ยืม 300 บาท คืน 330 บาทสัปดาห์หน้า',cost:()=>-300,tag:'มีหนี้ 330'},
+      {t:'ไม่ยืม ลดค่าใช้จ่ายที่เหลือแทน',cost:()=>0,tag:'ต้องรัดเข็มขัด'},
+      {t:'ไม่ยืม แต่ขอคุยกับที่บ้าน/ครูเพื่อหาทางออก',cost:()=>0,tag:'ขอความช่วยเหลือ'}
+    ],
+    coach:['ดอกเบี้ย 10% ต่อสัปดาห์ ถ้าคิดต่อเนื่อง 1 ปีจะเป็นเท่าไร','ถ้าสัปดาห์หน้ายังหาเงินคืนไม่ได้ จะเกิดอะไรขึ้นกับมิตรภาพ','ยังมีทางไหนอีกที่ไม่ต้องสร้างหนี้']
+  }
+];
+
+const REFLECT_Q = [
+  'ฉันตัดสินใจอะไรบ้างในสัปดาห์นี้ และการตัดสินใจไหนที่สำคัญที่สุด',
+  'ฉันใช้ข้อมูลหรือหลักฐานอะไรในการตัดสินใจ',
+  'สิ่งที่ฉันทำได้ดีคืออะไร',
+  'สิ่งที่ฉันควรปรับปรุงคืออะไร',
+  'ถ้าเกิดสถานการณ์นี้จริงในชีวิต ฉันจะใช้สิ่งที่เรียนรู้อย่างไร',
+  'ความคิดเห็นของเพื่อนหรือคำถามของโค้ช ทำให้ฉันเปลี่ยนความคิดตรงไหนบ้าง'
+];
+
+const RUBRICS = {
+  think:{n:'การคิดแก้ปัญหาและตัดสินใจ',l:[
+    'ตัดสินใจจากความรู้สึกหรือข้อมูลเพียงด้านเดียว',
+    'เสนอทางเลือกได้ แต่ยังอธิบายผลกระทบไม่ครบ',
+    'เปรียบเทียบทางเลือก ใช้หลักฐาน และอธิบายเหตุผลได้',
+    'วิเคราะห์หลายมิติ คาดการณ์ความเสี่ยง และปรับแผนเมื่อข้อมูลเปลี่ยน']},
+  self:{n:'การจัดการตนเอง',l:[
+    'ต้องให้ครูกำหนดงานและเตือนอย่างต่อเนื่อง',
+    'วางแผนได้บางส่วน แต่ยังทำไม่ต่อเนื่อง',
+    'วางแผน ติดตาม และรับผิดชอบงานของตนเอง',
+    'ประเมินตนเอง ปรับแผน และช่วยให้ทีมทำงานดีขึ้น']},
+  team:{n:'การสื่อสารและทำงานร่วมกัน',l:[
+    'ไม่รับฟังหรือไม่ทำตามบทบาท',
+    'มีส่วนร่วม แต่ยังจัดการความขัดแย้งไม่ได้',
+    'รับฟัง แบ่งงาน และสร้างข้อสรุปร่วมกัน',
+    'ประสานความคิดเห็น ช่วยสมาชิก และยกระดับผลงานทีม']}
+};
+
+/* =========================================================
+   STATE
+   ========================================================= */
+let s = null;
+const money = n => '฿' + Number(n||0).toLocaleString('th-TH');
+const $ = id => document.getElementById(id);
+const esc = t => String(t??'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+
+function newState(id,name,room,no,team,role){
+  return {id,name,room,no,team,role,started:Date.now(),
+    plan:{food:0,travel:0,phone:0,study:0,reserve:0,family:0},
+    planLocked:false, planEdits:0,
+    step:1, ledger:[], decisions:{}, coachLog:[], log:[],
+    reflect:{}, self:{}, teacher:{score:{},note:''}, submitted:false};
+}
+function logEv(type,detail){ s.log.push({t:Date.now(),type,detail}); }
+async function save(){ if(!s) return; await S.set('lc:draft:'+s.id, JSON.stringify(s), false);
+  if(s.submitted) await S.set('lc:sub:'+s.id, JSON.stringify(s), true); }
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+const views = ['home','setup','mission','reflect','report','teacher'];
+function go(v){ views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v)); window.scrollTo(0,0); }
+$('btnHome').onclick = ()=>go('home');
+
+function startMission(){
+  const name=$('fName').value.trim();
+  if(!name){ $('fName').focus(); $('fName').style.borderColor='var(--red)'; return; }
+  s = newState('st'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    name,$('fRoom').value.trim(),$('fNo').value.trim(),$('fTeam').value.trim(),$('fRole').value);
+  $('whoami').textContent = `${s.name} ${s.room?'· '+s.room:''}`;
+  logEv('start','เข้าสู่ภารกิจ');
+  go('mission'); render();
+}
+
+/* =========================================================
+   BUDGET MATH
+   ========================================================= */
+const planTotal = () => CATS.reduce((a,c)=>a+(+s.plan[c.k]||0),0);
+const spent = () => s.ledger.reduce((a,e)=>a+e.amount,0);
+const remaining = () => 1500 - spent();
+
+function renderStatus(){
+  const tot = planTotal(), rem = remaining();
+  const r=$('remain'); r.textContent=money(rem);
+  r.className='bignum '+(rem<0?'neg':rem>0?'ok':'');
+  const bar=$('planBar'), leg=$('planLegend'); bar.innerHTML=''; leg.innerHTML='';
+  CATS.forEach(c=>{
+    const v=+s.plan[c.k]||0; if(!v) return;
+    const i=document.createElement('i'); i.style.width=(v/1500*100)+'%'; i.style.background=c.c;
+    i.title=c.n+' '+money(v); bar.appendChild(i);
+    leg.insertAdjacentHTML('beforeend',`<span><b style="background:${c.c}"></b>${c.n} ${money(v)}</span>`);
+  });
+  if(tot<1500 && s.planLocked) leg.insertAdjacentHTML('beforeend',`<span><b style="background:#22303F"></b>ยังไม่จัดสรร ${money(1500-tot)}</span>`);
+  const w=$('warn');
+  if(rem<0) w.innerHTML=`<div class="notice">งบติดลบ ${money(Math.abs(rem))} บาท ภารกิจยังไปต่อได้ แต่ต้องอธิบายในขั้นสะท้อนคิดว่าจะแก้ไขอย่างไร</div>`;
+  else if(rem<100 && s.step>2) w.innerHTML=`<div class="notice">เหลือน้อยกว่า 100 บาท และยังไม่จบสัปดาห์ ลองทบทวนว่ารายการไหนตัดได้</div>`;
+  else w.innerHTML='';
+}
+
+function renderTimeline(){
+  const tl=$('timeline'); tl.innerHTML='';
+  for(let d=1; d<=7; d++){
+    const label = d===1?'วางแผน' : d===7?'สรุป' : (EVENTS.find(e=>e.day===d)?.title.slice(0,14)+'…');
+    const cls = d<s.step?'done' : d===s.step?'now':'';
+    tl.insertAdjacentHTML('beforeend',
+      `<div class="tl ${cls}"><div class="d">วันที่ ${d}</div><div class="s">${cls==='done'?'✓ ':''}${label}</div></div>`);
+  }
+}
+
+/* =========================================================
+   RENDER STAGES
+   ========================================================= */
+function render(){ renderTimeline(); renderStatus(); (s.step===1?stagePlan:s.step===7?stageWeekEnd:stageEvent)(); save(); }
+
+function stagePlan(){
+  $('stage').innerHTML = `
+  <div class="card">
+    <div class="eyebrow">C — Context · วันที่ 1</div>
+    <h2>วางแผนใช้เงิน 1,500 บาท ให้ครบ 7 วัน</h2>
+    <p class="muted">ยังไม่มีใครบอกว่าควรจัดสรรเท่าไร นักเรียนต้องตัดสินใจเองจากชีวิตจริงของตัวเอง และเตรียมรับมือกับสิ่งที่ยังไม่รู้ว่าจะเกิดขึ้น</p>
+    <div class="grid2" id="planInputs"></div>
+    <div class="row" style="margin-top:16px;justify-content:space-between">
+      <div class="mono" id="planSum"></div>
+      <button class="primary" id="lockPlan" onclick="lockPlan()">ยืนยันแผนและเริ่มวันที่ 2</button>
+    </div>
+    <label for="planWhy" style="margin-top:14px">เหตุผลของการจัดสรรแบบนี้ (อย่างน้อย 1 ประโยค)</label>
+    <textarea id="planWhy" placeholder="เช่น ให้ค่าอาหารมากที่สุดเพราะกินทุกวัน และกันสำรองไว้ 200 เพราะเคยมีเหตุฉุกเฉิน">${esc(s.planWhy||'')}</textarea>
+  </div>`;
+  const box=$('planInputs');
+  CATS.forEach(c=>{
+    box.insertAdjacentHTML('beforeend',
+      `<div><label for="p_${c.k}">${c.n} <span class="muted">· ${c.hint}</span></label>
+       <input id="p_${c.k}" class="mono" inputmode="numeric" value="${s.plan[c.k]||''}" placeholder="0"></div>`);
+  });
+  CATS.forEach(c=>{
+    $('p_'+c.k).oninput=e=>{ s.plan[c.k]=Math.max(0,parseInt(e.target.value.replace(/\D/g,''))||0);
+      sumPlan(); renderStatus(); };
+  });
+  $('planWhy').oninput=e=>{ s.planWhy=e.target.value; };
+  sumPlan();
+}
+function sumPlan(){
+  const t=planTotal(), el=$('planSum'); if(!el) return;
+  el.innerHTML = `รวม ${money(t)} / ฿1,500 ${t>1500?'<span style="color:var(--red)">· เกินงบ '+money(t-1500)+'</span>':t<1500?'<span class="muted">· ยังเหลือ '+money(1500-t)+'</span>':'<span style="color:var(--mint)">· พอดี</span>'}`;
+  $('lockPlan').disabled = t>1500 || t===0;
+}
+function lockPlan(){
+  if(!s.planWhy || s.planWhy.trim().length<10){ alert('เขียนเหตุผลของแผนอย่างน้อย 1 ประโยคก่อนเริ่มวันที่ 2'); $('planWhy').focus(); return; }
+  s.planLocked=true; s.step=2; logEv('plan','ยืนยันแผน: '+CATS.map(c=>c.n+' '+s.plan[c.k]).join(', '));
+  render();
+}
+
+function stageEvent(){
+  const ev = EVENTS.find(e=>e.day===s.step);
+  const d = s.decisions[ev.day] || (s.decisions[ev.day]={choice:null,pros:['','',''],cons:['','',''],reason:'',missing:'',changed:0});
+  $('stage').innerHTML = `
+  <div class="card">
+    <div class="eyebrow">R + A — วันที่ ${ev.day} · เหตุการณ์เปลี่ยนแปลง</div>
+    <h2>${ev.title}</h2>
+    <p>${ev.body}</p>
+    <div class="notice ok small mono">${ev.math(s)}</div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Decision Board</div>
+    <h3>ก่อนเลือก ให้เขียนข้อดี–ข้อเสียของทุกทางเลือกก่อน</h3>
+    <div id="opts"></div>
+    <label for="missing">ข้อมูลที่ฉันยังไม่รู้ และอยากรู้ก่อนตัดสินใจ</label>
+    <textarea id="missing" placeholder="เช่น ราคาใหม่ขึ้นถาวรหรือชั่วคราว / ร้านนี้มีตัวตนจริงไหม">${esc(d.missing)}</textarea>
+    <label for="reason">ฉันเลือกทางนี้เพราะ (อ้างอิงข้อมูลหรือตัวเลข)</label>
+    <textarea id="reason" placeholder="เช่น เลือกเดินบางวันเพราะประหยัดได้ 60 บาท และยังถึงโรงเรียนทันเวลา">${esc(d.reason)}</textarea>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="confirmBtn" onclick="confirmDecision(${ev.day})">ยืนยันการตัดสินใจ · ไปวันที่ ${ev.day+1}</button>
+      <span class="small muted">เปลี่ยนใจได้ก่อนกดยืนยัน การเปลี่ยนใจไม่ใช่ความผิด ระบบจะบันทึกว่าเปลี่ยนเพราะอะไร</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">AI Life Coach</div>
+    <h3>โค้ชจะถาม ไม่ตอบแทน</h3>
+    <div id="coachBox"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="coachIn" placeholder="พิมพ์ความคิดของนักเรียนให้โค้ชช่วยตั้งคำถามต่อ" style="flex:1;min-width:220px">
+      <button onclick="askCoach(${ev.day})" id="coachBtn">ส่งให้โค้ช</button>
+    </div>
+  </div>`;
+
+  const box=$('opts');
+  ev.options.forEach((o,i)=>{
+    const c=o.cost(s);
+    box.insertAdjacentHTML('beforeend',`
+      <div class="opt ${d.choice===i?'sel':''}" id="opt${i}">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <h4>ทางเลือกที่ ${i+1} · ${o.t}</h4>
+          <span class="cost">${c===0?'ไม่กระทบเงินสด':(c>0?'จ่ายเพิ่ม ':'ได้เงินมา ')+money(Math.abs(c))}</span>
+        </div>
+        <div><span class="pill">${o.tag}</span></div>
+        <div class="grid2" style="margin-top:8px">
+          <div><label for="pro${i}">ผลดี</label><input id="pro${i}" value="${esc(d.pros[i])}" placeholder="เขียนสั้น ๆ"></div>
+          <div><label for="con${i}">ผลเสีย/ความเสี่ยง</label><input id="con${i}" value="${esc(d.cons[i])}" placeholder="เขียนสั้น ๆ"></div>
+        </div>
+        <div style="margin-top:10px"><button class="small" onclick="pick(${ev.day},${i})">${d.choice===i?'✓ เลือกทางนี้อยู่':'เลือกทางนี้'}</button></div>
+      </div>`);
+  });
+  ev.options.forEach((o,i)=>{
+    $('pro'+i).oninput=e=>{d.pros[i]=e.target.value;};
+    $('con'+i).oninput=e=>{d.cons[i]=e.target.value;};
+  });
+  $('missing').oninput=e=>{d.missing=e.target.value;};
+  $('reason').oninput=e=>{d.reason=e.target.value;};
+  renderCoach(ev.day, ev);
+}
+
+function pick(day,i){
+  const d=s.decisions[day];
+  if(d.choice!==null && d.choice!==i){ d.changed++; logEv('change',`วันที่ ${day} เปลี่ยนจากทางเลือกที่ ${d.choice+1} เป็นทางเลือกที่ ${i+1}`); }
+  d.choice=i; stageEvent(); renderStatus();
+}
+
+function confirmDecision(day){
+  const ev=EVENTS.find(e=>e.day===day), d=s.decisions[day];
+  if(d.choice===null){ alert('เลือกทางเลือกก่อน 1 ทาง'); return; }
+  const filled = d.pros.filter(x=>x.trim()).length + d.cons.filter(x=>x.trim()).length;
+  if(filled<4){ alert('เขียนผลดีและผลเสียอย่างน้อย 2 ทางเลือก เพื่อให้เห็นว่าเปรียบเทียบก่อนตัดสินใจ'); return; }
+  if(d.reason.trim().length<10){ alert('เขียนเหตุผลของการตัดสินใจอย่างน้อย 1 ประโยค'); $('reason').focus(); return; }
+  const c=ev.options[d.choice].cost(s);
+  s.ledger = s.ledger.filter(x=>x.day!==day);
+  s.ledger.push({day,label:ev.title+' · '+ev.options[d.choice].t,amount:c});
+  logEv('decide',`วันที่ ${day} เลือก "${ev.options[d.choice].t}" (${c>=0?'-':'+'}${Math.abs(c)} บาท) เหตุผล: ${d.reason.trim()}`);
+  s.step = day+1; render();
+}
+
+function stageWeekEnd(){
+  const rem=remaining();
+  $('stage').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">F — วันที่ 7 · ปิดสัปดาห์</div>
+    <h2>สัปดาห์นี้จบลงแบบนี้</h2>
+    <div class="bignum ${rem<0?'neg':'ok'}">${money(rem)}</div>
+    <p class="muted small">เงินคงเหลือไม่ใช่คะแนน นักเรียนที่เหลือเงินมากแต่ตัดสินใจโดยไม่ดูผลกระทบ อาจได้ระดับสมรรถนะต่ำกว่านักเรียนที่เงินหมดแต่คิดรอบด้าน</p>
+    <table style="margin-top:12px"><thead><tr><th>วัน</th><th>เหตุการณ์และการตัดสินใจ</th><th style="text-align:right">ผลต่อเงินสด</th></tr></thead><tbody>
+      ${s.ledger.sort((a,b)=>a.day-b.day).map(l=>`<tr><td class="mono">${l.day}</td><td>${esc(l.label)}</td>
+        <td class="mono" style="text-align:right;color:${l.amount>0?'var(--red)':l.amount<0?'var(--mint)':'var(--muted)'}">${l.amount===0?'—':(l.amount>0?'-':'+')+money(Math.abs(l.amount))}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="row" style="margin-top:18px"><button class="primary" onclick="toReflect()">ไปขั้นสะท้อนคิด</button></div>
+  </div>`;
+}
+
+/* =========================================================
+   AI COACH
+   ========================================================= */
+function renderCoach(day, ev){
+  const box=$('coachBox'); const log=s.coachLog.filter(c=>c.day===day);
+  box.innerHTML = `<div class="coach"><div class="who">Coach</div>
+     <div>ก่อนตัดสินใจ ลองตอบคำถามนี้ในใจ: <b>${ev.coach[0]}</b></div></div>` +
+    log.map(m=>`<div class="bubble ${m.role==='me'?'me':''}"><span class="small muted">${m.role==='me'?'นักเรียน':'โค้ช'}</span><br>${esc(m.text)}</div>`).join('');
+}
+
+async function askCoach(day){
+  const inp=$('coachIn'), txt=inp.value.trim(); if(!txt) return;
+  const ev=EVENTS.find(e=>e.day===day), d=s.decisions[day];
+  s.coachLog.push({day,role:'me',text:txt}); inp.value='';
+  renderCoach(day,ev);
+  $('coachBox').insertAdjacentHTML('beforeend','<div class="bubble" id="thinking"><span class="dots">โค้ชกำลังคิดคำถาม</span></div>');
+  $('coachBtn').disabled=true;
+
+  const sys = `คุณคือ "AI Life Coach" ในห้องเรียนไทย ระดับมัธยมศึกษา
+กฎเหล็ก:
+1. ห้ามบอกว่านักเรียนควรเลือกทางเลือกใด ห้ามให้คำตอบสำเร็จรูป ห้ามคำนวณคำตอบสุดท้ายให้
+2. ตอบด้วยคำถามปลายเปิด 1-2 คำถามเท่านั้น สั้น กระชับ ไม่เกิน 3 บรรทัด ภาษาไทยง่าย สุภาพ เป็นกันเอง
+3. คำถามต้องเจาะจงกับสิ่งที่นักเรียนเพิ่งเขียน และดึงไปสู่อย่างน้อยหนึ่งเรื่องนี้: แหล่งที่มาของข้อมูล, ทางเลือกอื่นที่ยังไม่ได้คิด, ผู้ที่ได้รับผลกระทบ, ความเสี่ยงที่ใหญ่ที่สุด, ผลระยะยาว, แผนสำรองถ้าล้มเหลว
+4. ถ้านักเรียนขอให้ตัดสินใจแทน ให้ปฏิเสธอย่างอบอุ่นและถามกลับแทน
+5. ห้ามชมเกินจริง ห้ามยาว`;
+  const ctx = `สถานการณ์: ${ev.title} — ${ev.body}
+งบตั้งต้น 1500 บาท แผนของนักเรียน: ${CATS.map(c=>c.n+' '+s.plan[c.k]).join(', ')} เงินคงเหลือขณะนี้ ${remaining()} บาท
+ทางเลือกที่มี: ${ev.options.map((o,i)=>(i+1)+'. '+o.t).join(' | ')}
+ทางที่นักเรียนกำลังเลือก: ${d.choice!==null?ev.options[d.choice].t:'ยังไม่เลือก'}
+เหตุผลที่เขียนไว้: ${d.reason||'ยังไม่เขียน'}
+นักเรียนพูดว่า: ${txt}`;
+
+  let reply=null;
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1000,
+        system: sys, messages:[{role:'user',content:ctx}] })
+    });
+    const data = await res.json();
+    reply = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+  }catch(e){ reply=null; }
+  if(!reply){
+    const bank=ev.coach; reply = bank[(s.coachLog.filter(c=>c.day===day&&c.role==='ai').length)%bank.length];
+  }
+  s.coachLog.push({day,role:'ai',text:reply});
+  logEv('coach',`วันที่ ${day} · นักเรียน: ${txt} · โค้ชถาม: ${reply}`);
+  $('coachBtn').disabled=false;
+  renderCoach(day,ev); save();
+}
+
+/* =========================================================
+   REFLECT
+   ========================================================= */
+function toReflect(){
+  go('reflect');
+  $('reflectForm').innerHTML = REFLECT_Q.map((q,i)=>
+    `<label for="rq${i}">${i+1}. ${q}</label><textarea id="rq${i}">${esc(s.reflect['q'+i]||'')}</textarea>`).join('');
+  REFLECT_Q.forEach((q,i)=>{ $('rq'+i).oninput=e=>{s.reflect['q'+i]=e.target.value;}; });
+  $('selfRubric').innerHTML = Object.entries(RUBRICS).map(([k,r])=>
+    `<div style="margin:14px 0"><h3>${r.n}</h3><div class="rub" id="rb_${k}">
+      ${r.l.map((t,i)=>`<button onclick="setSelf('${k}',${i+1})" class="${s.self[k]===i+1?'on':''}" id="rb_${k}_${i+1}">
+        <b class="mono">${i+1}</b> ${['เริ่มต้น','กำลังพัฒนา','สามารถ','เชี่ยวชาญ'][i]}<br><span class="muted small">${t}</span></button>`).join('')}
+    </div></div>`).join('');
+}
+function setSelf(k,v){ s.self[k]=v;
+  document.querySelectorAll('#rb_'+k+' button').forEach((b,i)=>b.classList.toggle('on',i+1===v)); save(); }
+
+async function finish(){
+  const answered = REFLECT_Q.filter((q,i)=>(s.reflect['q'+i]||'').trim().length>5).length;
+  if(answered<4){ alert('ตอบคำถามสะท้อนคิดอย่างน้อย 4 ข้อก่อนส่ง'); return; }
+  if(Object.keys(s.self).length<3){ alert('ประเมินตนเองให้ครบทั้ง 3 สมรรถนะ'); return; }
+  s.submitted=true; s.finished=Date.now(); logEv('submit','ส่งผลงาน');
+  await save(); showReport(s,false);
+}
+
+/* =========================================================
+   EVIDENCE + REPORT
+   ========================================================= */
+function evidence(st){
+  const dec=Object.values(st.decisions||{});
+  const analyzed = dec.reduce((a,d)=>a + d.pros.filter(x=>x.trim()).length + d.cons.filter(x=>x.trim()).length,0);
+  const numeric = dec.filter(d=>/\d/.test(d.reason||'')).length;
+  const changes = dec.reduce((a,d)=>a+(d.changed||0),0);
+  const missing = dec.filter(d=>(d.missing||'').trim().length>5).length;
+  const coachTurns = (st.coachLog||[]).filter(c=>c.role==='me').length;
+  const mins = st.finished? Math.round((st.finished-st.started)/60000):null;
+  return {analyzed,numeric,changes,missing,coachTurns,mins,decisions:dec.length};
+}
+
+function showReport(st, teacherView){
+  st.self=st.self||{}; st.reflect=st.reflect||{}; st.teacher=st.teacher||{score:{},note:''};
+  st.teacher.score=st.teacher.score||{};
+  const e=evidence(st), rem=1500 - (st.ledger||[]).reduce((a,l)=>a+l.amount,0);
+  $('v-report').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">รายงานรายบุคคล · Mission 01</div>
+    <h1>${esc(st.name)}</h1>
+    <p class="muted">${esc(st.room||'-')} เลขที่ ${esc(st.no||'-')} · ทีม ${esc(st.team||'-')} · บทบาท ${esc(st.role||'-')}</p>
+    <div class="grid3" style="margin-top:14px">
+      <div class="card tight"><div class="eyebrow">เงินคงเหลือ</div><div class="mono" style="font-size:24px">${money(rem)}</div></div>
+      <div class="card tight"><div class="eyebrow">ทางเลือกที่วิเคราะห์</div><div class="mono" style="font-size:24px">${e.analyzed} รายการ</div></div>
+      <div class="card tight"><div class="eyebrow">ปรับการตัดสินใจ</div><div class="mono" style="font-size:24px">${e.changes} ครั้ง</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>หลักฐานเชิงพฤติกรรม</h2>
+    <table><tbody>
+      <tr><td>เหตุการณ์ที่ตัดสินใจครบ</td><td class="mono">${e.decisions}/5</td></tr>
+      <tr><td>เหตุผลที่อ้างอิงตัวเลขหรือข้อมูล</td><td class="mono">${e.numeric}/5 เหตุการณ์</td></tr>
+      <tr><td>ระบุข้อมูลที่ยังขาดก่อนตัดสินใจ</td><td class="mono">${e.missing}/5 เหตุการณ์</td></tr>
+      <tr><td>เปลี่ยนการตัดสินใจหลังทบทวน</td><td class="mono">${e.changes} ครั้ง</td></tr>
+      <tr><td>สนทนากับ AI Coach</td><td class="mono">${e.coachTurns} ครั้ง</td></tr>
+      <tr><td>เวลาที่ใช้ทั้งภารกิจ</td><td class="mono">${e.mins?e.mins+' นาที':'—'}</td></tr>
+    </tbody></table>
+    <p class="small muted" style="margin-top:10px">ตัวเลขเหล่านี้เป็นร่องรอยพฤติกรรม ไม่ใช่คะแนนสมรรถนะ ครูต้องอ่านเหตุผลจริงประกอบก่อนให้ระดับ Rubric</p>
+  </div>
+
+  <div class="card">
+    <h2>บันทึกการตัดสินใจ</h2>
+    ${EVENTS.map(ev=>{const d=(st.decisions||{})[ev.day]; if(!d||d.choice===null) return '';
+      return `<div class="opt"><div class="eyebrow">วันที่ ${ev.day} · ${ev.title}</div>
+        <h4>เลือก: ${esc(ev.options[d.choice].t)}</h4>
+        <p class="small"><b>เหตุผล:</b> ${esc(d.reason)}</p>
+        ${d.missing?`<p class="small"><b>ข้อมูลที่ยังขาด:</b> ${esc(d.missing)}</p>`:''}
+        <p class="small muted">ผลดี–ผลเสียที่เขียน: ${ev.options.map((o,i)=>`(${i+1}) +${esc(d.pros[i]||'-')} / −${esc(d.cons[i]||'-')}`).join(' · ')}</p>
+        ${d.changed?`<span class="pill">เปลี่ยนใจ ${d.changed} ครั้ง</span>`:''}</div>`}).join('')}
+  </div>
+
+  <div class="card">
+    <h2>การสะท้อนคิด</h2>
+    ${REFLECT_Q.map((q,i)=>`<p class="small"><b>${i+1}. ${q}</b><br>${esc(st.reflect['q'+i]||'—')}</p>`).join('')}
+  </div>
+
+  <div class="card">
+    <h2>ผลประเมิน Rubric</h2>
+    <table><thead><tr><th>สมรรถนะ</th><th>ประเมินตนเอง</th><th>ครูประเมิน</th></tr></thead><tbody>
+      ${Object.entries(RUBRICS).map(([k,r])=>`<tr><td>${r.n}</td>
+        <td class="mono">${st.self[k]?st.self[k]+' — '+r.l[st.self[k]-1]:'—'}</td>
+        <td class="mono">${st.teacher?.score?.[k]?st.teacher.score[k]+' — '+r.l[st.teacher.score[k]-1]:'ยังไม่ประเมิน'}</td></tr>`).join('')}
+    </tbody></table>
+    ${st.teacher?.note?`<p class="small" style="margin-top:10px"><b>ข้อเสนอแนะจากครู:</b> ${esc(st.teacher.note)}</p>`:''}
+    ${teacherView?`<div id="tScore" class="noprint" style="margin-top:16px"></div>`:''}
+  </div>
+
+  <div class="row noprint" style="margin-bottom:30px">
+    <button onclick="window.print()">พิมพ์ / บันทึกเป็น PDF</button>
+    <button onclick="dl('${st.id}')">ดาวน์โหลดข้อมูลดิบ (JSON)</button>
+    ${teacherView?`<button onclick="openTeacher()">กลับหน้าครู</button>`:`<button onclick="go('home')">กลับหน้าแรก</button>`}
+  </div>`;
+  go('report');
+  if(teacherView) renderTeacherScore(st);
+  window._report = st;
+}
+
+function renderTeacherScore(st){
+  $('tScore').innerHTML = `<h3>ครูให้ระดับสมรรถนะ</h3>` + Object.entries(RUBRICS).map(([k,r])=>
+    `<div style="margin:10px 0"><div class="small muted">${r.n}</div><div class="rub" id="ts_${k}">
+      ${r.l.map((t,i)=>`<button class="${st.teacher?.score?.[k]===i+1?'on':''}" onclick="tSet('${k}',${i+1})"><b class="mono">${i+1}</b> ${t}</button>`).join('')}
+    </div></div>`).join('') +
+    `<label for="tNote">ข้อเสนอแนะถึงนักเรียน</label><textarea id="tNote">${esc(st.teacher?.note||'')}</textarea>
+     <div class="row" style="margin-top:10px"><button class="primary" onclick="tSave()">บันทึกผลประเมิน</button><span id="tSaved" class="small muted"></span></div>`;
+  $('tNote').oninput=e=>{ st.teacher.note=e.target.value; };
+}
+function tSet(k,v){ const st=window._report; st.teacher=st.teacher||{score:{},note:''}; st.teacher.score[k]=v;
+  document.querySelectorAll('#ts_'+k+' button').forEach((b,i)=>b.classList.toggle('on',i+1===v)); }
+async function tSave(){ const st=window._report; await S.set('lc:sub:'+st.id, JSON.stringify(st), true);
+  $('tSaved').textContent='บันทึกแล้ว'; setTimeout(()=>$('tSaved').textContent='',2500); }
+
+function dl(id){ const st=window._report;
+  const b=new Blob([JSON.stringify(st,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download='lifecraft_'+(st.name||id)+'.json'; a.click(); }
+
+/* =========================================================
+   TEACHER DASHBOARD
+   ========================================================= */
+async function openTeacher(){
+  go('teacher');
+  $('v-teacher').innerHTML=`<div class="card"><div class="eyebrow">Teacher Dashboard</div>
+    <h2>ผลงานที่นักเรียนส่งเข้ามา</h2><p class="muted small">กำลังโหลด…</p></div>`;
+  const keys = await S.list('lc:sub:', true);
+  const rows=[];
+  for(const k of keys){ const raw=await S.get(k,true); if(!raw) continue;
+    try{ rows.push(JSON.parse(raw)); }catch(e){} }
+  window._rows = rows;
+  if(!rows.length){
+    $('v-teacher').innerHTML=`<div class="card"><div class="eyebrow">Teacher Dashboard</div>
+      <h2>ยังไม่มีผลงานส่งเข้ามา</h2>
+      <p class="muted">เมื่อนักเรียนกด “ส่งผลงานให้ครู” รายชื่อจะขึ้นที่นี่พร้อมหลักฐานการตัดสินใจรายคน</p>
+      <div class="row"><button onclick="go('home')">กลับหน้าแรก</button></div></div>`;
+    return;
+  }
+  const cls = agg(rows);
+  $('v-teacher').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">Teacher Dashboard · Mission 01</div>
+    <h2>ระดับห้องเรียน</h2>
+    <div class="grid3">
+      <div class="card tight"><div class="eyebrow">ส่งแล้ว</div><div class="mono" style="font-size:24px">${rows.length} คน</div></div>
+      <div class="card tight"><div class="eyebrow">อ้างอิงตัวเลขในเหตุผล</div><div class="mono" style="font-size:24px">${cls.numericPct}%</div>
+        <div class="small muted">ของเหตุการณ์ทั้งหมด</div></div>
+      <div class="card tight"><div class="eyebrow">ปรับแผนหลังได้ข้อมูลใหม่</div><div class="mono" style="font-size:24px">${cls.changers} คน</div></div>
+    </div>
+    <div style="margin-top:14px">
+      <h3>ทางเลือกที่นักเรียนเลือกในแต่ละเหตุการณ์</h3>
+      ${EVENTS.map(ev=>{const c=cls.choice[ev.day];const tot=c.reduce((a,b)=>a+b,0)||1;
+        return `<div style="margin:10px 0"><div class="small">วันที่ ${ev.day} · ${ev.title}</div>
+        <div class="moneybar" style="height:18px">${ev.options.map((o,i)=>`<i style="width:${c[i]/tot*100}%;background:${['var(--gold)','var(--mint)','var(--violet)'][i]}" title="${o.t} ${c[i]} คน"></i>`).join('')}</div>
+        <div class="legend">${ev.options.map((o,i)=>`<span><b style="background:${['var(--gold)','var(--mint)','var(--violet)'][i]}"></b>${o.t} · ${c[i]} คน</span>`).join('')}</div></div>`}).join('')}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>ระดับรายบุคคล</h2>
+    <p class="small muted">คลิกที่ชื่อเพื่อดูหลักฐานเต็มและให้ระดับ Rubric</p>
+    <table><thead><tr><th>ชื่อ</th><th>ห้อง</th><th>เงินคงเหลือ</th><th>วิเคราะห์</th><th>อ้างตัวเลข</th><th>เปลี่ยนใจ</th><th>ครูประเมินแล้ว</th></tr></thead><tbody>
+    ${rows.map((r,i)=>{const e=evidence(r);const rem=1500-(r.ledger||[]).reduce((a,l)=>a+l.amount,0);
+      const scored=Object.keys(r.teacher?.score||{}).length===3;
+      return `<tr class="click" onclick="showReport(window._rows[${i}],true)">
+        <td>${esc(r.name)}</td><td>${esc(r.room||'-')}</td><td class="mono">${money(rem)}</td>
+        <td class="mono">${e.analyzed}</td><td class="mono">${e.numeric}/5</td><td class="mono">${e.changes}</td>
+        <td>${scored?'<span style="color:var(--mint)">✓</span>':'<span class="muted">—</span>'}</td></tr>`}).join('')}
+    </tbody></table>
+    <div class="row" style="margin-top:16px">
+      <button onclick="exportCSV()">ส่งออก CSV สำหรับรายงาน</button>
+      <button onclick="openTeacher()">รีเฟรช</button>
+      <button onclick="go('home')">กลับหน้าแรก</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>นักเรียนที่ควรได้รับการช่วยเหลือก่อน</h2>
+    ${cls.watch.length? cls.watch.map(w=>`<div class="opt"><h4>${esc(w.name)} · ${esc(w.room||'-')}</h4>
+        <p class="small muted">${w.why.join(' · ')}</p></div>`).join('')
+      : '<p class="muted small">ยังไม่พบสัญญาณที่ต้องช่วยเหลือเร่งด่วนจากหลักฐานชุดนี้</p>'}
+    <p class="small muted">เกณฑ์นี้เป็นเพียงการคัดกรองเบื้องต้นจากร่องรอยในระบบ ครูควรพูดคุยกับนักเรียนก่อนสรุป</p>
+  </div>`;
+}
+
+function agg(rows){
+  const choice={}; EVENTS.forEach(ev=>choice[ev.day]=[0,0,0]);
+  let numeric=0, total=0, changers=0; const watch=[];
+  rows.forEach(r=>{
+    const e=evidence(r); const why=[];
+    EVENTS.forEach(ev=>{ const d=(r.decisions||{})[ev.day];
+      if(d&&d.choice!==null){ choice[ev.day][d.choice]++; total++; if(/\d/.test(d.reason||'')) numeric++; } });
+    if(e.changes>0) changers++;
+    if(e.numeric<=1) why.push('แทบไม่ใช้ตัวเลข/หลักฐานในการให้เหตุผล');
+    if(e.analyzed<12) why.push('เปรียบเทียบทางเลือกน้อยกว่าที่ควร');
+    const d4=(r.decisions||{})[4]; if(d4&&d4.choice===0) why.push('เลือกโอนเงินให้ข้อความที่เข้าข่ายมิจฉาชีพ');
+    const d6=(r.decisions||{})[6]; if(d6&&d6.choice===0) why.push('เลือกกู้ยืมที่ดอกเบี้ย 10% ต่อสัปดาห์');
+    const rem=1500-(r.ledger||[]).reduce((a,l)=>a+l.amount,0); if(rem<0) why.push('งบติดลบเมื่อจบสัปดาห์');
+    if(why.length) watch.push({name:r.name,room:r.room,why});
+  });
+  return {choice, numericPct: total?Math.round(numeric/total*100):0, changers, watch};
+}
+
+function exportCSV(){
+  const rows=window._rows||[];
+  const head=['ชื่อ','ห้อง','เลขที่','ทีม','บทบาท','เงินคงเหลือ','ทางเลือกที่วิเคราะห์','เหตุผลอ้างตัวเลข','เปลี่ยนใจ','โค้ช','ประเมินตนเอง-คิด','ประเมินตนเอง-จัดการตน','ประเมินตนเอง-ทีม','ครู-คิด','ครู-จัดการตน','ครู-ทีม'];
+  const body=rows.map(r=>{const e=evidence(r);const rem=1500-(r.ledger||[]).reduce((a,l)=>a+l.amount,0);
+    return [r.name,r.room,r.no,r.team,r.role,rem,e.analyzed,e.numeric,e.changes,e.coachTurns,
+      r.self?.think||'',r.self?.self||'',r.self?.team||'',
+      r.teacher?.score?.think||'',r.teacher?.score?.self||'',r.teacher?.score?.team||''];});
+  const csv='\uFEFF'+[head,...body].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='lifecraft_mission01.csv'; a.click();
+}
+</script>
