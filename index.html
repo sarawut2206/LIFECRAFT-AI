@@ -67,6 +67,13 @@ tr.click:hover{background:var(--panel2);cursor:pointer}
 .bar{height:20px;border-radius:6px;overflow:hidden;display:flex;background:var(--soft);border:1px solid var(--line)}
 .bar i{display:block;height:100%}
 .hide{display:none}
+.chartwrap{position:relative;height:260px;margin-top:10px}
+.chartwrap.tall{height:300px}
+.chartgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.chartgrid{grid-template-columns:1fr}.chartwrap{height:230px}}
+.chartlegend{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--muted)}
+.chartlegend span{display:inline-flex;align-items:center;gap:5px}
+.chartlegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 4px}
 .chiphint{width:100%;font-size:12px;color:var(--muted)}
 .chip{font-size:13px;padding:7px 12px;min-height:auto;border-radius:999px;background:var(--soft);
@@ -112,8 +119,11 @@ tr.click:hover{background:var(--panel2);cursor:pointer}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:22px 0}
 @media(max-width:640px){.wrap{padding:12px 10px 70px}.card{padding:15px 13px}button{min-height:46px}
 input,textarea,select{font-size:16px}th,td{padding:6px 5px;font-size:13px}}
-@media print{body{background:#fff;color:#000}.noprint{display:none!important}.card{background:#fff;border-color:#bbb}
-h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}}
+@media print{body{background:#fff;color:#000}.noprint{display:none!important}.card{background:#fff;border-color:#bbb;box-shadow:none;break-inside:avoid}
+h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
+.chartwrap{height:220px!important;break-inside:avoid}.chartgrid{grid-template-columns:1fr 1fr}
+.printhead{display:block!important;text-align:right;font-size:11px;color:#555;margin-bottom:4px}}
+.printhead{display:none}
 </style>
 
 <div class="wrap">
@@ -341,9 +351,9 @@ function bad(id,msg){ toast(msg); const e=$(id); if(!e)return;
 
 /* ---------- ตัวเลือกสำเร็จรูป ให้แตะเลือกแทนการพิมพ์ ---------- */
 const SUG={
- a0n:['ซื้อของใช้ส่วนกลางที่ทุกคนได้ใช้ เช่น พัดลม ถังน้ำ ชั้นวางของ','ซื้ออุปกรณ์การเรียนกลางของห้อง เช่น ปากกาไวท์บอร์ด กระดาษ','จัดกิจกรรมที่ทุกคนร่วมได้ในห้อง','ซื้อของสำหรับดูแลความสะอาดของห้อง','กันเป็นกองกลางไว้ช่วยเพื่อนที่เดือดร้อน'],
- a1n:['ซื้อของใช้ส่วนกลางที่ทุกคนได้ใช้ เช่น พัดลม ถังน้ำ ชั้นวางของ','ซื้ออุปกรณ์การเรียนกลางของห้อง เช่น ปากกาไวท์บอร์ด กระดาษ','จัดกิจกรรมที่ทุกคนร่วมได้ในห้อง','ซื้อของสำหรับดูแลความสะอาดของห้อง','กันเป็นกองกลางไว้ช่วยเพื่อนที่เดือดร้อน'],
- a2n:['ซื้อของใช้ส่วนกลางที่ทุกคนได้ใช้ เช่น พัดลม ถังน้ำ ชั้นวางของ','ซื้ออุปกรณ์การเรียนกลางของห้อง เช่น ปากกาไวท์บอร์ด กระดาษ','จัดกิจกรรมที่ทุกคนร่วมได้ในห้อง','ซื้อของสำหรับดูแลความสะอาดของห้อง','กันเป็นกองกลางไว้ช่วยเพื่อนที่เดือดร้อน'],
+ a0n:['ซื้อของใช้ส่วนกลางที่ทุกคนได้ใช้ เช่น พัดลม ถังน้ำ ชั้นวางของ','ซื้ออุปกรณ์การเรียนกลางของห้อง เช่น ปากกาไวท์บอร์ด กระดาษ','ซ่อมของเดิมที่ชำรุดในห้องให้ใช้ได้ก่อน'],
+ a1n:['จัดกิจกรรมที่ทุกคนร่วมได้ในห้อง เช่น เลี้ยงอาหารว่างวันเกิดประจำเดือน','ซื้อของสำหรับดูแลความสะอาดของห้อง เช่น ไม้กวาด ถังขยะ','ซื้อพัดลมตัวเดียวติดหน้าห้อง ใช้ร่วมกันเป็นจุดเดียว'],
+ a2n:['กันเป็นกองกลางไว้ช่วยเพื่อนที่เดือดร้อนเฉพาะหน้า','แบ่งเงินคืนให้สมาชิกทุกคนคนละเท่า ๆ กัน','เก็บไว้เป็นทุนสำรองของห้องไว้ใช้ทีหลัง'],
  er0:['ตัดรายการที่คนใช้น้อยที่สุด เพราะกระทบคนน้อยกว่า','ลดทุกอย่างเท่ากัน เพื่อไม่ให้ใครรู้สึกถูกตัดคนเดียว','เปิดให้ห้องโหวตใหม่ เพราะเงินเป็นของทุกคน'],
  er1:['กันงบส่วนหนึ่งไว้ให้กลุ่มที่ยังไม่ได้ประโยชน์','เชิญเขามาร่วมออกแบบแผนใหม่ เพราะเขาเป็นเจ้าของเงินเท่ากัน','อธิบายเหตุผลของเสียงส่วนใหญ่ แล้วขอความเห็นเพิ่ม'],
  er2:['เลือกของที่มีมาตรฐาน เพราะเป็นเรื่องความปลอดภัยของทุกคน','หาข้อมูลเพิ่มและถามครูก่อน เพราะยังมีข้อมูลไม่พอ','เลือกของถูกเพราะได้จำนวนมากกว่า แต่ต้องตรวจสอบก่อนใช้'],
@@ -394,6 +404,22 @@ function chipTap(id,i,btn){
   el.value=v; el.dispatchEvent(new Event('input',{bubbles:true}));
   el.classList.remove('bad-field');
 }
+
+
+/* ---------- Chart.js loader ---------- */
+function loadChartJS(){
+  return new Promise(res=>{
+    if(window.Chart){res();return;}
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js';
+    s.onload=()=>res(); s.onerror=()=>res();
+    document.head.appendChild(s);
+  });
+}
+window._charts=window._charts||{};
+function killChart(id){ if(window._charts[id]){ try{window._charts[id].destroy();}catch(e){} delete window._charts[id]; } }
+const CPAL=()=>({teal:'#0E9F8C',tealSoft:'#8FE0CE',amber:'#F0A500',violet:'#6C63C7',red:'#D94F3D',grid:'#DCEFE6',text:'#123029'});
+
 
 /* ---------- ฐานงานวิจัย ---------- */
 const RESEARCH=[
@@ -839,6 +865,7 @@ function showReport(st,tv){
     return `<tr><td>${DIMS[k].n}</td><td class="mono">${a.toFixed(2)}</td><td class="mono">${b.toFixed(2)}</td>
       <td class="mono ${b-a>0?'ok':b-a<0?'bad':''}">${(b-a>=0?'+':'')+(b-a).toFixed(2)}</td></tr>`;}).join('');
   $('v-report').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')}</div>
   <div class="card"><div class="eyebrow">รายงานรายบุคคล · ภารกิจที่ 1</div>
     <h1>${esc(st.name)}</h1><p class="muted">${esc(st.room)} · บทบาท ${esc(st.role||'-')}</p>
     <div class="grid3" style="margin-top:12px">
@@ -849,6 +876,9 @@ function showReport(st,tv){
     </div>
     <table style="margin-top:14px"><thead><tr><th>ด้าน</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th></tr></thead><tbody>${rows}</tbody></table>
     <p class="small muted" style="margin-top:8px">คะแนนรายด้านเป็นค่าเฉลี่ยระดับพฤติกรรม 1–4</p>
+    <div class="chartwrap tall"><canvas id="radarChart"></canvas></div>
+    <div class="chartlegend"><span><i style="background:${CPAL().amber}"></i>ก่อน</span><span><i style="background:${CPAL().teal}"></i>หลัง</span></div>
+    <p class="small muted" style="margin-top:6px">แผนภูมิเรดาร์ช่วยให้เห็นจุดแข็งจุดอ่อนของนักเรียนคนนี้ในคราวเดียว ยิ่งจุดออกไปไกลจากศูนย์กลาง ยิ่งแสดงระดับสูง</p>
   </div>
   <div class="card"><h2>หลักฐานจากภารกิจ</h2>
     <p class="small"><b>ทางเลือกที่วิเคราะห์:</b> ${(st.plan.alt||[]).filter(a=>a.n).map(a=>esc(a.n)).join(' · ')||'-'}</p>
@@ -875,6 +905,25 @@ function showReport(st,tv){
     <button onclick="window.print()">พิมพ์ / บันทึก PDF</button>
     ${tv?`<button onclick="openTeacher()">กลับหน้าครู</button>`:`<button onclick="go('home')">กลับหน้าแรก</button>`}</div>`;
   go('report'); window._r=st; if(tv) tScoreUI(st);
+  loadChartJS().then(()=>drawRadar(st));
+}
+function drawRadar(st){
+  const el=document.getElementById('radarChart'); if(!el||typeof Chart==='undefined')return;
+  killChart('radarChart');
+  const labels=Object.keys(DIMS).map(k=>DIMS[k].n);
+  const before=Object.keys(DIMS).map(k=>dimScore(st.pre,k));
+  const after=Object.keys(DIMS).map(k=>dimScore(st.post,k));
+  const c=CPAL();
+  window._charts.radarChart=new Chart(el,{type:'radar',
+    data:{labels,datasets:[
+      {label:'ก่อน',data:before,borderColor:c.amber,backgroundColor:c.amber+'33',pointBackgroundColor:c.amber},
+      {label:'หลัง',data:after,borderColor:c.teal,backgroundColor:c.teal+'33',pointBackgroundColor:c.teal}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{r:{min:0,max:4,ticks:{stepSize:1,color:c.text,backdropColor:'transparent'},
+        grid:{color:c.grid},angleLines:{color:c.grid},
+        pointLabels:{color:c.text,font:{size:11}}}}}});
 }
 function tScoreUI(st){
   $('tScore').innerHTML=`<h3>ครูให้ระดับสมรรถนะ</h3>`+Object.entries(RUBRICS).map(([k,r])=>
@@ -907,6 +956,7 @@ async function openTeacher(){
 
   const wasAuto=!!_auto;
   $('v-teacher').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานสรุปทั้งห้อง ม.4/4</div>
   <div class="card"><div class="eyebrow">Teacher Dashboard · ม.4/4</div>
     <h2>ผลการดำเนินงาน (ข้อมูลสำหรับบทที่ 4)</h2>
     <div class="grid3">
@@ -915,6 +965,23 @@ async function openTeacher(){
       <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยหลัง</div><div class="bignum ok">${mPost.toFixed(2)}</div><div class="small muted">SD ${sd(post).toFixed(2)} · +${growth.toFixed(1)}%</div></div>
     </div>
     ${done.length?'':'<div class="notice">ยังไม่มีนักเรียนทำครบทั้งก่อนและหลัง ตัวเลขจะปรากฏเมื่อมีข้อมูลจริง ระบบไม่สร้างข้อมูลสมมติให้</div>'}
+  </div>
+
+  <div class="card"><h2>ภาพรวมทั้งห้อง</h2>
+    <p class="small muted">ใช้ดูผลได้ในคาบเลย ไม่ต้องรอเปิดตารางตัวเลข</p>
+    <h3 style="font-size:14px;margin-top:14px">คะแนนเฉลี่ยรายด้าน ก่อน–หลัง (แผนภูมิแท่ง)</h3>
+    <div class="chartwrap"><canvas id="classBar"></canvas></div>
+    <div class="chartgrid" style="margin-top:22px">
+      <div>
+        <h3 style="font-size:14px">สัดส่วนระดับสมรรถนะที่ครูให้ (แผนภูมิวงกลม)</h3>
+        <div class="chartwrap"><canvas id="classDonut"></canvas></div>
+      </div>
+      <div>
+        <h3 style="font-size:14px">คะแนนรวมก่อน–หลัง รายบุคคล (กราฟเส้น)</h3>
+        <div class="chartwrap"><canvas id="classLine"></canvas></div>
+      </div>
+    </div>
+    <div class="row noprint" style="margin-top:16px"><button onclick="window.print()">พิมพ์รายงานสรุปทั้งห้อง</button></div>
   </div>
 
   <div class="card"><h2>ความคืบหน้าของห้องตอนนี้</h2>
@@ -970,6 +1037,55 @@ async function openTeacher(){
       :'<p class="muted small">ยังไม่มีข้อมูลเพียงพอ หรือไม่พบสัญญาณที่ต้องดูแลเร่งด่วน</p>';})()}
     <p class="small muted">เป็นการคัดกรองเบื้องต้นจากร่องรอยในระบบ ครูควรพูดคุยกับนักเรียนก่อนสรุป</p></div>`;
   if(wasAuto && $('autoRef')) $('autoRef').checked=true;
+  loadChartJS().then(()=>drawClassCharts(all,done,m));
+}
+function drawClassCharts(all,done,m){
+  const c=CPAL();
+  const labels=Object.keys(DIMS).map(k=>DIMS[k].n);
+  const before=Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.pre,k))));
+  const after=Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.post,k))));
+  const barEl=document.getElementById('classBar');
+  if(barEl&&typeof Chart!=='undefined'){
+    killChart('classBar');
+    window._charts.classBar=new Chart(barEl,{type:'bar',
+      data:{labels,datasets:[
+        {label:'ก่อน',data:before,backgroundColor:c.amber},
+        {label:'หลัง',data:after,backgroundColor:c.teal}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{color:c.text,font:{size:11}}}},
+        scales:{y:{min:0,max:4,ticks:{color:c.text},grid:{color:c.grid}},
+                x:{ticks:{color:c.text,font:{size:10}},grid:{display:false}}}}});
+  }
+  const lv=[0,0,0,0];
+  done.forEach(d=>{Object.keys(RUBRICS).forEach(k=>{const v=(d.teacher&&d.teacher.score&&d.teacher.score[k]); if(v) lv[v-1]++;});});
+  const donutEl=document.getElementById('classDonut');
+  if(donutEl&&typeof Chart!=='undefined'){
+    killChart('classDonut');
+    const hasData=lv.some(x=>x>0);
+    window._charts.classDonut=new Chart(donutEl,{type:'doughnut',
+      data:{labels:['ระดับ 1 เริ่มต้น','ระดับ 2 กำลังพัฒนา','ระดับ 3 สามารถ','ระดับ 4 เชี่ยวชาญ'],
+        datasets:[{data:hasData?lv:[1,1,1,1],
+          backgroundColor:[c.red,c.amber,c.tealSoft,c.teal],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{color:c.text,font:{size:10},boxWidth:10}},
+          tooltip:{enabled:hasData}},
+        cutout:'62%'}});
+    if(!hasData){ donutEl.parentElement.insertAdjacentHTML('beforeend',
+      '<p class="small muted" style="text-align:center;margin-top:6px">ยังไม่มีครูให้ระดับสมรรถนะ กราฟจะแสดงสัดส่วนจริงเมื่อเริ่มประเมิน</p>'); }
+  }
+  const lineEl=document.getElementById('classLine');
+  if(lineEl&&typeof Chart!=='undefined'){
+    killChart('classLine');
+    const names=done.map(x=>x.name.replace('นาย',''));
+    window._charts.classLine=new Chart(lineEl,{type:'line',
+      data:{labels:names,datasets:[
+        {label:'ก่อน',data:done.map(x=>total(x.pre)),borderColor:c.amber,backgroundColor:c.amber,tension:.25},
+        {label:'หลัง',data:done.map(x=>total(x.post)),borderColor:c.teal,backgroundColor:c.teal,tension:.25}]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{position:'bottom',labels:{color:c.text,font:{size:11}}}},
+        scales:{y:{min:0,max:40,ticks:{color:c.text},grid:{color:c.grid}},
+                x:{ticks:{color:c.text,font:{size:9},maxRotation:60,minRotation:40},grid:{display:false}}}}});
+  }
 }
 
 let _auto=null;
