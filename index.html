@@ -63,6 +63,37 @@ tr.click:hover{background:var(--panel2);cursor:pointer}
 .bar{height:20px;border-radius:6px;overflow:hidden;display:flex;background:#0F1B27;border:1px solid var(--line)}
 .bar i{display:block;height:100%}
 .hide{display:none}
+/* ---- UX additions ---- */
+.prog{height:6px;background:#0F1B27;border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:10px 0 2px}
+.prog i{display:block;height:100%;background:var(--gold);transition:width .35s ease}
+.dots{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.dots button{width:34px;height:34px;min-height:34px;padding:0;border-radius:9px;font-size:13px;
+  font-family:var(--mono);background:#0F1B27;color:var(--muted)}
+.dots button.on{background:var(--mint);border-color:var(--mint);color:#06231a;font-weight:600}
+.dots button.cur{border-color:var(--gold);color:var(--gold)}
+.navrow{position:sticky;bottom:0;z-index:5;margin-top:18px;padding:12px 0 4px;
+  background:linear-gradient(180deg,transparent,var(--panel) 30%)}
+#body .card>.row:last-of-type,#v-test .card>.row:nth-last-of-type(1){position:sticky;bottom:0;z-index:5;
+  padding:12px 0 4px;background:linear-gradient(180deg,transparent,var(--panel) 35%)}
+.bad-field{border-color:var(--red)!important;box-shadow:0 0 0 3px #e4572e33}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.rcard{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;
+  padding:12px;background:#0F1B27;cursor:pointer;transition:.15s}
+.rcard:hover{border-color:var(--gold);transform:translateY(-1px)}
+.rcard .no{width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:var(--panel2);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:var(--muted)}
+.rcard .nm{font-size:14px;line-height:1.35}
+.rcard .st{font-size:11px;color:var(--muted);margin-top:2px}
+.rcard.done .no{background:#153228;color:var(--mint)}
+.rcard.doing .no{background:#3a2c0d;color:var(--gold)}
+.stepnum{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.08em}
+.grid5{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.pcard{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#0F1B27}
+.pcard .n{font-size:13px}
+.pcard .s{font-size:11px;color:var(--muted);margin-top:3px}
+.pcard.ok{border-color:var(--mint)}.pcard.ok .s{color:var(--mint)}
+.pcard.go{border-color:var(--gold)}.pcard.go .s{color:var(--gold)}
+@media(max-width:640px){.dots button{width:30px;height:30px}}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:99;background:#2A1A16;border:1px solid var(--red);color:var(--text);padding:12px 18px;border-radius:10px;max-width:min(560px,92vw);font-size:14px;opacity:0;pointer-events:none;transition:.25s}
 #toast.show{opacity:1}#toast.good{background:#12291F;border-color:var(--mint)}
 .saved{font-family:var(--mono);font-size:11px;color:var(--mint);opacity:0;transition:.3s}.saved.on{opacity:1}
@@ -283,26 +314,39 @@ async function save(force){if(!s)return;const j=JSON.stringify(s);LS.set('lc:'+s
   queueRemote('lc:'+s.idx,s.name,j); if(force) await flushRemote(true); flagSaved();}
 
 function blank(idx){return{idx,name:ROSTER[idx],room:'ม.4/4',started:Date.now(),
- pre:{},post:{},phase:'pre',step:0,role:'',plan:{},decisions:{},reflect:{},self:{},action:{},
+ pre:{},post:{},phase:'pre',step:0,qi:0,role:'',plan:{},decisions:{},reflect:{},self:{},action:{},
  coachLog:[],log:[],teacher:{score:{},note:''},done:false};}
 function logEv(t,d){s.log.push({t:Date.now(),type:t,detail:d});}
+function bad(id,msg){ toast(msg); const e=$(id); if(!e)return;
+  e.classList.add('bad-field'); e.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>e.focus({preventScroll:true}),350);
+  e.addEventListener('input',()=>e.classList.remove('bad-field'),{once:true}); }
 
 /* ---------- pick student ---------- */
 function renderPick(){
-  $('v-pick').innerHTML=`<div class="card"><div class="eyebrow">ขั้นที่ 0</div>
-  <h2>เลือกชื่อของนักเรียน</h2><p class="muted small">รายชื่อนักเรียนชั้น ม.4/4 จำนวน ${ROSTER.length} คน แตะที่ชื่อของตัวเองเพื่อเริ่ม</p>
-  <div id="roster"></div>
-  <div class="row" style="margin-top:14px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
+  $('v-pick').innerHTML=`<div class="card">
+  <div class="eyebrow">เริ่มต้น</div>
+  <h2>แตะชื่อของตัวเอง</h2>
+  <p class="muted small">นักเรียนชั้น ม.4/4 จำนวน ${ROSTER.length} คน · ถ้าเคยทำค้างไว้ ระบบจะพากลับไปที่เดิมให้</p>
+  <input id="rsearch" placeholder="พิมพ์ชื่อเพื่อค้นหา" style="margin:12px 0 14px" oninput="filterRoster(this.value)">
+  <div class="roster" id="roster"></div>
+  <div class="row" style="margin-top:16px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
   const box=$('roster');
   ROSTER.forEach((n,i)=>box.insertAdjacentHTML('beforeend',
-    `<div class="opt" onclick="startStudent(${i})"><h4>${i+1}. ${n}</h4>
-     <span class="small muted" id="stat${i}">ยังไม่ได้เริ่ม</span></div>`));
+    `<div class="rcard" id="rc${i}" data-n="${n}" onclick="startStudent(${i})">
+       <div class="no">${i+1}</div>
+       <div><div class="nm">${n}</div><div class="st" id="stat${i}">ยังไม่ได้เริ่ม</div></div></div>`));
   ROSTER.forEach(async(n,i)=>{
     const raw=await S.get('lc:'+i,true); if(!raw)return;
-    try{const d=JSON.parse(raw);const el=$('stat'+i);if(!el)return;
-      el.innerHTML=d.done?'<span class="ok">ทำครบแล้ว</span>':'ทำค้างไว้ · '+(d.phase==='pre'?'แบบวัดก่อน':d.phase==='post'?'แบบวัดหลัง':'ภารกิจ');
+    try{const d=JSON.parse(raw);const el=$('stat'+i),c=$('rc'+i);if(!el)return;
+      if(d.done){el.textContent='ทำครบแล้ว';c.classList.add('done');}
+      else{el.textContent='ทำค้างไว้ · '+(d.phase==='pre'?'แบบวัดก่อน':d.phase==='post'?'แบบวัดหลัง':'ขั้นที่ '+(d.step+1));c.classList.add('doing');}
     }catch(e){}
   });
+}
+function filterRoster(q){
+  q=(q||'').trim();
+  ROSTER.forEach((n,i)=>{const c=$('rc'+i); if(c) c.style.display=(!q||n.includes(q))?'':'none';});
 }
 async function startStudent(i){
   const raw=await S.get('lc:'+i,true);
@@ -320,37 +364,44 @@ function route(){
 function renderTest(){
   go('test');
   const isPre=s.phase==='pre', ans=isPre?s.pre:s.post;
+  if(typeof s.qi!=='number') s.qi=0;
+  if(s.qi>=ITEMS.length) s.qi=ITEMS.length-1;
+  const i=s.qi, it=ITEMS[i], n=Object.keys(ans).length, last=i===ITEMS.length-1;
   $('v-test').innerHTML=`<div class="card">
-    <div class="eyebrow">${isPre?'Input · แบบวัดก่อนกิจกรรม':'Output · แบบวัดหลังกิจกรรม'}</div>
-    <h2>แบบวัดสมรรถนะชีวิตและความเป็นพลเมืองดีเชิงสถานการณ์</h2>
-    <p class="muted small">10 สถานการณ์ เลือกข้อที่ตรงกับสิ่งที่นักเรียน<b>จะทำจริง</b>มากที่สุด ไม่ใช่ข้อที่ดูดีที่สุด ไม่มีคะแนนถูกผิด และไม่มีผลต่อเกรด</p>
-    <div id="items"></div>
-    <div class="row" style="margin-top:16px"><button class="primary" onclick="submitTest()">ส่งแบบวัด</button>
-    <span class="small muted" id="prog"></span></div></div>`;
-  const box=$('items');
-  ITEMS.forEach((it,i)=>{
-    box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:#0F1B27">
-      <div class="eyebrow">ข้อ ${i+1} · ${DIMS[it.d].n}</div>
-      <h3 style="font-size:15px">${it.q}</h3><div id="it${i}"></div></div>`);
-    const g=$('it'+i);
-    it.o.forEach((o,j)=>g.insertAdjacentHTML('beforeend',
-      `<div class="opt ${ans['q'+i]===j+1?'sel':''}" id="o${i}_${j}" onclick="setAns(${i},${j+1})">${o}</div>`));
-  });
-  updProg();
+    <div class="eyebrow">${isPre?'แบบวัดก่อนกิจกรรม':'แบบวัดหลังกิจกรรม'}</div>
+    <div class="prog"><i style="width:${n/ITEMS.length*100}%"></i></div>
+    <div class="row" style="justify-content:space-between">
+      <span class="stepnum">ข้อ ${i+1} / ${ITEMS.length}</span>
+      <span class="stepnum">ตอบแล้ว ${n} ข้อ</span></div>
+    <h2 style="margin-top:14px;font-size:19px">${it.q}</h2>
+    <p class="small muted">เลือกข้อที่ตรงกับสิ่งที่นักเรียน<b>จะทำจริง</b>มากที่สุด ไม่ใช่ข้อที่ดูดีที่สุด ไม่มีคำตอบถูกผิด และไม่มีผลต่อคะแนนเก็บ</p>
+    <div id="opts"></div>
+    <div class="dots" id="dots"></div>
+    <div class="row navrow">
+      <button onclick="qGo(${i-1})" ${i===0?'disabled':''}>ย้อนกลับ</button>
+      <button class="primary" onclick="${last?'submitTest()':'qGo('+(i+1)+')'}">${last?'ส่งแบบวัด':'ข้อถัดไป'}</button>
+    </div></div>`;
+  const g=$('opts');
+  it.o.forEach((o,j)=>g.insertAdjacentHTML('beforeend',
+    `<div class="opt ${ans['q'+i]===j+1?'sel':''}" id="o${j}" onclick="setAns(${i},${j+1})" style="padding:15px">${o}</div>`));
+  const d=$('dots');
+  ITEMS.forEach((x,k)=>d.insertAdjacentHTML('beforeend',
+    `<button class="${ans['q'+k]?'on':''} ${k===i?'cur':''}" onclick="qGo(${k})" aria-label="ไปข้อ ${k+1}">${k+1}</button>`));
 }
+function qGo(k){ if(k<0||k>=ITEMS.length)return; s.qi=k; save(); renderTest(); window.scrollTo({top:0,behavior:'smooth'}); }
 function setAns(i,v){
   const ans=s.phase==='pre'?s.pre:s.post; ans['q'+i]=v;
-  ITEMS[i].o.forEach((o,j)=>$('o'+i+'_'+j).classList.toggle('sel',j+1===v));
-  updProg(); save();
-}
-function updProg(){
-  const ans=s.phase==='pre'?s.pre:s.post, n=Object.keys(ans).length;
-  const e=$('prog'); if(e) e.textContent=`ตอบแล้ว ${n} จาก ${ITEMS.length} ข้อ`;
+  ITEMS[i].o.forEach((o,j)=>$('o'+j).classList.toggle('sel',j+1===v));
+  save();
+  if(i<ITEMS.length-1) setTimeout(()=>qGo(i+1),280);
+  else renderTest();
 }
 function submitTest(){
   const ans=s.phase==='pre'?s.pre:s.post;
-  if(Object.keys(ans).length<ITEMS.length){toast('ยังตอบไม่ครบ 10 ข้อ ระบบต้องใช้คะแนนครบเพื่อเทียบก่อน–หลัง');return;}
-  if(s.phase==='pre'){s.phase='mission';s.step=0;logEv('pre','ทำแบบวัดก่อนเสร็จ คะแนน '+total(s.pre));save(true);renderMission();}
+  const miss=ITEMS.map((x,i)=>i).filter(i=>!ans['q'+i]);
+  if(miss.length){ s.qi=miss[0]; renderTest();
+    toast('ยังเหลือข้อ '+miss.map(i=>i+1).join(', ')+' ระบบต้องใช้คะแนนครบ 10 ข้อเพื่อเทียบก่อนและหลัง'); return; }
+  if(s.phase==='pre'){s.phase='mission';s.step=0;s.qi=0;logEv('pre','ทำแบบวัดก่อนเสร็จ คะแนน '+total(s.pre));save(true);renderMission();}
   else{s.done=true;s.finished=Date.now();logEv('post','ทำแบบวัดหลังเสร็จ คะแนน '+total(s.post));save(true);showReport(s,false);toast('ส่งครบแล้ว ขอบคุณครับ',1);}
 }
 const total=a=>Object.values(a).reduce((x,y)=>x+y,0);
@@ -366,9 +417,18 @@ function groupScore(a,g){
 /* ---------- mission (UP TO GROW) ---------- */
 const STEPS=[['U','เข้าใจ'],['P','เห็นปัญหา'],['T','คิดมีหลักฐาน'],['O','ตัดสินใจ'],
              ['G','ทำงานกลุ่ม'],['R','สะท้อนคิด'],['O','ปรับปรุง'],['W','เพื่อส่วนรวม']];
+const STEPMIN=[5,8,10,7,10,5,3,5];
 function stepBar(){
-  return `<div class="steps">${STEPS.map((x,i)=>
-    `<div class="st ${i<s.step?'done':i===s.step?'now':''}"><div class="l">${x[0]}</div><div class="n">${x[1]}</div></div>`).join('')}</div>`;
+  const pct=(s.step/STEPS.length)*100;
+  const left=STEPMIN.slice(s.step).reduce((a,b)=>a+b,0);
+  return `<div class="card tight" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between">
+      <span class="stepnum">ขั้นที่ ${s.step+1} / ${STEPS.length} · ${STEPS[s.step][0]} ${STEPS[s.step][1]}</span>
+      <span class="stepnum">เหลืออีกประมาณ ${left} นาที</span></div>
+    <div class="prog"><i style="width:${pct}%"></i></div>
+    <div class="steps" style="margin:10px 0 0">${STEPS.map((x,i)=>
+      `<div class="st ${i<s.step?'done':i===s.step?'now':''}"><div class="l">${x[0]}</div><div class="n">${x[1]}</div></div>`).join('')}</div>
+  </div>`;
 }
 function renderMission(){
   go('mission');
@@ -392,7 +452,7 @@ function stU(){
   <div class="row" style="margin-top:14px"><button class="primary" onclick="okU()">ขั้นต่อไป</button></div></div>`;
   ['feel','know','need'].forEach(k=>$(k).oninput=e=>{s.plan[k]=e.target.value;});
 }
-function okU(){ if((s.plan.need||'').trim().length<5){toast('เขียนข้อมูลที่ยังไม่รู้อย่างน้อย 1 อย่าง การรู้ว่าตัวเองยังไม่รู้อะไร คือจุดเริ่มของการคิดอย่างมีหลักฐาน');return;} logEv('U','ระบุข้อมูลที่ยังขาด'); nextStep(); }
+function okU(){ if((s.plan.need||'').trim().length<5){bad('need','เขียนข้อมูลที่ยังไม่รู้อย่างน้อย 1 อย่าง การรู้ว่าตัวเองยังไม่รู้อะไร คือจุดเริ่มของการคิดอย่างมีหลักฐาน');return;} logEv('U','ระบุข้อมูลที่ยังขาด'); nextStep(); }
 
 function stP(){
   $('body').innerHTML=`<div class="card"><div class="eyebrow">P — Perceive the problem</div>
@@ -406,7 +466,8 @@ function stP(){
   <div class="row" style="margin-top:14px"><button onclick="back()">ย้อนกลับ</button><button class="primary" onclick="okP()">ขั้นต่อไป</button></div></div>`;
   ['fact','op','who'].forEach(k=>$(k).oninput=e=>{s.plan[k]=e.target.value;});
 }
-function okP(){ if((s.plan.fact||'').trim().length<5||(s.plan.who||'').trim().length<5){toast('กรอกข้อเท็จจริงและผู้ได้รับผลกระทบก่อน สองอย่างนี้คือฐานของการตัดสินใจที่เป็นธรรม');return;} logEv('P','แยกข้อเท็จจริงและระบุผู้มีส่วนได้ส่วนเสีย'); nextStep(); }
+function okP(){ if((s.plan.fact||'').trim().length<5){bad('fact','กรอกข้อเท็จจริงที่ตรวจสอบได้ก่อน นี่คือฐานของการตัดสินใจที่เป็นธรรม');return;}
+  if((s.plan.who||'').trim().length<5){bad('who','ระบุผู้ได้รับผลกระทบก่อน เพราะเป็นเงินของทุกคนในห้อง');return;} logEv('P','แยกข้อเท็จจริงและระบุผู้มีส่วนได้ส่วนเสีย'); nextStep(); }
 
 function stT(){
   const p=s.plan; p.alt=p.alt||[{},{},{}];
@@ -464,7 +525,9 @@ function stO(){
 function pickAlt(i){ if(s.plan.choice!==undefined&&s.plan.choice!==i){s.plan.changed=(s.plan.changed||0)+1;logEv('change','เปลี่ยนทางเลือกเป็นที่ '+(i+1));} s.plan.choice=i; stO(); }
 function okO(){
   if(s.plan.choice===undefined){toast('เลือกทางเลือก 1 ทางก่อน');return;}
-  if((s.plan.why||'').length<10||(s.plan.lose||'').length<5||(s.plan.own||'').length<5){toast('ตอบให้ครบทั้งเหตุผล ผู้เสียประโยชน์ และการรับผิดชอบ นี่คือหัวใจของขั้นนี้');return;}
+  if((s.plan.why||'').length<10){bad('why','เขียนเหตุผลของการเลือก โดยอ้างอิงตัวเลขหรือข้อเท็จจริง');return;}
+  if((s.plan.lose||'').length<5){bad('lose','ระบุผู้ที่อาจเสียประโยชน์ และวิธีดูแลเขา นี่คือหัวใจของความเป็นพลเมืองดี');return;}
+  if((s.plan.own||'').length<5){bad('own','เขียนว่าจะรับผิดชอบอย่างไรถ้าผลออกมาไม่ดี');return;}
   logEv('O','ตัดสินใจและระบุความรับผิดชอบ'); nextStep();
 }
 
@@ -499,7 +562,7 @@ function pickEv(i,j){ const d=s.decisions[i]; if(d.pick!==undefined&&d.pick!==j)
 function okG(){
   const n=Object.values(s.decisions).filter(d=>d.pick!==undefined&&(d.r||'').length>4).length;
   if(n<EVENTS.length){toast('ตอบให้ครบทั้ง '+EVENTS.length+' เหตุการณ์ พร้อมเหตุผลสั้น ๆ');return;}
-  if(!(s.contrib||'').trim()){toast('เขียนสิ่งที่ทำจริงในบทบาทของตัวเอง เพื่อให้ครูให้คะแนนรายบุคคลได้');return;}
+  if(!(s.contrib||'').trim()){bad('contrib','เขียนสิ่งที่ทำจริงในบทบาทของตัวเอง เพื่อให้ครูให้คะแนนรายบุคคลได้');return;}
   logEv('G','ตัดสินใจครบทุกเหตุการณ์ บทบาท: '+s.role); nextStep();
 }
 
@@ -511,7 +574,8 @@ function stR(){
   REFLECT_Q.forEach((q,i)=>$('r'+i).oninput=e=>{s.reflect['q'+i]=e.target.value;});
 }
 function okR(){ const n=REFLECT_Q.filter((q,i)=>(s.reflect['q'+i]||'').trim().length>5).length;
-  if(n<4){toast('ตอบสะท้อนคิดอย่างน้อย 4 ข้อ');return;} logEv('R','สะท้อนคิด '+n+' ข้อ'); nextStep(); }
+  if(n<4){const m=REFLECT_Q.map((q,i)=>i).find(i=>(s.reflect['q'+i]||'').trim().length<=5);
+    bad('r'+m,'ตอบสะท้อนคิดอย่างน้อย 4 ข้อ ตอบแล้ว '+n+' ข้อ');return;} logEv('R','สะท้อนคิด '+n+' ข้อ'); nextStep(); }
 
 function stOpt(){
   $('body').innerHTML=`<div class="card"><div class="eyebrow">O — Optimize</div>
@@ -529,7 +593,7 @@ function stOpt(){
 }
 function setSelf(k,v){ s.self[k]=v; stOpt(); }
 function okOpt(){ if(Object.keys(s.self).length<4){toast('ประเมินตนเองให้ครบทั้ง 4 ด้าน');return;}
-  if((s.fix||'').length<5){toast('เขียนสิ่งที่จะปรับอย่างน้อย 1 อย่าง');return;} logEv('Opt','ประเมินตนเองและระบุสิ่งที่จะปรับ'); nextStep(); }
+  if((s.fix||'').length<5){bad('fix','เขียนสิ่งที่จะปรับอย่างน้อย 1 อย่าง');return;} logEv('Opt','ประเมินตนเองและระบุสิ่งที่จะปรับ'); nextStep(); }
 
 function stW(){
   $('body').innerHTML=`<div class="card"><div class="eyebrow">W — Work for the common good</div>
@@ -542,7 +606,8 @@ function stW(){
   <button class="primary" onclick="okW()">จบภารกิจ · ทำแบบวัดหลัง</button></div></div>`;
   ['w1','w2','w3'].forEach(k=>$(k).oninput=e=>{s.action[k]=e.target.value;});
 }
-function okW(){ if((s.action.w1||'').length<5||(s.action.w2||'').length<5){toast('เขียนข้อตกลงของห้องและสิ่งที่จะลงมือทำเอง');return;}
+function okW(){ if((s.action.w1||'').length<5){bad('w1','เขียนข้อตกลงหรือแนวปฏิบัติที่เสนอให้ห้อง');return;}
+  if((s.action.w2||'').length<5){bad('w2','เขียนสิ่งที่จะลงมือทำเองภายในสัปดาห์นี้');return;}
   logEv('W','เสนอข้อตกลงและแผนลงมือ'); nextStep(); }
 
 function back(){ if(s.step>0){s.step--;renderMission();} }
@@ -660,6 +725,7 @@ async function openTeacher(){
   const sd=a=>{if(a.length<2)return 0;const mu=m(a);return Math.sqrt(a.reduce((x,y)=>x+(y-mu)**2,0)/(a.length-1));};
   const mPre=m(pre),mPost=m(post),growth=mPre?((mPost-mPre)/mPre*100):0;
 
+  const wasAuto=!!_auto;
   $('v-teacher').innerHTML=`
   <div class="card"><div class="eyebrow">Teacher Dashboard · ม.4/4</div>
     <h2>ผลการดำเนินงาน (ข้อมูลสำหรับบทที่ 4)</h2>
@@ -669,6 +735,19 @@ async function openTeacher(){
       <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยหลัง</div><div class="bignum ok">${mPost.toFixed(2)}</div><div class="small muted">SD ${sd(post).toFixed(2)} · +${growth.toFixed(1)}%</div></div>
     </div>
     ${done.length?'':'<div class="notice">ยังไม่มีนักเรียนทำครบทั้งก่อนและหลัง ตัวเลขจะปรากฏเมื่อมีข้อมูลจริง ระบบไม่สร้างข้อมูลสมมติให้</div>'}
+  </div>
+
+  <div class="card"><h2>ความคืบหน้าของห้องตอนนี้</h2>
+    <p class="small muted noprint">ใช้ดูระหว่างคาบว่าใครติดอยู่ขั้นไหน จะได้เดินไปช่วยได้ถูกคน</p>
+    <div class="grid5">${ROSTER.map((n,i)=>{const d=all[i];
+      const st=!d?'ยังไม่เริ่ม':d.done?'ส่งครบแล้ว':d.phase==='pre'?('แบบวัดก่อน ข้อ '+((d.qi||0)+1)):d.phase==='post'?('แบบวัดหลัง ข้อ '+((d.qi||0)+1)):('ขั้น '+STEPS[d.step][0]+' '+STEPS[d.step][1]);
+      const cls=!d?'':d.done?'ok':'go';
+      return `<div class="pcard ${cls}"><div class="n">${n.replace('นาย','')}</div><div class="s">${st}</div></div>`;}).join('')}</div>
+    <div class="row noprint" style="margin-top:12px">
+      <button onclick="openTeacher()">รีเฟรชตอนนี้</button>
+      <label class="small muted" style="display:flex;align-items:center;gap:8px;margin:0">
+        <input type="checkbox" id="autoRef" style="width:auto" onchange="toggleAuto(this.checked)"> รีเฟรชอัตโนมัติทุก 30 วินาที</label>
+    </div>
   </div>
 
   <div class="card"><h2>ตารางคะแนนดิบรายบุคคล</h2>
@@ -710,7 +789,13 @@ async function openTeacher(){
       return w.length?w.map(x=>`<div class="opt"><h4>${esc(x.n)}</h4><p class="small muted">${x.r.join(' · ')}</p></div>`).join('')
       :'<p class="muted small">ยังไม่มีข้อมูลเพียงพอ หรือไม่พบสัญญาณที่ต้องดูแลเร่งด่วน</p>';})()}
     <p class="small muted">เป็นการคัดกรองเบื้องต้นจากร่องรอยในระบบ ครูควรพูดคุยกับนักเรียนก่อนสรุป</p></div>`;
+  if(wasAuto && $('autoRef')) $('autoRef').checked=true;
 }
+
+let _auto=null;
+function toggleAuto(on){ clearInterval(_auto);
+  if(on){ _auto=setInterval(()=>{ if(!$('v-teacher').classList.contains('hide')) openTeacher(); },30000);
+    toast('เปิดรีเฟรชอัตโนมัติแล้ว',1); } }
 
 function exportCSV(){
   const all=window._all||[];
