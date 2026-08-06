@@ -1708,6 +1708,8 @@ async function openQDash(){
     </tbody></table>
   </div>
 
+  ${summaryCard()}
+
   <div class="card"><h2>คำตอบรายบุคคล</h2>
     <table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>เลือก</th><th>เหตุผล</th><th>ครูให้ระดับ</th></tr></thead><tbody>
     ${ROSTER.map((n,i)=>{const d=rows[i];
@@ -1735,7 +1737,9 @@ async function openQDash(){
       <p class="small"><b>${esc(QDEF.reflect[1]||'')}</b><br>${esc(d.r1||'—')}</p></div>`).join('')
       :'<p class="muted small">ยังไม่มีนักเรียนส่งคำตอบ</p>'}
   </div>`;
+  afterQDash();
 }
+function afterQDash(){ try{ mountSuggest(); }catch(e){} }
 async function qSetLevel(i,v){
   const rows=window._q||[]; const d=rows[i]; if(!d) return;
   d.teacher=d.teacher||{}; d.teacher.level=v;
@@ -2086,6 +2090,139 @@ function pickInterviewSample(){
   window._sample=sample.map(x=>x.i);
   toast('เลือกนักเรียน '+sample.length+' คนสำหรับสัมภาษณ์แล้ว');
   openTeacher();
+}
+
+
+/* ============ AI สรุปภาพรวมห้อง และแนะนำสิ่งที่ครูควรเสริม ============
+   ใช้หลังจบกิจกรรม เพื่อให้ครูพูดสรุปกับนักเรียนได้ทันทีในคาบ
+   AI เสนอประเด็น ครูเป็นผู้เลือกว่าจะเสริมเรื่องใด และเพิ่มเติมเองได้
+   ===================================================================== */
+
+/* รวบรวมข้อมูลดิบของห้องเพื่อส่งให้ AI วิเคราะห์ */
+function classDigestQuick(rows){
+  const done=rows.filter(x=>x&&x.done);
+  const counts=QDEF.options.map((o,j)=>done.filter(d=>d.pick===j).length);
+  const lvAvg=done.length?(done.reduce((a,d)=>a+(QDEF.options[d.pick]?.level||0),0)/done.length):0;
+  return {
+    n:done.length, total:ROSTER.length, counts, lvAvg,
+    topic:QDEF.topic, situation:QDEF.situation,
+    options:QDEF.options.map((o,j)=>`ระดับ ${o.level}: ${o.t} (เลือก ${counts[j]} คน)`),
+    reasons:done.map(d=>d.reason).filter(x=>x),
+    reflects:done.map(d=>[d.r0,d.r1].filter(x=>x).join(' / ')).filter(x=>x)
+  };
+}
+
+/* สรุปสำรองเมื่อ AI ไม่พร้อม คำนวณจากข้อมูลจริงล้วน */
+function fallbackSummary(g){
+  const maxIdx=g.counts.indexOf(Math.max(...g.counts));
+  const lowCount=g.counts[0]+g.counts[1];
+  const pts=[];
+  pts.push(`นักเรียนตอบแล้ว ${g.n} คน จาก ${g.total} คน ระดับเฉลี่ยจากตัวเลือกอยู่ที่ ${g.lvAvg.toFixed(2)} จาก 4`);
+  pts.push(`ทางเลือกที่นักเรียนเลือกมากที่สุดคือ ${QDEF.options[maxIdx]?.t||'-'} จำนวน ${g.counts[maxIdx]} คน`);
+  if(lowCount>g.n/2) pts.push(`นักเรียนมากกว่าครึ่งห้องเลือกทางเลือกระดับ 1 ถึง 2 แสดงว่ายังตัดสินใจจากความรู้สึกหรือทำตามกลุ่มเป็นหลัก`);
+  else pts.push(`นักเรียนส่วนใหญ่เลือกทางเลือกระดับ 3 ถึง 4 แสดงว่าเริ่มคำนึงถึงข้อมูลและผู้ได้รับผลกระทบ`);
+  const shortReasons=g.reasons.filter(r=>r.length<25).length;
+  if(shortReasons>g.n/3) pts.push(`มีนักเรียน ${shortReasons} คนที่เขียนเหตุผลสั้นมาก ควรฝึกการอธิบายเหตุผลด้วยข้อมูล`);
+  const suggest=[
+    'ชวนนักเรียนพูดถึงผู้ที่ไม่ได้ประโยชน์จากทางเลือกที่ห้องเลือกมากที่สุด',
+    'ถามนักเรียนว่าใช้ข้อมูลอะไรตัดสินใจ และข้อมูลนั้นตรวจสอบได้จากไหน',
+    'ให้นักเรียนที่เลือกต่างจากเสียงส่วนใหญ่ได้อธิบายเหตุผลของตนเอง',
+    'สรุปว่าเมื่อไม่มีใครเห็น การตัดสินใจของเราควรเปลี่ยนหรือไม่ เพราะอะไร'
+  ];
+  return {points:pts, suggest, byAI:false};
+}
+
+/* เรียก AI ให้สรุปและเสนอประเด็นที่ครูควรเสริม */
+async function aiSummarizeQuick(){
+  const rows=window._q||[];
+  const g=classDigestQuick(rows);
+  if(!g.n){ toast('ยังไม่มีนักเรียนส่งคำตอบ'); return; }
+  const btn=$('aiSumBtn'); if(btn){btn.disabled=true;btn.textContent='กำลังวิเคราะห์…';}
+  const sys=`คุณเป็นผู้ช่วยครูไทย วิเคราะห์ผลการตอบของนักเรียนทั้งห้องหลังทำภารกิจสถานการณ์ในคาบโฮมรูม
+ตอบกลับเป็น JSON เท่านั้น ห้ามมีข้อความอื่นนอก JSON ห้ามใส่ markdown
+โครงสร้าง {"points":["ข้อสังเกต 3-4 ข้อ"],"suggest":["ประเด็นที่ครูควรเสริม 3-4 ข้อ"]}
+กฎ
+1 points ต้องอ้างอิงตัวเลขและคำตอบจริงที่ให้มาเท่านั้น ห้ามเดาสิ่งที่ไม่มีในข้อมูล
+2 suggest ต้องเป็นประเด็นที่ครูพูดเสริมได้ในเวลา 5 นาที เขียนเป็นประโยคสั่งการสั้น ๆ ที่ครูอ่านแล้วทำตามได้ทันที
+3 ห้ามระบุชื่อนักเรียน ห้ามตัดสินว่านักเรียนคนใดดีหรือไม่ดี ห้ามบอกว่าคำตอบใดถูกหรือผิด
+4 ภาษาไทยกระชับ แต่ละข้อไม่เกิน 2 บรรทัด`;
+  const prompt=`หัวข้อภารกิจ: ${g.topic}
+สถานการณ์: ${g.situation}
+จำนวนที่ตอบ: ${g.n} จาก ${g.total} คน
+ระดับเฉลี่ยจากตัวเลือก: ${g.lvAvg.toFixed(2)} จาก 4
+การกระจายของตัวเลือก:
+${g.options.join('\n')}
+ตัวอย่างเหตุผลที่นักเรียนเขียน:
+${g.reasons.slice(0,15).map((r,i)=>(i+1)+'. '+r).join('\n')}
+ตัวอย่างการสะท้อนคิด:
+${g.reflects.slice(0,10).map((r,i)=>(i+1)+'. '+r).join('\n')}`;
+  let res=null;
+  try{
+    const j=await apiCall({action:'coach',system:sys,prompt});
+    let txt=(j.reply||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    const s=txt.indexOf('{'), e=txt.lastIndexOf('}');
+    if(s>=0&&e>s) txt=txt.slice(s,e+1);
+    const o=JSON.parse(txt);
+    if(Array.isArray(o.points)&&Array.isArray(o.suggest)&&o.points.length&&o.suggest.length)
+      res={points:o.points.map(String),suggest:o.suggest.map(String),byAI:true};
+  }catch(e){ res=null; }
+  if(!res){ res=fallbackSummary(g); toast('AI ไม่พร้อมใช้งาน ระบบสรุปจากข้อมูลจริงในระบบแทน'); }
+  QDEF.summary=res; QDEF.summary.at=Date.now();
+  LS.set(qDefKey(QCODE),JSON.stringify(QDEF));
+  queueRemote(qDefKey(QCODE),'ภารกิจด่วน '+QDEF.topic,JSON.stringify(QDEF));
+  flushRemote(true);
+  if(btn){btn.disabled=false;btn.textContent='ให้ AI สรุปใหม่';}
+  openQDash();
+}
+
+/* กล่องแสดงผลสรุปสำหรับครูใช้พูดหน้าห้อง */
+function summaryCard(){
+  const s=QDEF && QDEF.summary;
+  if(!s) return `<div class="card"><h2>สรุปภาพรวมสำหรับครูพูดหน้าห้อง</h2>
+    <p class="small muted">กดปุ่มด้านล่างเพื่อให้ระบบวิเคราะห์คำตอบทั้งห้อง แล้วเสนอประเด็นที่ครูควรพูดเสริม ใช้เวลาไม่เกิน 1 นาที</p>
+    <div class="row noprint"><button class="primary" id="aiSumBtn" onclick="aiSummarizeQuick()">วิเคราะห์ภาพรวมห้อง</button></div></div>`;
+  return `<div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">สรุปภาพรวมสำหรับครูพูดหน้าห้อง</h2>
+      <span class="pill">${s.byAI?'วิเคราะห์โดย AI':'สรุปจากข้อมูลในระบบ'}</span></div>
+    <p class="small muted">วิเคราะห์เมื่อ ${fmtDT(s.at)} · ครูเป็นผู้เลือกว่าจะพูดประเด็นใด และเพิ่มประเด็นของตนเองได้</p>
+
+    <h3 style="font-size:15px;margin-top:14px">ห้องนี้คิดอย่างไรกับเรื่องนี้</h3>
+    <ol style="margin:6px 0 0 18px">${s.points.map(x=>`<li class="small" style="margin-bottom:4px">${esc(x)}</li>`).join('')}</ol>
+
+    <h3 style="font-size:15px;margin-top:16px">ประเด็นที่ควรพูดเสริม</h3>
+    <div id="sugList"></div>
+
+    <label for="ownNote" style="margin-top:12px">ประเด็นที่ครูต้องการเสริมเพิ่มเติมเอง</label>
+    <textarea id="ownNote" placeholder="เช่น ต้องการเชื่อมโยงกับเหตุการณ์ที่เพิ่งเกิดในโรงเรียน">${esc((QDEF.summary.ownNote)||'')}</textarea>
+
+    <div class="row noprint" style="margin-top:12px">
+      <button class="primary" onclick="saveSummaryNote()">บันทึกสิ่งที่ครูเสริม</button>
+      <button id="aiSumBtn" onclick="aiSummarizeQuick()">ให้ AI สรุปใหม่</button>
+      <button onclick="window.print()">พิมพ์เป็นหลักฐาน</button>
+    </div>
+    <div class="notice good" style="margin-top:12px"><span class="small">ระบบเสนอประเด็นจากคำตอบจริงของนักเรียนเท่านั้น ไม่ได้ตัดสินว่าคำตอบใดถูกหรือผิด และไม่ระบุชื่อนักเรียน ครูเป็นผู้ตัดสินใจว่าจะเสริมเรื่องใดในคาบ</span></div>
+  </div>`;
+}
+function mountSuggest(){
+  const box=$('sugList'); if(!box||!QDEF.summary) return;
+  const s=QDEF.summary; s.picked=s.picked||[];
+  box.innerHTML=s.suggest.map((x,i)=>
+    `<div class="opt ${s.picked.includes(i)?'sel':''}" onclick="toggleSuggest(${i})">
+      <span class="small">${esc(x)}</span></div>`).join('');
+  const el=$('ownNote'); if(el) el.oninput=e=>{QDEF.summary.ownNote=e.target.value;};
+}
+function toggleSuggest(i){
+  const s=QDEF.summary; s.picked=s.picked||[];
+  const k=s.picked.indexOf(i);
+  if(k>=0) s.picked.splice(k,1); else s.picked.push(i);
+  mountSuggest();
+}
+async function saveSummaryNote(){
+  LS.set(qDefKey(QCODE),JSON.stringify(QDEF));
+  queueRemote(qDefKey(QCODE),'ภารกิจด่วน '+QDEF.topic,JSON.stringify(QDEF));
+  const ok=await flushRemote(true);
+  toast(ok?'บันทึกแล้ว ใช้เป็นหลักฐานการสะท้อนผลกับนักเรียนได้':'บันทึกในเครื่องแล้ว',ok);
 }
 
 /* ---------- boot ---------- */
