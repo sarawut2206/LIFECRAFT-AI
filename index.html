@@ -145,11 +145,11 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
     <p class="muted" style="max-width:62ch">แต่ละสัปดาห์คือภารกิจสถานการณ์ 1 เรื่อง ใช้เครื่องมือวัดชุดเดียวกันทุกภารกิจ เพื่อติดตามพัฒนาการต่อเนื่องรายเดือนและรายภาคเรียน ไม่ใช่ภารกิจเดียวจบ</p>
     <div id="resumeBox" style="margin-top:14px"></div>
     <div class="row" style="margin-top:16px">
-      <button onclick="openTeacher()">ครู · Dashboard และผลก่อน–หลัง</button>
-      <button onclick="go('semester');renderSemester()">ภาพรวมภาคเรียน</button>
-      <button onclick="openQuick()">ภารกิจด่วนรายวัน (ครู)</button>
-      <button onclick="qStart()">ทำภารกิจด่วน (นักเรียน)</button>
-      <button onclick="openSetup()">ตั้งค่าห้องเรียน / คลังภารกิจ</button>
+      <button class="primary" onclick="qStart()">นักเรียน · ทำภารกิจด่วน</button>
+      <button onclick="needTeacher(openTeacher)">ครู · Dashboard และผลก่อน–หลัง</button>
+      <button onclick="needTeacher(()=>{go('semester');renderSemester();})">ภาพรวมภาคเรียน</button>
+      <button onclick="needTeacher(openQuick)">ภารกิจด่วนรายวัน (ครู)</button>
+      <button onclick="needTeacher(openSetup)">ตั้งค่าห้องเรียน / คลังภารกิจ</button>
       <button onclick="openResearch()">ฐานงานวิจัยอ้างอิง</button>
     </div>
   </div>
@@ -184,6 +184,8 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 <section id="v-qdash" class="hide"></section>
 <section id="v-setup2" class="hide"></section>
 <section id="v-interview" class="hide"></section>
+<section id="v-lock" class="hide"></section>
+<section id="v-share" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -438,18 +440,22 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   if(v==='home') renderMissionList();}
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
 function renderMissionList(){
   const el=$('missionList'); if(!el) return;
   el.innerHTML = MISSIONS.map(m=>`
-    <div class="opt" style="cursor:${m.enabled?'pointer':'default'}" ${m.enabled?`onclick="enterMission(${m.id})"`:''}>
+    <div class="opt" style="cursor:default">
       <div class="row" style="justify-content:space-between;align-items:flex-start">
         <h4 style="margin:0">สัปดาห์ ${m.week} · ${m.title}</h4>
         <span class="pill">${m.enabled?'พร้อมใช้งาน':'อยู่ระหว่างเตรียมการ'}</span></div>
-      <p class="small muted" style="margin:4px 0 0">${m.theme}</p></div>`).join('');
+      <p class="small muted" style="margin:4px 0 6px">${m.theme}</p>
+      ${m.enabled?`<div class="row">
+        <button class="small primary" onclick="enterMission(${m.id})">เข้าทำภารกิจ</button>
+        <button class="small" onclick="openShare('week',${m.id},'สัปดาห์ ${m.week} · ${esc(m.title)}')">สร้างลิงก์ให้นักเรียน</button>
+      </div>`:''}</div>`).join('');
 }
 async function renderSemester(){
   $('v-semester').innerHTML=`<div class="card"><h2>กำลังตรวจสอบข้อมูล...</h2></div>`;
@@ -1268,7 +1274,8 @@ async function openTeacher(){
     <p class="muted small">${mi.theme}</p>
     <div class="row noprint" style="margin-top:10px">
       ${MISSIONS.filter(m=>m.enabled).map(m=>`<button class="${m.id===curMission?'primary':''}" onclick="curMission=${m.id};openTeacher()">สัปดาห์ ${m.week} · ${m.title}</button>`).join('')}
-      <button onclick="go('semester');renderSemester()">ภาพรวมภาคเรียน</button>
+      <button onclick="needTeacher(()=>{go('semester');renderSemester();})">ภาพรวมภาคเรียน</button>
+      <button onclick="lockTeacher()">ออกจากหน้าครู</button>
     </div>
     <h3 style="margin-top:16px;font-size:15px">ผลการดำเนินงาน (ข้อมูลสำหรับบทที่ 4)</h3>
     <div class="grid3">
@@ -1598,7 +1605,7 @@ async function qApprove(){
   queueRemote(qDefKey(QCODE),'ภารกิจด่วน '+QDEF.topic,JSON.stringify(QDEF));
   await flushRemote(true);
   toast('เปิดใช้ภารกิจด่วนแล้ว รหัส '+QCODE,1);
-  openQDash();
+  openShare('quick',QCODE,QDEF.topic);
 }
 
 /* ---------- หน้านักเรียนทำภารกิจด่วน ---------- */
@@ -1694,6 +1701,7 @@ async function openQDash(){
     </div>
     <div class="row noprint" style="margin-top:12px">
       <button onclick="openQDash()">รีเฟรช</button>
+      <button class="primary" onclick="openShare('quick',QCODE,esc(QDEF.topic))">สร้างลิงก์ให้นักเรียน</button>
       <button onclick="qExport()">ส่งออก CSV</button>
       <button onclick="window.print()">พิมพ์รายงาน</button>
       <button onclick="openQuick()">สร้างภารกิจด่วนใหม่</button>
@@ -2225,6 +2233,121 @@ async function saveSummaryNote(){
   toast(ok?'บันทึกแล้ว ใช้เป็นหลักฐานการสะท้อนผลกับนักเรียนได้':'บันทึกในเครื่องแล้ว',ok);
 }
 
+
+/* ================= ระบบรหัสเข้าหน้าครู และลิงก์ภารกิจสำหรับนักเรียน =================
+   1. หน้าฝั่งครูต้องใส่รหัสก่อนเข้า ป้องกันนักเรียนกดเข้าโดยไม่ตั้งใจ
+   2. สร้างลิงก์และ QR ให้นักเรียนเข้าภารกิจได้ตรง ไม่ต้องผ่านหน้าครู
+   =============================================================================== */
+const TEACHER_PIN='SaM2569';
+let teacherUnlocked=false;
+try{ if(sessionStorage.getItem('lc:tok')==='1') teacherUnlocked=true; }catch(e){}
+
+/* ประตูตรวจรหัส เรียกก่อนเข้าทุกหน้าฝั่งครู */
+function needTeacher(fn){
+  if(teacherUnlocked){ fn(); return; }
+  window._afterUnlock=fn;
+  go('lock'); renderLock();
+}
+function renderLock(){
+  $('v-lock').innerHTML=`
+  <div class="card" style="max-width:460px;margin:40px auto">
+    <div class="eyebrow">สำหรับครูผู้สอน</div>
+    <h2>ใส่รหัสเพื่อเข้าหน้าครู</h2>
+    <p class="muted small">ส่วนนี้แสดงคะแนนและข้อมูลของนักเรียนทั้งห้อง จึงจำกัดเฉพาะครูผู้สอน หากนักเรียนกดเข้ามาโดยไม่ตั้งใจ ให้กดปุ่มกลับหน้าแรกด้านล่าง</p>
+    <label for="pinIn">รหัสผ่าน</label>
+    <input type="password" id="pinIn" placeholder="กรอกรหัสผ่าน" onkeydown="if(event.key==='Enter')checkPin()">
+    <div class="row" style="margin-top:14px">
+      <button class="primary" onclick="checkPin()">เข้าสู่หน้าครู</button>
+      <button onclick="go('home')">กลับหน้าแรก</button>
+    </div>
+    <p class="small muted" style="margin-top:12px">การป้องกันนี้เป็นระดับการใช้งานในชั้นเรียน เพื่อกันการกดเข้าโดยไม่ตั้งใจ ไม่ใช่ระบบความปลอดภัยระดับสูง</p>
+  </div>`;
+  setTimeout(()=>{const e=$('pinIn'); if(e) e.focus();},100);
+}
+function checkPin(){
+  const v=($('pinIn')||{}).value||'';
+  if(v.trim()!==TEACHER_PIN){ bad('pinIn','รหัสไม่ถูกต้อง กรุณาลองใหม่'); return; }
+  teacherUnlocked=true;
+  try{ sessionStorage.setItem('lc:tok','1'); }catch(e){}
+  toast('เข้าสู่หน้าครูแล้ว',1);
+  const fn=window._afterUnlock||(()=>openTeacher());
+  window._afterUnlock=null; fn();
+}
+function lockTeacher(){
+  teacherUnlocked=false;
+  try{ sessionStorage.removeItem('lc:tok'); }catch(e){}
+  toast('ออกจากหน้าครูแล้ว',1); go('home'); renderMissionList();
+}
+
+/* ---------- สร้างลิงก์ภารกิจสำหรับนักเรียน ---------- */
+function baseURL(){
+  const u=location.href.split('#')[0].split('?')[0];
+  return u;
+}
+function missionLink(kind,id){
+  return baseURL()+'?m='+encodeURIComponent(kind)+'&id='+encodeURIComponent(id);
+}
+function openShare(kind,id,title){
+  window._share={kind,id,title};
+  go('share'); renderShare();
+}
+function renderShare(){
+  const s=window._share; const url=missionLink(s.kind,s.id);
+  const qr='https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+encodeURIComponent(url);
+  $('v-share').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">ลิงก์สำหรับนักเรียน</div>
+    <h1>${esc(s.title)}</h1>
+    <p class="muted small">ให้นักเรียนสแกน QR หรือเปิดลิงก์ด้านล่าง ระบบจะพาเข้าภารกิจนี้โดยตรง ไม่ผ่านหน้าครู</p>
+    <div style="text-align:center;margin:18px 0">
+      <img src="${qr}" alt="QR code สำหรับเข้าภารกิจ" style="width:260px;height:260px;border:1px solid var(--line);border-radius:12px;background:#fff"
+        onerror="this.style.display='none';document.getElementById('qrFail').style.display='block'">
+      <div id="qrFail" style="display:none" class="notice">แสดง QR ไม่ได้เพราะไม่มีอินเทอร์เน็ต ให้ใช้วิธีคัดลอกลิงก์ด้านล่างแทน</div>
+    </div>
+    <label for="linkBox">ลิงก์ภารกิจ</label>
+    <input id="linkBox" value="${esc(url)}" readonly onclick="this.select()">
+    <div class="row" style="margin-top:12px">
+      <button class="primary" onclick="copyLink()">คัดลอกลิงก์</button>
+      <button onclick="window.print()">พิมพ์ QR</button>
+      <button onclick="openTeacher()">ไปหน้าติดตามผล</button>
+      <button onclick="go('home')">กลับหน้าแรก</button>
+    </div>
+    <div class="notice good" style="margin-top:14px">
+      <b>วิธีใช้ในคาบ</b><br>
+      <span class="small">1) เปิดหน้านี้บนจอโปรเจกเตอร์ให้นักเรียนสแกนพร้อมกัน หรือส่งลิงก์เข้ากลุ่มไลน์ห้อง<br>
+      2) นักเรียนเลือกชื่อตนเองแล้วทำภารกิจได้ทันที<br>
+      3) ครูกดปุ่มไปหน้าติดตามผล เพื่อดูว่าใครส่งแล้วกี่คนแบบเรียลไทม์</span>
+    </div>
+  </div>`;
+}
+function copyLink(){
+  const el=$('linkBox'); if(!el) return;
+  el.select();
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(el.value).then(()=>toast('คัดลอกลิงก์แล้ว ส่งให้นักเรียนได้เลย',1),()=>document.execCommand('copy'));
+    }else{ document.execCommand('copy'); toast('คัดลอกลิงก์แล้ว',1); }
+  }catch(e){ toast('คัดลอกไม่สำเร็จ ให้กดค้างที่ช่องลิงก์แล้วเลือกคัดลอก'); }
+}
+
+/* ---------- เปิดภารกิจจากลิงก์ที่นักเรียนได้รับ ---------- */
+async function routeFromURL(){
+  const q=new URLSearchParams(location.search);
+  const kind=q.get('m'), id=q.get('id');
+  if(!kind) return false;
+  if(kind==='week'){
+    const mid=parseInt(id);
+    if(isNaN(mid)||!MISSIONS[mid]||!MISSIONS[mid].enabled) return false;
+    curMission=mid; go('pick'); renderPick(); return true;
+  }
+  if(kind==='quick'){
+    const raw=await S.get(qDefKey(id),true);
+    if(!raw){ toast('ไม่พบภารกิจนี้ ให้ครูเปิดภารกิจก่อน'); return false; }
+    QDEF=JSON.parse(raw); QCODE=id; go('qstudent'); renderQPick(); return true;
+  }
+  return false;
+}
+
 /* ---------- boot ---------- */
 async function checkResume(){
   const lastRaw=await S.get('lc:last',false); if(lastRaw===null)return;
@@ -2236,6 +2359,7 @@ async function checkResume(){
     <button class="small" style="margin-left:10px" onclick="curMission=${lastMid};startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
 }
 loadImportedMissions();
+routeFromURL();
 const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
 renderMissionList(); renderPick(); checkResume();
 </script>
