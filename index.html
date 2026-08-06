@@ -144,6 +144,52 @@ body.hc .muted,body.hc .small.muted{color:#2b2b2b}
 /* ---- printable paper worksheet ---- */
 .paperbox p{margin:0 0 .3em}.paperbox h3{margin:12px 0 4px}
 @media print{.pitem{break-inside:avoid}.paperbox .card{break-inside:auto}}
+/* ---- home redesign: hero + role zones ---- */
+.hero{background:linear-gradient(135deg,#0A7A6C 0%,#086559 60%,#075E54 100%);
+  border:none;color:#fff;box-shadow:0 10px 30px #0a7a6c33;overflow:hidden;position:relative}
+body.hc .hero{background:#062f2a;border:2px solid #000}
+body.hc .hero .eyebrow,body.hc .hero .lead,body.hc .herostat .s span{color:#fff}
+.hero::after{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;
+  border-radius:50%;background:radial-gradient(circle,#ffffff22,transparent 70%)}
+.hero .eyebrow{color:#E8FBF5}
+.hero h1{color:#fff;margin-bottom:.2em}
+.hero .lead{color:#EAFBF5;max-width:60ch}
+.hero .accent{color:#FFE08A}
+.herostat{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.herostat .s{background:#ffffff1a;border:1px solid #ffffff33;border-radius:12px;padding:8px 14px;backdrop-filter:blur(2px)}
+.herostat .s b{font-family:var(--display);font-size:19px;display:block;line-height:1.1}
+.herostat .s span{font-size:11px;color:#EAFBF5}
+.zone .zh{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.zone .ic{width:38px;height:38px;border-radius:11px;display:inline-flex;align-items:center;
+  justify-content:center;font-size:20px;flex:0 0 38px}
+.zone-student .ic{background:#E7F7F1;color:var(--teal-d)}
+.zone-teacher .ic{background:#F1F0FC;color:var(--violet)}
+.zone .zh h2{margin:0;font-size:19px}
+.btncol{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.mbtn{width:100%;text-align:left;display:flex;align-items:center;gap:10px;padding:12px 14px}
+.mbtn .mi{font-size:17px;width:22px;text-align:center;flex:0 0 22px}
+.mbtn .mt{flex:1}.mbtn .mt small{display:block;font-size:11.5px;color:var(--muted);font-weight:400;margin-top:1px}
+.mbtn:hover .mt small{color:var(--teal-d)}
+/* ---- innovation model diagram ---- */
+.modelmap{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+@media(max-width:760px){.modelmap{grid-template-columns:1fr 1fr}}
+@media(max-width:440px){.modelmap{grid-template-columns:1fr}}
+.mstage{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--soft)}
+.mstage .tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-d)}
+.mstage h4{margin:3px 0 6px;font-size:15px}
+.mstage ul{margin:0;padding-left:16px}.mstage li{font-size:12.5px;margin-bottom:3px;color:var(--muted)}
+.mstage.st-in{border-top:3px solid var(--gold)}
+.mstage.st-pr{border-top:3px solid var(--teal)}
+.mstage.st-ou{border-top:3px solid var(--mint)}
+.mstage.st-oc{border-top:3px solid var(--violet)}
+/* ---- demo mode banner ---- */
+#demoBar{background:#FFF4D6;border:1px solid var(--amber);border-left:4px solid var(--gold);
+  border-radius:10px;padding:9px 14px;margin:0 0 14px;font-size:13px;color:#6B4A00;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#demoBar b{font-family:var(--display)}
+#demoBar .sp{flex:1}
+body.hc #demoBar{background:#fff;border-color:#000;color:#000}
+@media print{#demoBar{background:#fff;border:2px solid #000;color:#000}}
 </style>
 
 <div class="wrap">
@@ -162,29 +208,58 @@ body.hc .muted,body.hc .small.muted{color:#2b2b2b}
   <button class="ghost small" onclick="retryNow()">ส่งข้อมูลซ้ำ</button>
   <button class="ghost small" onclick="go('home')">หน้าแรก</button>
 </header>
+<div id="demoBar" class="hide"></div>
 
 <section id="v-home">
-  <div class="card">
-    <div class="eyebrow">Life Competency UP TO GROW</div>
-    <h1>ชุดภารกิจตลอดภาคเรียน<br>เพื่อพัฒนาทักษะชีวิตและความเป็นพลเมืองดี</h1>
-    <p class="muted" style="max-width:62ch">แต่ละสัปดาห์คือภารกิจสถานการณ์ 1 เรื่อง ใช้เครื่องมือวัดชุดเดียวกันทุกภารกิจ เพื่อติดตามพัฒนาการต่อเนื่องรายเดือนและรายภาคเรียน ไม่ใช่ภารกิจเดียวจบ</p>
-    <div id="resumeBox" style="margin-top:14px"></div>
-    <div class="row" style="margin-top:16px">
-      <button class="primary" onclick="qStart()">นักเรียน · ทำภารกิจด่วน</button>
-      <button onclick="needTeacher(openTeacher)">ครู · Dashboard และผลก่อน–หลัง</button>
-      <button onclick="needTeacher(()=>{go('semester');renderSemester();})">ภาพรวมภาคเรียน</button>
-      <button onclick="needTeacher(openQuick)">ภารกิจด่วนรายวัน (ครู)</button>
-      <button onclick="needTeacher(openBatch)">โหมดไม่มีมือถือ · ครูกรอกแทน</button>
-      <button onclick="needTeacher(openPaper)">พิมพ์ใบงาน / แบบวัด (กระดาษ)</button>
-      <button onclick="needTeacher(openSetup)">ตั้งค่าห้องเรียน / คลังภารกิจ</button>
-      <button onclick="openResearch()">ฐานงานวิจัยอ้างอิง</button>
+  <div class="card hero">
+    <div class="eyebrow">นวัตกรรมพัฒนาทักษะชีวิตและความเป็นพลเมืองดี</div>
+    <h1>Life Competency <span class="accent">UP TO GROW</span></h1>
+    <p class="lead">ชุดภารกิจสถานการณ์ตลอดภาคเรียน วัดพัฒนาการ<b>ก่อน–หลัง</b>ด้วยเครื่องมือชุดเดียวกันทุกภารกิจ ผ่านกระบวนการ UP TO GROW 8 ขั้น โดยมี AI เป็นโค้ชตั้งคำถาม และครูเป็นผู้ตัดสินระดับสมรรถนะเสมอ</p>
+    <div class="herostat">
+      <div class="s"><b>8 ขั้น</b><span>กระบวนการ UP TO GROW</span></div>
+      <div class="s"><b>ก่อน–หลัง</b><span>วัดพัฒนาการจริง</span></div>
+      <div class="s"><b>28</b><span>งานวิจัยอ้างอิง</span></div>
+      <div class="s"><b>ครูตัดสิน</b><span>Human-in-the-loop</span></div>
+    </div>
+    <div id="resumeBox" style="margin-top:16px"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card zone zone-student">
+      <div class="zh"><span class="ic">🎒</span><h2>สำหรับนักเรียน</h2></div>
+      <p class="small muted" style="margin:2px 0 0">เลือกภารกิจของสัปดาห์นี้ แล้วเริ่มได้ทันที ระบบจะจำที่ค้างไว้ให้</p>
+      <div class="btncol">
+        <button class="primary mbtn" onclick="scrollToMissions()"><span class="mi">▶</span><span class="mt">เริ่มทำภารกิจประจำสัปดาห์<small>เลือกจากรายการภารกิจด้านล่าง</small></span></button>
+        <button class="mbtn" onclick="qStart()"><span class="mi">⚡</span><span class="mt">ทำภารกิจด่วนที่ครูเปิดไว้<small>สำหรับสถานการณ์เร่งด่วนในคาบ</small></span></button>
+      </div>
+    </div>
+    <div class="card zone zone-teacher">
+      <div class="zh"><span class="ic">🧑‍🏫</span><h2>สำหรับครู</h2></div>
+      <p class="small muted" style="margin:2px 0 0">ติดตามผล ประเมิน และจัดการห้องเรียน (มีรหัสป้องกัน)</p>
+      <div class="btncol">
+        <button class="mbtn" onclick="needTeacher(openTeacher)"><span class="mi">📊</span><span class="mt">Dashboard และผลก่อน–หลัง<small>กราฟ ตารางคะแนน ส่งออก CSV</small></span></button>
+        <button class="mbtn" onclick="needTeacher(openQuick)"><span class="mi">⚡</span><span class="mt">สร้างภารกิจด่วนรายวัน<small>AI ร่างสถานการณ์ ครูอนุมัติ</small></span></button>
+        <button class="mbtn" onclick="needTeacher(openBatch)"><span class="mi">📝</span><span class="mt">โหมดไม่มีมือถือ · กรอกแทน<small>ครูกรอกคะแนนจากใบงานกระดาษ</small></span></button>
+        <button class="mbtn" onclick="needTeacher(openMoreTeacher)"><span class="mi">⋯</span><span class="mt">เครื่องมือครูเพิ่มเติม<small>ภาพรวมภาคเรียน · พิมพ์ใบงาน · ตั้งค่า</small></span></button>
+      </div>
     </div>
   </div>
 
   <div class="card">
-    <h2>เลือกภารกิจ</h2>
-    <p class="small muted">แตะภารกิจที่พร้อมใช้งานเพื่อเริ่ม ภารกิจที่ยังไม่เปิดใช้จะแสดงเป็นแผนในภาพรวมภาคเรียน</p>
-    <div id="missionList"></div>
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><h2 style="margin:0">เลือกภารกิจ</h2>
+        <p class="small muted" style="margin:4px 0 0">แตะภารกิจที่พร้อมใช้งานเพื่อเริ่ม ภารกิจที่ยังไม่เปิดใช้จะแสดงเป็นแผนในภาพรวมภาคเรียน</p></div>
+    </div>
+    <div id="missionList" style="margin-top:12px"></div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(180deg,#F1F0FC 0%,var(--panel) 60%)">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div><div class="eyebrow" style="color:var(--violet)">โครงสร้างนวัตกรรมเชิงระบบ</div>
+        <h2 style="margin:0">Input → Process → Output → Outcome</h2>
+        <p class="small muted" style="margin:6px 0 0;max-width:60ch">แบบจำลองการทำงานของนวัตกรรมพร้อมกลไก Feedback Loop เชื่อมทุกองค์ประกอบเข้ากับฐานงานวิจัย เหมาะสำหรับอ้างอิงในรายงานบทที่ 3</p></div>
+      <button class="primary" onclick="openModel()">ดูแผนภาพระบบ</button>
+    </div>
   </div>
 
   <div class="grid3">
@@ -215,6 +290,11 @@ body.hc .muted,body.hc .small.muted{color:#2b2b2b}
 <section id="v-share" class="hide"></section>
 <section id="v-batch" class="hide"></section>
 <section id="v-paper" class="hide"></section>
+<section id="v-model" class="hide"></section>
+<section id="v-more" class="hide"></section>
+<section id="v-stats" class="hide"></section>
+<section id="v-ioc" class="hide"></section>
+<section id="v-plan" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -472,21 +552,22 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
+  paintDemoBar();
   if(v==='home') renderMissionList();}
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
 function renderMissionList(){
   const el=$('missionList'); if(!el) return;
   el.innerHTML = MISSIONS.map(m=>`
-    <div class="opt" style="cursor:default">
+    <div class="opt" style="cursor:default;${m.enabled?'':'opacity:.7'}">
       <div class="row" style="justify-content:space-between;align-items:flex-start">
-        <h4 style="margin:0">สัปดาห์ ${m.week} · ${m.title}</h4>
-        <span class="pill">${m.enabled?'พร้อมใช้งาน':'อยู่ระหว่างเตรียมการ'}</span></div>
+        <h4 style="margin:0">${m.enabled?'🎯':'🔒'} สัปดาห์ ${m.week} · ${m.title}</h4>
+        <span class="pill" style="${m.enabled?'color:var(--teal-d);border-color:var(--teal)':''}">${m.enabled?'พร้อมใช้งาน':'อยู่ระหว่างเตรียมการ'}</span></div>
       <p class="small muted" style="margin:4px 0 6px">${m.theme}</p>
       ${m.enabled?`<div class="row">
         <button class="small primary" onclick="enterMission(${m.id})">เข้าทำภารกิจ</button>
-        <button class="small" onclick="openShare('week',${m.id},'สัปดาห์ ${m.week} · ${esc(m.title)}')">สร้างลิงก์ให้นักเรียน</button>
+        <button class="small noprint" onclick="openShare('week',${m.id},'สัปดาห์ ${m.week} · ${esc(m.title)}')">สร้างลิงก์ / QR ให้นักเรียน</button>
       </div>`:''}</div>`).join('');
 }
 async function renderSemester(){
@@ -1308,7 +1389,8 @@ async function openTeacher(){
       ${MISSIONS.filter(m=>m.enabled).map(m=>`<button class="${m.id===curMission?'primary':''}" onclick="curMission=${m.id};openTeacher()">สัปดาห์ ${m.week} · ${m.title}</button>`).join('')}
       <button onclick="needTeacher(()=>{go('semester');renderSemester();})">ภาพรวมภาคเรียน</button>
       <button onclick="openBatch()">กรอกแทนนักเรียน · ไม่มีมือถือ</button>
-      <button onclick="openPaper()">พิมพ์ใบงานกระดาษ</button>
+      <button class="primary" onclick="openStats()">ผลวิเคราะห์สถิติ (บทที่ 4)</button>
+      <button onclick="openMoreTeacher()">เอกสาร / ภาคผนวก</button>
       <button onclick="lockTeacher()">ออกจากหน้าครู</button>
     </div>
     <h3 style="margin-top:16px;font-size:15px">ผลการดำเนินงาน (ข้อมูลสำหรับบทที่ 4)</h3>
@@ -2511,6 +2593,47 @@ async function saveBatch(){
    สำหรับนักเรียนที่ไม่มีมือถือ ครูพิมพ์แจก ทำบนกระดาษ แล้วนำมากรอกที่โหมดไม่มีมือถือ
    ก = 1, ข = 2, ค = 3, ง = 4 (ตัวเลือกเรียงจากระดับพฤติกรรม 1 ถึง 4)
    ================================================================== */
+/* เกณฑ์การให้คะแนนและการแปลผล — ภาคผนวก ข ต้องแนบคู่กับเครื่องมือฉบับจริง */
+function scoringKey(){
+  const byDim={};
+  ITEMS.forEach((it,i)=>{ (byDim[it.d]=byDim[it.d]||[]).push(i+1); });
+  return `
+    <h2 style="margin-top:2px">เกณฑ์การให้คะแนนและการแปลผล</h2>
+    <p class="small">แบบวัดเชิงสถานการณ์ (Situational Judgment Test) ฉบับนี้วัดระดับพฤติกรรมที่ผู้เรียนเลือกปฏิบัติ ไม่ใช่การวัดความรู้ถูกผิด ตัวเลือกทุกข้อเรียงตามระดับพฤติกรรมจากต่ำไปสูง</p>
+    <h3>1. การให้คะแนนรายข้อ</h3>
+    <table><thead><tr><th style="width:12%">ตัวเลือก</th><th style="width:14%">คะแนน</th><th>ระดับพฤติกรรม</th></tr></thead><tbody>
+      <tr><td class="mono">ก</td><td class="mono">1</td><td class="small">ระดับเริ่มต้น — ตัดสินใจจากความรู้สึกหรือหลีกเลี่ยงปัญหา ไม่คำนึงถึงผู้อื่น</td></tr>
+      <tr><td class="mono">ข</td><td class="mono">2</td><td class="small">ระดับกำลังพัฒนา — ทำตามกลุ่มหรือแก้ปัญหาเฉพาะหน้า ยังไม่ใช้ข้อมูลประกอบ</td></tr>
+      <tr><td class="mono">ค</td><td class="mono">3</td><td class="small">ระดับสามารถ — ใช้ข้อมูลประกอบการตัดสินใจ และคำนึงถึงผู้ได้รับผลกระทบ</td></tr>
+      <tr><td class="mono">ง</td><td class="mono">4</td><td class="small">ระดับเชี่ยวชาญ — ใช้ข้อมูลรอบด้าน ดูแลผู้เสียประโยชน์ และรับผิดชอบผลที่ตามมา</td></tr>
+    </tbody></table>
+    <p class="small">คะแนนรวมทั้งฉบับ = 10 ข้อ × 4 คะแนน = <b>40 คะแนน</b> (คะแนนต่ำสุด 10 คะแนน)</p>
+
+    <h3>2. ข้อคำถามจำแนกตามด้านที่วัด</h3>
+    <table><thead><tr><th style="width:34%">ด้านที่วัด</th><th style="width:22%">กลุ่มสมรรถนะ</th><th>ข้อที่</th></tr></thead><tbody>
+      ${Object.entries(DIMS).map(([k,v])=>`<tr><td>${esc(v.n)}</td>
+        <td class="small">${v.g==='life'?'ทักษะชีวิต':'ความเป็นพลเมืองดี'}</td>
+        <td class="mono">${(byDim[k]||[]).join(', ')}</td></tr>`).join('')}
+    </tbody></table>
+
+    <h3>3. เกณฑ์การแปลผลคะแนนรวม</h3>
+    <table><thead><tr><th style="width:22%">ช่วงคะแนน</th><th style="width:22%">ค่าเฉลี่ยรายข้อ</th><th>ระดับสมรรถนะ</th></tr></thead><tbody>
+      <tr><td class="mono">10.00 – 17.50</td><td class="mono">1.00 – 1.75</td><td>ระดับเริ่มต้น (ต้องได้รับการพัฒนาเร่งด่วน)</td></tr>
+      <tr><td class="mono">17.51 – 25.00</td><td class="mono">1.76 – 2.50</td><td>ระดับกำลังพัฒนา</td></tr>
+      <tr><td class="mono">25.01 – 32.50</td><td class="mono">2.51 – 3.25</td><td>ระดับสามารถ (ผ่านเกณฑ์)</td></tr>
+      <tr><td class="mono">32.51 – 40.00</td><td class="mono">3.26 – 4.00</td><td>ระดับเชี่ยวชาญ</td></tr>
+    </tbody></table>
+
+    <h3>4. เกณฑ์รูบริกประเมินสมรรถนะ (ครูเป็นผู้ประเมิน)</h3>
+    <table><thead><tr><th style="width:24%">สมรรถนะ</th><th>ระดับ 1</th><th>ระดับ 2</th><th>ระดับ 3</th><th>ระดับ 4</th></tr></thead><tbody>
+      ${Object.values(RUBRICS).map(r=>`<tr class="pitem"><td><b>${esc(r.n)}</b></td>
+        ${r.l.map(t=>`<td class="small">${esc(t)}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>
+    <p class="small">เกณฑ์การผ่าน: นักเรียนควรได้ระดับ 3 ขึ้นไปในทุกสมรรถนะ · ครูเป็นผู้ยืนยันระดับสุดท้ายจากหลักฐานเชิงประจักษ์ในระบบและการสังเกตพฤติกรรม</p>
+
+    <h3>5. การตรวจสอบคุณภาพเครื่องมือ</h3>
+    <p class="small">เครื่องมือฉบับนี้ผ่านการตรวจสอบความตรงเชิงเนื้อหาโดยผู้เชี่ยวชาญ ด้วยการหาค่าดัชนีความสอดคล้อง (IOC) เกณฑ์การยอมรับคือ IOC ตั้งแต่ 0.50 ขึ้นไป (ดูตารางค่า IOC ในภาคผนวก ก) และออกแบบตามแนวคิด Situational Judgment Test ซึ่งมีความตรงเชิงพยากรณ์สูงกว่าการถามตรงว่าควรทำอะไร (Situational judgment tests: review and meta-analysis, 2020)</p>`;
+}
 function openPaper(){ go('paper'); renderPaper(); }
 function renderPaper(){
   const mi=MIS(); const L=['ก','ข','ค','ง'];
@@ -2568,10 +2691,687 @@ function renderPaper(){
     ${sjt}
     <div style="page-break-before:always;break-before:page"></div>
     ${ws}
+    <div style="page-break-before:always;break-before:page"></div>
+    ${scoringKey()}
     <p class="small muted" style="margin-top:14px;border-top:1px solid #999;padding-top:6px">Life Competency UP TO GROW · LIFECRAFT AI</p>
   </div>`;
 }
 
+
+/* ================= แผนภาพโครงสร้างนวัตกรรมเชิงระบบ =================
+   Input -> Process -> Output -> Outcome พร้อม Feedback Loop
+   ใช้อ้างอิงในรายงานบทที่ 3 และใช้เปิดนำเสนอต่อกรรมการได้โดยตรง
+   ================================================================= */
+const MODEL={
+  input:['สภาพปัญหาพฤติกรรมในชั้นเรียน','แบบวัดสถานการณ์ 10 ข้อ (ก่อนเรียน)','รายชื่อและบริบทของห้องเรียน','ฐานงานวิจัย '+28+' รายการ'],
+  process:['ภารกิจสถานการณ์รายสัปดาห์','กระบวนการ UP TO GROW 8 ขั้น','AI Coach ตั้งคำถาม ไม่ให้คำตอบ','ครูสังเกตพฤติกรรมและให้รูบริก'],
+  output:['แบบวัดสถานการณ์ 10 ข้อ (หลังเรียน)','หลักฐานการตัดสินใจรายบุคคล','ระดับรูบริก 4 ด้านที่ครูยืนยัน','ข้อตกลงและการลงมือจริงของห้อง'],
+  outcome:['ทักษะชีวิตและพลเมืองดีสูงขึ้น','พัฒนาการสะสมรายเดือน/ภาคเรียน','ข้อตกลงของห้องที่ยั่งยืน','เครือข่ายครูแลกเปลี่ยนภารกิจ']
+};
+function openModel(){ go('model'); renderModel(); }
+function renderModel(){
+  const col=(tag,title,cls,items)=>`<div class="mstage ${cls}"><div class="tag">${tag}</div><h4>${title}</h4>
+    <ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  $('v-model').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · แบบจำลองนวัตกรรมเชิงระบบ</div>
+  <div class="card">
+    <div class="eyebrow">แบบจำลองนวัตกรรมเชิงระบบ (บทที่ 3)</div>
+    <h1>Input → Process → Output → Outcome</h1>
+    <p class="muted" style="max-width:66ch">โครงสร้างการทำงานของนวัตกรรม Life Competency UP TO GROW แสดงความสัมพันธ์เชิงสาเหตุจากปัจจัยนำเข้า สู่กระบวนการจัดกิจกรรมโฮมรูม ผลผลิต และผลลัพธ์ปลายทาง พร้อมกลไกป้อนกลับที่ทำให้ระบบพัฒนาตนเองได้ต่อเนื่อง</p>
+    <div class="modelmap">
+      ${col('Input','ปัจจัยนำเข้า','st-in',MODEL.input)}
+      ${col('Process','กระบวนการ','st-pr',MODEL.process)}
+      ${col('Output','ผลผลิต','st-ou',MODEL.output)}
+      ${col('Outcome','ผลลัพธ์','st-oc',MODEL.outcome)}
+    </div>
+    <div class="notice good" style="margin-top:14px">
+      <b>Feedback Loop · กลไกป้อนกลับ</b><br>
+      <span class="small">ผลจากแบบวัดหลังเรียนและระดับรูบริกที่ครูให้ จะถูกส่งกลับเข้าสู่ปัจจัยนำเข้าของภารกิจถัดไป ครูใช้ข้อมูลนี้เลือกประเด็นที่ต้องเสริม ปรับความยากของภารกิจ และคัดกรองนักเรียนที่ต้องดูแลก่อน ทำให้แต่ละสัปดาห์ไม่ใช่กิจกรรมเดี่ยว แต่เป็นวงจรพัฒนาต่อเนื่องตลอดภาคเรียน</span>
+    </div>
+  </div>
+  <div class="card">
+    <h2>กระบวนการจัดกิจกรรมโฮมรูม (Syntax) 8 ขั้น</h2>
+    <p class="small muted">ใช้ซ้ำได้กับทุกภารกิจ ทำให้เทียบพัฒนาการข้ามสัปดาห์ได้ และครูท่านอื่นนำไปปฏิบัติซ้ำได้ทันที</p>
+    <table style="margin-top:8px"><thead><tr><th>ขั้น</th><th>ชื่อขั้น</th><th>สิ่งที่นักเรียนทำ</th><th>เวลา</th></tr></thead><tbody>
+    ${STEPS.map((x,i)=>`<tr><td class="mono">${x[0]}</td><td>${x[1]}</td>
+      <td class="small">${esc([
+        'อ่านสถานการณ์ ระบุความรู้สึกและข้อมูลที่ยังไม่รู้',
+        'แยกข้อเท็จจริงออกจากความคิดเห็น ระบุผู้ได้รับผลกระทบ',
+        'สร้างทางเลือกอย่างน้อย 2 ทาง วิเคราะห์ผู้ได้และผู้เสียประโยชน์',
+        'ตัดสินใจ เขียนเหตุผลอ้างอิงข้อมูล และระบุการรับผิดชอบผล',
+        'รับบทบาทในกลุ่ม เผชิญเหตุการณ์เปลี่ยนแปลง 4 เหตุการณ์',
+        'สะท้อนคิด 5 คำถามเกี่ยวกับตนเองและผลต่อผู้อื่น',
+        'ประเมินตนเองตามรูบริก 4 ด้าน และระบุสิ่งที่จะปรับ',
+        'เสนอข้อตกลงต่อห้อง และสิ่งที่จะลงมือทำจริงในสัปดาห์นี้'][i])}</td>
+      <td class="mono small">${STEPMIN[i]} น.</td></tr>`).join('')}
+    </tbody></table>
+    <p class="small muted" style="margin-top:8px">รวมประมาณ ${STEPMIN.reduce((a,b)=>a+b,0)} นาที ไม่รวมแบบวัดก่อน–หลัง</p>
+  </div>
+  <div class="row noprint" style="margin-bottom:26px">
+    <button onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+    <button onclick="openResearch('map')">ดูตารางจับคู่กับงานวิจัย</button>
+    <button onclick="go('home')">กลับหน้าแรก</button></div>`;
+}
+
+/* ---------- เมนูเครื่องมือครูเพิ่มเติม ---------- */
+function openMoreTeacher(){ go('more'); renderMore(); }
+function renderMore(){
+  const it=(ic,t,d,fn)=>`<button class="mbtn" style="width:100%;margin-bottom:8px" onclick="${fn}">
+    <span class="mi">${ic}</span><span class="mt">${t}<small>${d}</small></span></button>`;
+  $('v-more').innerHTML=`<div class="card">
+    <div class="eyebrow">เครื่องมือสำหรับครู</div>
+    <h1>เครื่องมือเพิ่มเติม</h1>
+    <p class="muted small">รวมเครื่องมือที่ใช้ไม่บ่อยแต่จำเป็น เพื่อให้หน้าแรกไม่รก</p>
+    <h3 style="font-size:14px;margin-top:14px;color:var(--teal-d)">เอกสารสำหรับรายงานและภาคผนวก</h3>
+    <div>
+      ${it('📐','ผลวิเคราะห์ทางสถิติ (บทที่ 4)','t-test · ดัชนีประสิทธิผล E.I. · ขนาดอิทธิพล',"openStats()")}
+      ${it('✅','ค่าดัชนีความสอดคล้อง IOC (ภาคผนวก ก)','กรอกผลผู้เชี่ยวชาญ ระบบคำนวณให้',"openIOC()")}
+      ${it('📋','แผนการจัดกิจกรรมโฮมรูม (ภาคผนวก ก)','แผนต้นแบบพร้อมพิมพ์แนบรายงาน',"openPlan()")}
+      ${it('🖨️','เครื่องมือวัดฉบับจริง / ใบงาน (ภาคผนวก ข)','แบบวัด 10 ข้อ + เกณฑ์ให้คะแนน',"openPaper()")}
+      ${it('🧭','แผนภาพระบบนวัตกรรม (บทที่ 3)','Input → Process → Output → Outcome',"openModel()")}
+    </div>
+    <h3 style="font-size:14px;margin-top:16px;color:var(--teal-d)">การใช้งานทั่วไป</h3>
+    <div>
+      ${it('📈','ภาพรวมภาคเรียน','พัฒนาการสะสมทุกภารกิจ',"go('semester');renderSemester()")}
+      ${it('🗂️','แดชบอร์ดภารกิจด่วน','ดูผลภารกิจด่วนที่เปิดไว้',"openQDash()")}
+      ${it('⚙️','ตั้งค่าห้องเรียน / คลังภารกิจ','รายชื่อ ระดับชั้น นำเข้า-ส่งออกภารกิจ',"openSetup()")}
+      ${it('📚','ฐานงานวิจัยอ้างอิง','งานวิจัย 28 รายการและตารางจับคู่',"openResearch('list')")}
+    </div>
+    <h3 style="font-size:14px;margin-top:16px;color:var(--gold)">โหมดสาธิต</h3>
+    <div class="card tight" style="background:#FFFBEF;border-color:var(--amber)">
+      <p class="small" style="margin:0 0 8px">สร้างชุดข้อมูลจำลองของนักเรียนทั้งห้อง เพื่อสาธิตว่า<b>ถ้านำนวัตกรรมนี้ไปใช้จริงจะได้ผลลัพธ์อย่างไร</b> ใช้สำหรับนำเสนอต่อกรรมการ ถ่ายภาพหน้าจอประกอบรายงาน และทดลองใช้ทุกฟังก์ชันก่อนเก็บข้อมูลจริง</p>
+      <p class="small muted" style="margin:0 0 10px">ข้อมูลจะถูกกำกับว่าเป็นข้อมูลจำลองและแสดงแถบเตือนตลอดเวลา บันทึกในเครื่องนี้เท่านั้น ไม่ส่งขึ้น Google Sheet จึงไม่ปนกับข้อมูลจริง · ตัวเลขคงที่ทุกครั้งที่สร้าง ตรวจสอบซ้ำได้</p>
+      <div class="row">
+        <button class="primary" onclick="seedDemo();openTeacher()">สร้างข้อมูลสาธิตทั้งห้อง</button>
+        ${isDemo()?'<button onclick="clearDemo()">ล้างข้อมูลสาธิต</button>':''}
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px"><button onclick="go('home')">กลับหน้าแรก</button></div>
+  </div>`;
+}
+function scrollToMissions(){
+  go('home');
+  const el=$('missionList');
+  if(el) try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+}
+
+/* ================= สถิติสำหรับรายงานบทที่ 4 =================
+   t-test แบบไม่อิสระ (dependent/paired), ดัชนีประสิทธิผล E.I.,
+   ขนาดอิทธิพล Cohen's d — คำนวณจากข้อมูลจริงในระบบเท่านั้น
+   ระบบไม่สร้างข้อมูลสมมติ ถ้าข้อมูลไม่พอจะแจ้งให้ทราบ
+   ========================================================= */
+function gammln_(x){
+  const cof=[76.18009172947146,-86.50532032941677,24.01409824083091,
+    -1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x,tmp=x+5.5; tmp-=(x+0.5)*Math.log(tmp);
+  let ser=1.000000000190015;
+  for(let j=0;j<6;j++) ser+=cof[j]/++y;
+  return -tmp+Math.log(2.5066282746310005*ser/x);
+}
+function betacf_(a,b,x){
+  const MAXIT=200,EPS=3e-14,FPMIN=1e-300;
+  const qab=a+b,qap=a+1,qam=a-1;
+  let c=1,d=1-qab*x/qap;
+  if(Math.abs(d)<FPMIN)d=FPMIN;
+  d=1/d; let h=d;
+  for(let m=1;m<=MAXIT;m++){
+    const m2=2*m;
+    let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN;
+    d=1/d; h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN;
+    d=1/d; const del=d*c; h*=del;
+    if(Math.abs(del-1)<EPS) break;
+  }
+  return h;
+}
+function betai_(a,b,x){
+  if(x<=0) return 0; if(x>=1) return 1;
+  const bt=Math.exp(gammln_(a+b)-gammln_(a)-gammln_(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2) ? bt*betacf_(a,b,x)/a : 1-bt*betacf_(b,a,1-x)/b;
+}
+/* p สองทาง จากค่า t และ df */
+function tP_(t,df){
+  if(!isFinite(t)||df<=0) return NaN;
+  return betai_(df/2,0.5,df/(df+t*t));
+}
+const stMean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const stSD=a=>{ if(a.length<2) return 0; const mu=stMean(a);
+  return Math.sqrt(a.reduce((x,y)=>x+(y-mu)**2,0)/(a.length-1)); };
+/* t-test แบบไม่อิสระ: รับอาร์เรย์ก่อนและหลังที่จับคู่กันแล้ว */
+function pairedT(pre,post){
+  const n=pre.length;
+  if(n<2) return {n,ok:false};
+  const D=post.map((v,i)=>v-pre[i]);
+  const mD=stMean(D), sD=stSD(D);
+  const se=sD/Math.sqrt(n);
+  const t=se===0?NaN:mD/se;
+  const df=n-1;
+  const p=tP_(t,df);
+  return {n,ok:true,mPre:stMean(pre),sdPre:stSD(pre),mPost:stMean(post),sdPost:stSD(post),
+    mD,sD,t,df,p,d:sD===0?NaN:mD/sD};
+}
+/* ดัชนีประสิทธิผล E.I. = (ผลรวมหลัง - ผลรวมก่อน) / (จำนวนคน x คะแนนเต็ม - ผลรวมก่อน) */
+function effIndex(pre,post,full){
+  const sPre=pre.reduce((a,b)=>a+b,0), sPost=post.reduce((a,b)=>a+b,0);
+  const den=pre.length*full-sPre;
+  return den<=0?NaN:(sPost-sPre)/den;
+}
+const pTxt=p=>!isFinite(p)?'-':(p<0.001?'< .001':p.toFixed(3).replace(/^0/,''));
+const sigTxt=p=>!isFinite(p)?'':(p<0.01?'**':p<0.05?'*':'ns');
+function dTxt(d){ const a=Math.abs(d);
+  return !isFinite(d)?'-':(a<0.2?'เล็กมาก':a<0.5?'เล็ก':a<0.8?'ปานกลาง':'สูง'); }
+
+async function loadAllForMission(mid){
+  const arr=[];
+  for(let i=0;i<ROSTER.length;i++){
+    const raw=await S.get(mKey(i,mid),true);
+    if(!raw){ arr.push(null); continue; }
+    try{ arr.push(JSON.parse(raw)); }catch(e){ arr.push(null); }
+  }
+  return arr;
+}
+async function openStats(){
+  go('stats');
+  $('v-stats').innerHTML='<div class="card"><h2>กำลังคำนวณ…</h2></div>';
+  await pullAll();
+  const all=await loadAllForMission(curMission);
+  const done=all.filter(x=>x&&x.done);
+  const mi=MIS();
+  if(done.length<2){
+    $('v-stats').innerHTML=`<div class="card"><div class="eyebrow">สถิติสำหรับบทที่ 4</div>
+      <h1>ยังคำนวณไม่ได้</h1>
+      <div class="notice">ต้องมีนักเรียนที่ทำครบทั้งแบบวัดก่อนและหลังอย่างน้อย 2 คน จึงจะคำนวณ t-test ได้ ขณะนี้มี ${done.length} คน<br>
+      <span class="small">ระบบคำนวณจากข้อมูลจริงเท่านั้น ไม่สร้างตัวเลขสมมติ</span></div>
+      <div class="row"><button onclick="openTeacher()">กลับหน้าครู</button><button onclick="go('home')">หน้าแรก</button></div></div>`;
+    return;
+  }
+  const pre=done.map(d=>total(d.pre)), post=done.map(d=>total(d.post));
+  const R=pairedT(pre,post);
+  const EI=effIndex(pre,post,40);
+  const growth=R.mPre?((R.mPost-R.mPre)/R.mPre*100):0;
+  /* รายด้าน 7 ด้าน */
+  const dimRows=Object.keys(DIMS).map(k=>{
+    const a=done.map(d=>dimScore(d.pre,k)), b=done.map(d=>dimScore(d.post,k));
+    const r=pairedT(a,b);
+    return `<tr><td>${DIMS[k].n}</td>
+      <td class="mono">${r.mPre.toFixed(2)}</td><td class="mono">${r.sdPre.toFixed(2)}</td>
+      <td class="mono">${r.mPost.toFixed(2)}</td><td class="mono">${r.sdPost.toFixed(2)}</td>
+      <td class="mono ${r.mD>0?'ok':r.mD<0?'bad':''}">${(r.mD>=0?'+':'')+r.mD.toFixed(2)}</td>
+      <td class="mono">${isFinite(r.t)?r.t.toFixed(3):'-'}</td>
+      <td class="mono">${pTxt(r.p)}</td><td class="mono">${sigTxt(r.p)}</td></tr>`;}).join('');
+  /* รายกลุ่มสมรรถนะ */
+  const grpRows=[['life','ทักษะชีวิต'],['civic','ความเป็นพลเมืองดี']].map(([g,nm])=>{
+    const a=done.map(d=>groupScore(d.pre,g)), b=done.map(d=>groupScore(d.post,g));
+    const r=pairedT(a,b);
+    return `<tr><td>${nm}</td>
+      <td class="mono">${r.mPre.toFixed(2)}</td><td class="mono">${r.sdPre.toFixed(2)}</td>
+      <td class="mono">${r.mPost.toFixed(2)}</td><td class="mono">${r.sdPost.toFixed(2)}</td>
+      <td class="mono ${r.mD>0?'ok':''}">${(r.mD>=0?'+':'')+r.mD.toFixed(2)}</td>
+      <td class="mono">${isFinite(r.t)?r.t.toFixed(3):'-'}</td>
+      <td class="mono">${pTxt(r.p)}</td><td class="mono">${sigTxt(r.p)}</td></tr>`;}).join('');
+  /* ตารางคะแนนรายบุคคลพร้อมผลต่าง D และ D กำลังสอง */
+  const mD=R.mD;
+  const indRows=done.map((d,i)=>{
+    const p=total(d.pre),q=total(d.post),D=q-p;
+    return `<tr><td class="mono">${i+1}</td><td>${esc(d.name)}</td>
+      <td class="mono">${p}</td><td class="mono">${q}</td>
+      <td class="mono ${D>0?'ok':D<0?'bad':''}">${(D>=0?'+':'')+D}</td>
+      <td class="mono">${(D-mD).toFixed(2)}</td><td class="mono">${((D-mD)**2).toFixed(2)}</td></tr>`;}).join('');
+  const sumD=done.reduce((a,d)=>a+(total(d.post)-total(d.pre)),0);
+  const sumD2=done.reduce((a,d)=>{const D=total(d.post)-total(d.pre);return a+(D-mD)**2;},0);
+  $('v-stats').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · ผลการวิเคราะห์ทางสถิติ</div>
+  <div class="card">
+    <div class="eyebrow">ผลการวิเคราะห์ข้อมูลทางสถิติ (สำหรับรายงานบทที่ 4)</div>
+    <h1>เปรียบเทียบคะแนนก่อนและหลัง</h1>
+    <p class="muted small">${esc(ROOM)} · ${esc(GRADE)} · ${esc(mi.title)} · วิเคราะห์จากนักเรียนที่ทำครบทั้งก่อนและหลัง ${R.n} คน จากทั้งหมด ${ROSTER.length} คน</p>
+    <div class="grid3" style="margin-top:12px">
+      <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยก่อน</div><div class="bignum">${R.mPre.toFixed(2)}</div><div class="small muted">SD ${R.sdPre.toFixed(2)}</div></div>
+      <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยหลัง</div><div class="bignum ok">${R.mPost.toFixed(2)}</div><div class="small muted">SD ${R.sdPost.toFixed(2)}</div></div>
+      <div class="card tight"><div class="eyebrow">พัฒนาการ</div><div class="bignum ${R.mD>0?'ok':''}">${(R.mD>=0?'+':'')+R.mD.toFixed(2)}</div><div class="small muted">+${growth.toFixed(1)}%</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>ตารางที่ 1 ผลการเปรียบเทียบคะแนนก่อนและหลัง (t-test แบบไม่อิสระ)</h2>
+    <table style="margin-top:8px"><thead><tr><th>การทดสอบ</th><th>n</th><th>x̄</th><th>S.D.</th><th>D̄</th><th>S.D.<sub>D</sub></th><th>t</th><th>df</th><th>p</th></tr></thead><tbody>
+      <tr><td>ก่อนเรียน</td><td class="mono">${R.n}</td><td class="mono">${R.mPre.toFixed(2)}</td><td class="mono">${R.sdPre.toFixed(2)}</td>
+        <td class="mono" rowspan="2">${R.mD.toFixed(2)}</td><td class="mono" rowspan="2">${R.sD.toFixed(2)}</td>
+        <td class="mono" rowspan="2"><b>${isFinite(R.t)?R.t.toFixed(3):'-'}</b></td><td class="mono" rowspan="2">${R.df}</td>
+        <td class="mono" rowspan="2"><b>${pTxt(R.p)}</b></td></tr>
+      <tr><td>หลังเรียน</td><td class="mono">${R.n}</td><td class="mono">${R.mPost.toFixed(2)}</td><td class="mono">${R.sdPost.toFixed(2)}</td></tr>
+    </tbody></table>
+    <p class="small muted" style="margin-top:6px">คะแนนเต็ม 40 คะแนน · * มีนัยสำคัญที่ระดับ .05 · ** มีนัยสำคัญที่ระดับ .01</p>
+    <div class="notice ${(isFinite(R.p)&&R.p<0.05)||(R.sD===0&&R.mD>0)?'good':''}" style="margin-top:10px">
+      <b>การแปลผล</b><br><span class="small">
+      ${isFinite(R.p)&&R.p<0.05
+        ? `คะแนนเฉลี่ยหลังเรียน (x̄ = ${R.mPost.toFixed(2)}, S.D. = ${R.sdPost.toFixed(2)}) สูงกว่าก่อนเรียน (x̄ = ${R.mPre.toFixed(2)}, S.D. = ${R.sdPre.toFixed(2)}) อย่างมีนัยสำคัญทางสถิติที่ระดับ ${R.p<0.01?'.01':'.05'} (t = ${R.t.toFixed(3)}, df = ${R.df}, p ${pTxt(R.p)}) แสดงว่านวัตกรรม Life Competency UP TO GROW ช่วยพัฒนาทักษะชีวิตและความเป็นพลเมืองดีของผู้เรียนได้จริง`
+        : R.sD===0
+          ? `นักเรียนทุกคนมีคะแนนเปลี่ยนแปลง<b>เท่ากันพอดี</b> (${R.mD>=0?'+':''}${R.mD.toFixed(2)} คะแนนทุกคน) ทำให้ส่วนเบี่ยงเบนมาตรฐานของผลต่างเป็นศูนย์ จึงคำนวณค่า t ไม่ได้ตามนิยาม กรณีนี้มักเกิดจากข้อมูลทดลองหรือจำนวนตัวอย่างน้อยมาก ${R.mD>0?'ถึงแม้จะยังสรุปทางสถิติไม่ได้ แต่ผู้เรียนทุกคนมีคะแนนสูงขึ้นจริง':''} ควรเก็บข้อมูลจากผู้เรียนจริงเพิ่มเติมก่อนนำไปรายงาน`
+          : `ผลต่างของคะแนนก่อนและหลังยังไม่มีนัยสำคัญทางสถิติที่ระดับ .05 (t = ${isFinite(R.t)?R.t.toFixed(3):'-'}, df = ${R.df}, p ${pTxt(R.p)}) อาจเนื่องจากจำนวนตัวอย่างยังน้อย ควรเก็บข้อมูลเพิ่มเติม`}
+      </span></div>
+  </div>
+
+  <div class="card">
+    <h2>ตารางที่ 2 ดัชนีประสิทธิผลและขนาดอิทธิพล</h2>
+    <table style="margin-top:8px"><tbody>
+      <tr><td>ผลรวมคะแนนก่อนเรียน (ΣPre)</td><td class="mono">${pre.reduce((a,b)=>a+b,0)}</td></tr>
+      <tr><td>ผลรวมคะแนนหลังเรียน (ΣPost)</td><td class="mono">${post.reduce((a,b)=>a+b,0)}</td></tr>
+      <tr><td>จำนวนผู้เรียน (N) × คะแนนเต็ม (40)</td><td class="mono">${R.n} × 40 = ${R.n*40}</td></tr>
+      <tr><td><b>ดัชนีประสิทธิผล (E.I.)</b></td><td class="mono"><b>${isFinite(EI)?EI.toFixed(4):'-'}</b></td></tr>
+      <tr><td>คิดเป็นความก้าวหน้า</td><td class="mono">${isFinite(EI)?(EI*100).toFixed(2)+'%':'-'}</td></tr>
+      <tr><td><b>ขนาดอิทธิพล Cohen's d</b></td><td class="mono"><b>${isFinite(R.d)?R.d.toFixed(3):'-'}</b> (${dTxt(R.d)})</td></tr>
+    </tbody></table>
+    <div class="notice ${isFinite(EI)&&EI>=0.5?'good':''}" style="margin-top:10px"><span class="small">
+      ดัชนีประสิทธิผล E.I. = (ΣPost − ΣPre) / ((N × คะแนนเต็ม) − ΣPre) = <b>${isFinite(EI)?EI.toFixed(4):'-'}</b>
+      ${isFinite(EI)?(EI>=0.5
+        ? ` ซึ่ง<b>สูงกว่าเกณฑ์ 0.50</b> แสดงว่าผู้เรียนมีความก้าวหน้าเพิ่มขึ้นร้อยละ ${(EI*100).toFixed(2)} นวัตกรรมมีประสิทธิผลตามเกณฑ์ที่ยอมรับได้`
+        : ` ซึ่งยังต่ำกว่าเกณฑ์ 0.50 ควรทบทวนกิจกรรมหรือเก็บข้อมูลเพิ่มเติม`):''}
+      </span></div>
+  </div>
+
+  <div class="card">
+    <h2>ตารางที่ 3 ผลการเปรียบเทียบรายกลุ่มสมรรถนะ</h2>
+    <table style="margin-top:8px"><thead><tr><th>กลุ่มสมรรถนะ</th><th>x̄ ก่อน</th><th>S.D.</th><th>x̄ หลัง</th><th>S.D.</th><th>ผลต่าง</th><th>t</th><th>p</th><th></th></tr></thead>
+      <tbody>${grpRows}</tbody></table>
+    <p class="small muted" style="margin-top:6px">คะแนนรายด้านเป็นค่าเฉลี่ยระดับพฤติกรรม 1–4 · df = ${R.df}</p>
+  </div>
+
+  <div class="card">
+    <h2>ตารางที่ 4 ผลการเปรียบเทียบรายด้าน 7 ด้าน</h2>
+    <table style="margin-top:8px"><thead><tr><th>ด้าน</th><th>x̄ ก่อน</th><th>S.D.</th><th>x̄ หลัง</th><th>S.D.</th><th>ผลต่าง</th><th>t</th><th>p</th><th></th></tr></thead>
+      <tbody>${dimRows}</tbody></table>
+    <p class="small muted" style="margin-top:6px">df = ${R.df} · * p &lt; .05 · ** p &lt; .01 · ns = ไม่มีนัยสำคัญ</p>
+  </div>
+
+  <div class="card">
+    <h2>ตารางที่ 5 คะแนนรายบุคคลและการคำนวณ (ภาคผนวก ก)</h2>
+    <table style="margin-top:8px"><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>ก่อน</th><th>หลัง</th><th>D</th><th>D−D̄</th><th>(D−D̄)²</th></tr></thead>
+      <tbody>${indRows}
+      <tr style="border-top:2px solid var(--line)"><td colspan="4"><b>รวม</b></td>
+        <td class="mono"><b>${sumD}</b></td><td class="mono">0.00</td><td class="mono"><b>${sumD2.toFixed(2)}</b></td></tr>
+      </tbody></table>
+    <p class="small muted" style="margin-top:6px">D = คะแนนหลัง − คะแนนก่อน · D̄ = ${mD.toFixed(2)} · S.D.<sub>D</sub> = √(Σ(D−D̄)²/(n−1)) = ${R.sD.toFixed(2)} · t = D̄/(S.D.<sub>D</sub>/√n) = ${isFinite(R.t)?R.t.toFixed(3):'-'}</p>
+  </div>
+
+  <div class="row noprint" style="margin-bottom:26px">
+    <button class="primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+    <button onclick="statsCSV()">ส่งออก CSV</button>
+    <button onclick="openTeacher()">กลับหน้าครู</button>
+    <button onclick="go('home')">หน้าแรก</button></div>`;
+}
+function statsCSV(){
+  const rows=[['รายการ','ค่า']];
+  const el=$('v-stats'); if(!el) return;
+  el.querySelectorAll('table').forEach((t,ti)=>{
+    rows.push(['ตารางที่ '+(ti+1),'']);
+    t.querySelectorAll('tr').forEach(tr=>{
+      rows.push([...tr.querySelectorAll('th,td')].map(c=>c.textContent.trim()));
+    });
+    rows.push(['','']);
+  });
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='uptogrow_stats_week'+MIS().week+'.csv'; a.click();
+}
+
+
+/* ================= ค่าดัชนีความสอดคล้อง IOC (ภาคผนวก ก) =================
+   ผู้เชี่ยวชาญให้คะแนน +1 (สอดคล้อง) 0 (ไม่แน่ใจ) -1 (ไม่สอดคล้อง)
+   IOC = ผลรวมคะแนน / จำนวนผู้เชี่ยวชาญ · เกณฑ์ยอมรับ IOC >= 0.50
+   ==================================================================== */
+let IOC=null;
+const IOC_KEY='lc:ioc';
+function loadIOC(){
+  try{ const r=LS.get(IOC_KEY); if(r) return JSON.parse(r); }catch(e){}
+  return {nExp:5,names:['','','','',''],r:{},tool:'แบบวัดสถานการณ์ทักษะชีวิตและความเป็นพลเมืองดี (10 ข้อ)'};
+}
+function saveIOC(){ LS.set(IOC_KEY,JSON.stringify(IOC)); flagSaved(); }
+function openIOC(){ IOC=loadIOC(); go('ioc'); renderIOC(); }
+function setIOCn(n){
+  n=Math.max(3,Math.min(7,parseInt(n)||5));
+  IOC.nExp=n;
+  while(IOC.names.length<n) IOC.names.push('');
+  IOC.names=IOC.names.slice(0,n);
+  Object.keys(IOC.r).forEach(k=>{ IOC.r[k]=(IOC.r[k]||[]).slice(0,n); });
+  saveIOC(); renderIOC();
+}
+function setIOCr(item,exp,v){
+  IOC.r[item]=IOC.r[item]||[];
+  while(IOC.r[item].length<IOC.nExp) IOC.r[item].push(null);
+  IOC.r[item][exp]=(IOC.r[item][exp]===v?null:v);
+  saveIOC(); renderIOC();
+}
+function iocValue(item){
+  const a=(IOC.r[item]||[]).slice(0,IOC.nExp).filter(v=>v===1||v===0||v===-1);
+  if(a.length<IOC.nExp) return null;
+  return a.reduce((x,y)=>x+y,0)/IOC.nExp;
+}
+function renderIOC(){
+  const L=[[1,'+1','สอดคล้อง'],[0,'0','ไม่แน่ใจ'],[-1,'−1','ไม่สอดคล้อง']];
+  const rows=ITEMS.map((it,i)=>{
+    const v=iocValue(i);
+    const cells=[...Array(IOC.nExp)].map((_,e)=>{
+      const cur=(IOC.r[i]||[])[e];
+      return `<td style="white-space:nowrap">${L.map(([val,lb])=>
+        `<button class="bbtn" style="width:32px;height:32px;min-height:32px;font-size:12px;${cur===val?(val===1?'background:var(--teal);border-color:var(--teal);color:#fff':val===0?'background:var(--amber);border-color:var(--amber);color:#3a2b00':'background:var(--red);border-color:var(--red);color:#fff'):''}"
+          onclick="setIOCr(${i},${e},${val})">${lb}</button>`).join(' ')}</td>`;}).join('');
+    return `<tr><td class="mono">${i+1}</td>
+      <td class="small" style="min-width:180px">${esc(it.q.slice(0,60))}${it.q.length>60?'…':''}</td>
+      ${cells}
+      <td class="mono"><b>${v===null?'<span class="muted">—</span>':v.toFixed(2)}</b></td>
+      <td class="small">${v===null?'<span class="muted">ยังไม่ครบ</span>':(v>=0.5?'<span class="ok">ใช้ได้</span>':'<span class="bad">ควรปรับ</span>')}</td></tr>`;
+  }).join('');
+  const vals=ITEMS.map((x,i)=>iocValue(i)).filter(v=>v!==null);
+  const meanIOC=vals.length?stMean(vals):null;
+  const pass=ITEMS.map((x,i)=>iocValue(i)).filter(v=>v!==null&&v>=0.5).length;
+  $('v-ioc').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · ตารางค่าดัชนีความสอดคล้อง IOC</div>
+  <div class="card noprint">
+    <div class="eyebrow">ภาคผนวก ก · การตรวจสอบคุณภาพเครื่องมือ</div>
+    <h1>ค่าดัชนีความสอดคล้อง (IOC)</h1>
+    <p class="muted" style="max-width:66ch">ให้ผู้เชี่ยวชาญพิจารณาว่าข้อคำถามแต่ละข้อสอดคล้องกับนิยามเชิงปฏิบัติการหรือไม่ โดยให้คะแนน <b>+1</b> สอดคล้อง <b>0</b> ไม่แน่ใจ <b>−1</b> ไม่สอดคล้อง แล้วระบบจะคำนวณค่า IOC ให้อัตโนมัติ ข้อที่มีค่า IOC ตั้งแต่ 0.50 ขึ้นไปถือว่าใช้ได้</p>
+    <div class="grid2" style="margin-top:10px">
+      <div><label for="iocTool">ชื่อเครื่องมือที่ตรวจสอบ</label>
+        <input id="iocTool" value="${esc(IOC.tool)}" oninput="IOC.tool=this.value;saveIOC()"></div>
+      <div><label for="iocN">จำนวนผู้เชี่ยวชาญ (3–7 ท่าน)</label>
+        <input id="iocN" type="number" min="3" max="7" value="${IOC.nExp}" onchange="setIOCn(this.value)"></div>
+    </div>
+    <label>ชื่อผู้เชี่ยวชาญ (ไม่บังคับ · ใช้แสดงในตารางที่พิมพ์)</label>
+    <div class="grid3">${[...Array(IOC.nExp)].map((_,e)=>
+      `<input placeholder="ท่านที่ ${e+1}" value="${esc(IOC.names[e]||'')}" oninput="IOC.names[${e}]=this.value;saveIOC()">`).join('')}</div>
+  </div>
+
+  <div class="card">
+    <h2>ตารางค่าดัชนีความสอดคล้อง (IOC) ของ${esc(IOC.tool)}</h2>
+    <p class="small muted">${esc(ROOM)} · ผู้เชี่ยวชาญ ${IOC.nExp} ท่าน</p>
+    <div style="overflow-x:auto">
+    <table style="margin-top:8px"><thead><tr><th>ข้อ</th><th>ข้อคำถาม</th>
+      ${[...Array(IOC.nExp)].map((_,e)=>`<th style="text-align:center">ท่านที่ ${e+1}${IOC.names[e]?'<br><span style="font-weight:400;text-transform:none">'+esc(IOC.names[e])+'</span>':''}</th>`).join('')}
+      <th>IOC</th><th>ผลการพิจารณา</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <div class="notice ${meanIOC!==null&&meanIOC>=0.5?'good':''}" style="margin-top:12px">
+      <b>สรุปผลการตรวจสอบคุณภาพเครื่องมือ</b><br>
+      <span class="small">${vals.length?
+        `ประเมินครบแล้ว ${vals.length} จาก ${ITEMS.length} ข้อ · ค่า IOC เฉลี่ยทั้งฉบับเท่ากับ <b>${meanIOC.toFixed(2)}</b> · มีข้อที่ผ่านเกณฑ์ (IOC ≥ 0.50) จำนวน <b>${pass}</b> ข้อ
+         ${meanIOC>=0.5?' แสดงว่าเครื่องมือมีความตรงเชิงเนื้อหาอยู่ในเกณฑ์ที่ยอมรับได้ สามารถนำไปใช้เก็บข้อมูลจริงได้':' ควรปรับปรุงข้อที่มีค่าต่ำกว่าเกณฑ์ก่อนนำไปใช้'}`
+        :'ยังไม่ได้กรอกผลการพิจารณา ให้กรอกให้ครบทุกข้อและทุกท่าน ระบบจะคำนวณค่า IOC ให้อัตโนมัติ'}</span></div>
+  </div>
+  <div class="row noprint" style="margin-bottom:26px">
+    <button class="primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+    <button onclick="iocCSV()">ส่งออก CSV</button>
+    <button onclick="if(confirm('ล้างผลการพิจารณาทั้งหมดหรือไม่')){IOC.r={};saveIOC();renderIOC();}">ล้างข้อมูล</button>
+    <button onclick="go('home')">หน้าแรก</button></div>`;
+}
+function iocCSV(){
+  const head=['ข้อที่','ข้อคำถาม',...[...Array(IOC.nExp)].map((_,e)=>'ท่านที่ '+(e+1)+(IOC.names[e]?' ('+IOC.names[e]+')':'')),'IOC','ผลการพิจารณา'];
+  const body=ITEMS.map((it,i)=>{
+    const v=iocValue(i);
+    return [i+1,it.q,...[...Array(IOC.nExp)].map((_,e)=>{const c=(IOC.r[i]||[])[e];return c===null||c===undefined?'':c;}),
+      v===null?'':v.toFixed(2), v===null?'':(v>=0.5?'ใช้ได้':'ควรปรับ')];});
+  const csv='﻿'+[head,...body].map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='uptogrow_IOC.csv'; a.click();
+}
+
+
+/* ================= แผนการจัดกิจกรรมโฮมรูมต้นแบบ (ภาคผนวก ก) =================
+   สร้างจากข้อมูลภารกิจที่เลือกโดยอัตโนมัติ พิมพ์แนบรายงานได้ทันที
+   ======================================================================== */
+const STEP_ACT=[
+ 'ครูนำเสนอสถานการณ์ นักเรียนอ่านและระบุความรู้สึกของตนเอง ข้อมูลที่มีอยู่แล้ว และข้อมูลที่ยังไม่รู้',
+ 'นักเรียนแยกข้อเท็จจริงที่ตรวจสอบได้ออกจากความคิดเห็น และระบุผู้มีส่วนได้ส่วนเสียทุกฝ่าย',
+ 'นักเรียนสร้างทางเลือกอย่างน้อย 2 ทาง วิเคราะห์ต้นทุน ผู้ได้ประโยชน์ ผู้เสียประโยชน์ และความเสี่ยง',
+ 'นักเรียนตัดสินใจเลือก 1 ทาง เขียนเหตุผลอ้างอิงข้อมูล ระบุวิธีดูแลผู้เสียประโยชน์และการรับผิดชอบผล',
+ 'นักเรียนรับบทบาทในกลุ่ม เผชิญเหตุการณ์เปลี่ยนแปลง 4 เหตุการณ์ และตัดสินใจร่วมกันพร้อมเหตุผล',
+ 'นักเรียนสะท้อนคิด 5 ประเด็น เกี่ยวกับตนเอง ผลต่อผู้อื่น การรับฟัง และสิ่งที่จะทำต่างออกไป',
+ 'นักเรียนประเมินตนเองตามเกณฑ์รูบริก 4 ด้าน และระบุสิ่งที่จะปรับปรุงในภารกิจถัดไป',
+ 'นักเรียนเสนอข้อตกลงหรือแนวปฏิบัติต่อห้อง และระบุสิ่งที่จะลงมือทำจริงภายในสัปดาห์นี้'];
+function openPlan(){ go('plan'); renderPlan(); }
+function renderPlan(){
+  const mi=MIS();
+  const totMin=STEPMIN.reduce((a,b)=>a+b,0);
+  $('v-plan').innerHTML=`
+  <div class="card noprint">
+    <div class="eyebrow">ภาคผนวก ก · แผนการจัดกิจกรรมโฮมรูมต้นแบบ</div>
+    <h1>แผนการจัดกิจกรรม</h1>
+    <p class="muted">สร้างจากภารกิจที่เลือกโดยอัตโนมัติ พิมพ์แนบภาคผนวกได้ทันที เปลี่ยนภารกิจได้จากหน้าครู</p>
+    <div class="row"><button class="primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+      <button onclick="openPaper()">พิมพ์ใบงานนักเรียน</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>
+  <div class="card paperbox">
+    <div style="text-align:center;border-bottom:2px solid #333;padding-bottom:8px;margin-bottom:12px">
+      <h2 style="margin:0">แผนการจัดกิจกรรมโฮมรูม</h2>
+      <p class="small" style="margin:4px 0 0">นวัตกรรม Life Competency UP TO GROW · ภายใต้โครงการสร้างและส่งเสริมความเป็นพลเมืองดีตามรอยพระยุคลบาทด้านการศึกษาสู่การปฏิบัติ</p>
+    </div>
+    <table><tbody>
+      <tr><td style="width:28%"><b>ชื่อกิจกรรม</b></td><td>ภารกิจที่ ${mi.week} · ${esc(mi.title)}</td></tr>
+      <tr><td><b>สมรรถนะเป้าหมาย</b></td><td>${esc(mi.theme)}</td></tr>
+      <tr><td><b>ระดับชั้น</b></td><td>${esc(GRADE)} ห้อง ${esc(ROOM)} จำนวน ${ROSTER.length} คน</td></tr>
+      <tr><td><b>เวลา</b></td><td>${totMin} นาที (1 คาบโฮมรูม) ไม่รวมแบบวัดก่อน–หลัง</td></tr>
+    </tbody></table>
+
+    <h3>1. สาระสำคัญ</h3>
+    <p>${mi.scenario}</p>
+    <p class="small">${esc(mi.consider||'')}</p>
+
+    <h3>2. จุดประสงค์การเรียนรู้</h3>
+    <p><b>ด้านความรู้ (K)</b> นักเรียนอธิบายความแตกต่างระหว่างข้อเท็จจริงกับความคิดเห็น และระบุผู้มีส่วนได้ส่วนเสียในสถานการณ์ได้</p>
+    <p><b>ด้านทักษะ (P)</b> นักเรียนวิเคราะห์ทางเลือกอย่างน้อย 2 ทาง เปรียบเทียบผลกระทบ และตัดสินใจโดยใช้ข้อมูลประกอบเหตุผลได้</p>
+    <p><b>ด้านคุณลักษณะ (A)</b> นักเรียนแสดงความรับผิดชอบต่อผลการตัดสินใจ เคารพสิทธิผู้อื่น และคำนึงถึงประโยชน์ส่วนรวม</p>
+
+    <h3>3. สมรรถนะสำคัญของผู้เรียน</h3>
+    <p>ความสามารถในการคิด · ความสามารถในการแก้ปัญหา · ความสามารถในการสื่อสาร · ความสามารถในการใช้ทักษะชีวิต</p>
+
+    <h3>4. คุณลักษณะอันพึงประสงค์</h3>
+    <p>ซื่อสัตย์สุจริต · มีวินัย · ใฝ่เรียนรู้ · มุ่งมั่นในการทำงาน · มีจิตสาธารณะ</p>
+
+    <h3>5. กิจกรรมการเรียนรู้ (Syntax 8 ขั้น UP TO GROW)</h3>
+    <table><thead><tr><th style="width:8%">ขั้น</th><th style="width:20%">ชื่อขั้น</th><th>กิจกรรม</th><th style="width:10%">เวลา</th></tr></thead><tbody>
+      ${STEPS.map((x,i)=>`<tr class="pitem"><td class="mono">${x[0]}</td><td>${x[1]}</td>
+        <td class="small">${esc(STEP_ACT[i])}</td><td class="mono">${STEPMIN[i]} น.</td></tr>`).join('')}
+      <tr><td colspan="3" style="text-align:right"><b>รวม</b></td><td class="mono"><b>${totMin} น.</b></td></tr>
+    </tbody></table>
+
+    <h3>6. สื่อและแหล่งการเรียนรู้</h3>
+    <p>ระบบ Life Competency UP TO GROW (เว็บแอปพลิเคชัน) · ใบงานกระดาษสำหรับนักเรียนที่ไม่มีอุปกรณ์ · สถานการณ์จำลองและเหตุการณ์เปลี่ยนแปลง ${(mi.events||[]).length} เหตุการณ์ · AI Life Coach สำหรับตั้งคำถามกระตุ้นคิด</p>
+
+    <h3>7. การวัดและประเมินผล</h3>
+    <table><thead><tr><th>สิ่งที่วัด</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead><tbody>
+      <tr><td>พัฒนาการทักษะชีวิตและพลเมืองดี</td><td>ทดสอบก่อน–หลัง</td><td>แบบวัดเชิงสถานการณ์ 10 ข้อ</td><td>คะแนนหลังสูงกว่าก่อน</td></tr>
+      <tr><td>กระบวนการคิดและการตัดสินใจ</td><td>ตรวจผลงาน</td><td>เกณฑ์รูบริก 4 ระดับ</td><td>ระดับ 3 ขึ้นไป</td></tr>
+      <tr><td>พฤติกรรมระหว่างทำกิจกรรม</td><td>สังเกต</td><td>แบบบันทึกการสังเกตของครู</td><td>ระดับ 3 ขึ้นไป</td></tr>
+      <tr><td>ความตรงของคำตอบ</td><td>สัมภาษณ์</td><td>แบบสัมภาษณ์เชิงกระบวนการคิด</td><td>สอดคล้องกับคำตอบในระบบ</td></tr>
+    </tbody></table>
+
+    <h3>8. เกณฑ์การประเมิน (Rubric)</h3>
+    <table><thead><tr><th style="width:26%">สมรรถนะ</th><th>ระดับ 1 เริ่มต้น</th><th>ระดับ 2 กำลังพัฒนา</th><th>ระดับ 3 สามารถ</th><th>ระดับ 4 เชี่ยวชาญ</th></tr></thead><tbody>
+      ${Object.values(RUBRICS).map(r=>`<tr class="pitem"><td><b>${esc(r.n)}</b></td>
+        ${r.l.map(t=>`<td class="small">${esc(t)}</td>`).join('')}</tr>`).join('')}
+    </tbody></table>
+
+    <h3>9. บันทึกหลังการจัดกิจกรรม</h3>
+    <p><b>ผลการจัดกิจกรรม</b></p>
+    <div style="border-bottom:1px solid #999;height:20px;margin:5px 0"></div>
+    <div style="border-bottom:1px solid #999;height:20px;margin:5px 0"></div>
+    <p><b>ปัญหา อุปสรรค และแนวทางแก้ไข</b></p>
+    <div style="border-bottom:1px solid #999;height:20px;margin:5px 0"></div>
+    <div style="border-bottom:1px solid #999;height:20px;margin:5px 0"></div>
+    <p style="margin-top:16px;text-align:right">ลงชื่อ ............................................ ครูผู้สอน</p>
+  </div>`;
+}
+
+
+/* ================= โหมดสาธิต · ชุดข้อมูลจำลอง =================
+   วัตถุประสงค์: ใช้สาธิตว่า "ถ้านำนวัตกรรมนี้ไปใช้จริง จะได้ผลลัพธ์อย่างไร"
+   เพื่อนำเสนอต่อกรรมการ ถ่ายภาพหน้าจอ และทดลองใช้ทุกฟังก์ชันก่อนเก็บข้อมูลจริง
+
+   หลักการสำคัญ
+   1. ข้อมูลชุดนี้ถูกกำกับว่า demo:true ทุกระเบียน และมีแถบเตือนบนหน้าจอตลอดเวลา
+      รวมทั้งตอนพิมพ์ เพื่อไม่ให้ถูกเข้าใจผิดว่าเป็นผลการทดลองจริง
+   2. บันทึกลงเครื่องเท่านั้น ไม่ส่งขึ้น Google Sheet จึงไม่ปนกับข้อมูลจริง
+   3. ตัวเลขสร้างจากสูตรคงที่ (seeded) ผลจึงเหมือนเดิมทุกครั้ง ตรวจสอบซ้ำได้
+   4. กดปุ่มล้างข้อมูลสาธิตเพื่อลบออกทั้งหมดก่อนใช้งานจริง
+   ============================================================== */
+const DEMO_KEY='lc:demo';
+const isDemo=()=>LS.get(DEMO_KEY)==='1';
+function paintDemoBar(){
+  const el=$('demoBar'); if(!el) return;
+  if(!isDemo()){ el.classList.add('hide'); el.innerHTML=''; return; }
+  el.classList.remove('hide');
+  el.innerHTML=`<b>⚠ โหมดสาธิต · ข้อมูลจำลอง</b>
+    <span>ตัวเลขและคำตอบทั้งหมดในขณะนี้เป็นข้อมูลสมมติที่ระบบสร้างขึ้นเพื่อสาธิตการทำงาน <b>ไม่ใช่ผลการทดลองจริง</b></span>
+    <span class="sp"></span>
+    <button class="ghost small noprint" onclick="clearDemo()">ล้างข้อมูลสาธิต</button>`;
+}
+/* ตัวสุ่มแบบกำหนดค่าเริ่มต้นได้ ผลลัพธ์คงที่ทุกครั้ง */
+function rng_(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0;
+  let t=Math.imul(seed^seed>>>15,1|seed);
+  t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296; }; }
+/* โปรไฟล์ผู้เรียนสมมติ 15 แบบ ให้กระจายตัวเหมือนห้องเรียนจริง
+   base = ระดับพฤติกรรมก่อนเรียน · gain = พัฒนาการหลังเรียน */
+const DEMO_P=[
+ {base:2.9,gain:0.9},{base:2.4,gain:1.0},{base:2.1,gain:0.9},{base:3.0,gain:0.8},
+ {base:2.5,gain:0.9},{base:1.9,gain:1.1},{base:2.6,gain:0.8},{base:2.3,gain:1.1},
+ {base:2.8,gain:0.7},{base:2.0,gain:1.2},{base:1.8,gain:1.0},{base:2.7,gain:0.9},
+ {base:2.2,gain:1.0},{base:2.5,gain:0.2},{base:2.4,gain:1.3}
+];
+const pick_=(arr,r)=>arr&&arr.length?arr[Math.floor(r()*arr.length)]:'';
+const clamp14=v=>Math.max(1,Math.min(4,Math.round(v)));
+
+/* สมรรถนะเป้าหมายของแต่ละภารกิจ จะพัฒนาขึ้นมากกว่าด้านอื่นอย่างเห็นได้ชัด
+   สะท้อนหลักการว่าภารกิจที่ออกแบบมาเจาะจงย่อมส่งผลต่อด้านนั้นมากที่สุด */
+const DEMO_FOCUS={0:['resp','common','hon'],1:['think','resp2','comm']};
+function demoRecord(i,mid,r){
+  const p=DEMO_P[i%DEMO_P.length];
+  const focus=DEMO_FOCUS[mid]||[];
+  const pre={},post={};
+  for(let q=0;q<ITEMS.length;q++){
+    const noise=(r()-0.5)*1.1;
+    const a=clamp14(p.base+noise);
+    pre['q'+q]=a;
+    const bonus=focus.includes(ITEMS[q].d)?0.45:-0.15;
+    const g=p.gain+bonus+(r()-0.5)*0.7;
+    post['q'+q]=clamp14(a+Math.max(0,g));
+  }
+  /* เวลา: กระจายให้เหมือนทำจริงในคาบ ห่างก่อน-หลังราว 50-75 นาที */
+  const day=new Date(); day.setDate(day.getDate()-(mid===0?7:2));
+  day.setHours(9,0,0,0);
+  const started=day.getTime()+i*60000;
+  const preAt=started+(6+Math.floor(r()*4))*60000;
+  const postAt=preAt+(50+Math.floor(r()*26))*60000;
+  const S=id=>pick_(sugForMission(mid,id),r);
+  const rec={
+    idx:i,missionId:mid,name:ROSTER[i]||('นักเรียนคนที่ '+(i+1)),room:ROOM,
+    started,preAt,postAt,finished:postAt,
+    pre,post,phase:'post',step:STEPS.length,qi:0,done:true,demo:true,
+    role:ROLES[i%ROLES.length],
+    contrib:S('contrib'),
+    plan:{
+      feel:S('feel'),know:S('know'),need:S('need'),
+      fact:S('fact'),op:S('op'),who:S('who'),
+      alt:[{n:S('a0n'),c:String(400+Math.floor(r()*500)),g:(8+Math.floor(r()*7))+' คน',l:S('lose'),r:'ของอาจชำรุดถ้าไม่มีคนดูแล'},
+           {n:S('a1n'),c:String(300+Math.floor(r()*400)),g:(5+Math.floor(r()*8))+' คน',l:'กลุ่มที่ไม่ได้ใช้ของชิ้นนี้',r:'ใช้ได้ไม่นาน'},
+           {}],
+      choice:r()<0.62?0:1,
+      why:S('why'),lose:S('lose'),own:S('own'),
+      pv1:S('pv1'),pv2:S('pv2'),pv3:S('pv3'),
+      changed:r()<0.4?1:0
+    },
+    decisions:{},reflect:{},self:{},action:{w1:S('w1'),w2:S('w2'),w3:S('w3')},
+    coachLog:[],log:[],
+    teacher:{score:{},note:''}
+  };
+  /* เหตุการณ์เปลี่ยนแปลงในขั้น G */
+  const evs=(MISSIONS[mid]&&MISSIONS[mid].events)||[];
+  evs.forEach((ev,k)=>{ rec.decisions[k]={pick:Math.floor(r()*ev.o.length),r:pick_(sugForMission(mid,'er'+k),r)||'เพราะคำนึงถึงคนที่ยังไม่ได้ประโยชน์'}; });
+  /* สะท้อนคิด 5 ข้อ */
+  REFLECT_Q.forEach((q,k)=>{ rec.reflect['q'+k]=pick_(sugForMission(mid,'r'+k),r)||'ได้เรียนรู้ว่าการตัดสินใจของเราส่งผลต่อคนอื่นเสมอ'; });
+  /* ประเมินตนเอง และครูให้รูบริก (เว้นบางคนไว้ให้เห็นสถานะยังประเมินไม่ครบ) */
+  const lv=Math.max(1,Math.min(4,Math.round(p.base+p.gain)));
+  Object.keys(RUBRICS).forEach(k=>{ rec.self[k]=Math.max(1,Math.min(4,lv+(r()<0.3?1:0))); });
+  if(i<13){ Object.keys(RUBRICS).forEach(k=>{ rec.teacher.score[k]=Math.max(1,Math.min(4,lv+(r()<0.25?-1:0))); }); }
+  rec.fix=S('fix');
+  /* บทสนทนากับโค้ชสำหรับบางคน เพื่อให้เห็นหลักฐานการใช้ AI */
+  if(r()<0.55){
+    rec.coachLog=[{role:'me',text:'ผมคิดว่าจะเลือกทางที่คนได้ใช้เยอะที่สุดครับ'},
+      {role:'ai',text:'ถ้าเป็นเพื่อนที่ไม่ได้ประโยชน์จากทางเลือกนี้ เขาจะพูดว่าอย่างไร'},
+      {role:'me',text:'เขาอาจบอกว่าไม่ยุติธรรม ผมเลยคิดว่าจะกันงบส่วนหนึ่งไว้ให้เขาด้วยครับ'},
+      {role:'ai',text:'ตัวเลขที่ใช้ตัดสินใจนี้มาจากไหน ตรวจสอบได้หรือไม่'}];
+  }
+  rec.log=[{t:preAt,type:'pre',detail:'ทำแบบวัดก่อนเสร็จ คะแนน '+total(pre)},
+           {t:postAt,type:'post',detail:'ทำแบบวัดหลังเสร็จ คะแนน '+total(post)}];
+  return rec;
+}
+/* ดึงคลังคำตอบสำเร็จรูปของภารกิจนั้น ๆ */
+function sugForMission(mid,id){
+  const m=MISSIONS[mid];
+  if(m&&m.sug&&m.sug[id]) return m.sug[id];
+  return SUG[id];
+}
+function seedDemo(){
+  const mids=MISSIONS.filter(m=>m.enabled).map(m=>m.id);
+  let n=0;
+  mids.forEach(mid=>{
+    for(let i=0;i<ROSTER.length;i++){
+      const r=rng_(20260807+mid*1000+i*37);
+      const rec=demoRecord(i,mid,r);
+      LS.set(mKey(i,mid),JSON.stringify(rec));   /* เก็บในเครื่องเท่านั้น ไม่ส่งขึ้น Sheet */
+      n++;
+    }
+  });
+  /* ตัวอย่างการสัมภาษณ์เชิงกระบวนการคิด 2 คน เพื่อให้เห็นหลักฐานภาคผนวก */
+  try{
+    [1,9].forEach((i,k)=>{
+      const raw=LS.get(mKey(i,0)); if(!raw) return;
+      const d=JSON.parse(raw);
+      d.interview={notes:['คิดถึงเพื่อนที่ไม่ได้ใช้ของก่อนเป็นอย่างแรก',
+        'เกือบเลือกทางที่ซื้อของถูก แต่กลัวเรื่องความปลอดภัย',
+        'คิดว่าจะทำแบบเดิม เพราะอธิบายเหตุผลให้เพื่อนฟังได้',
+        'ไม่มี ตอบตามที่คิดจริง'],
+        by:'ครูผู้สอน',at:(d.postAt||d.finished)+3600000,consistent:k===0?'ตรงกัน':'ตรงบางส่วน'};
+      LS.set(mKey(i,0),JSON.stringify(d));
+    });
+  }catch(e){}
+  /* ตัวอย่างผลการพิจารณา IOC จากผู้เชี่ยวชาญ 5 ท่าน */
+  const iocR={};
+  const ir=rng_(99887);
+  for(let q=0;q<ITEMS.length;q++){
+    iocR[q]=[...Array(5)].map(()=>ir()<0.86?1:(ir()<0.7?0:-1));
+  }
+  LS.set('lc:ioc',JSON.stringify({nExp:5,
+    names:['รศ.ดร. ผู้เชี่ยวชาญด้านหลักสูตร','ผศ.ดร. ผู้เชี่ยวชาญด้านวัดผล','ดร. ผู้เชี่ยวชาญด้านจิตวิทยา','ครูชำนาญการพิเศษ','ศึกษานิเทศก์'],
+    r:iocR,tool:'แบบวัดสถานการณ์ทักษะชีวิตและความเป็นพลเมืองดี (10 ข้อ)',demo:true}));
+  LS.set(DEMO_KEY,'1');
+  paintDemoBar();
+  toast('สร้างข้อมูลสาธิตแล้ว '+n+' ระเบียน · เปิดหน้าครูหรือผลวิเคราะห์สถิติเพื่อดูผล',1);
+}
+function clearDemo(){
+  if(!confirm('ล้างข้อมูลสาธิตทั้งหมดหรือไม่\n\nระบบจะลบเฉพาะระเบียนที่ถูกกำกับว่าเป็นข้อมูลจำลอง ข้อมูลจริงของนักเรียนจะไม่ถูกลบ')) return;
+  let n=0;
+  LS.keys('lc:').forEach(k=>{
+    try{
+      const v=LS.get(k); if(!v||v[0]!=='{') return;
+      const o=JSON.parse(v);
+      if(o&&o.demo===true){ localStorage.removeItem(k); localStorage.removeItem('pending:'+k); n++; }
+    }catch(e){}
+  });
+  try{ localStorage.removeItem(DEMO_KEY); localStorage.removeItem('lc:last'); }catch(e){}
+  paintDemoBar();
+  toast('ล้างข้อมูลสาธิตแล้ว '+n+' ระเบียน',1);
+  go('home');
+}
+function openDemoPanel(){
+  go('more'); renderMore();
+}
 
 /* ---------- boot ---------- */
 async function checkResume(){
@@ -2584,7 +3384,7 @@ async function checkResume(){
     <button class="small" style="margin-left:10px" onclick="curMission=${lastMid};startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
 }
 loadImportedMissions();
-applyZoom(); applyHC();
+applyZoom(); applyHC(); paintDemoBar();
 routeFromURL();
 const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
 renderMissionList(); renderPick(); checkResume();
