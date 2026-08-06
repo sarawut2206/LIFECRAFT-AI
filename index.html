@@ -124,6 +124,26 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 .chartwrap{height:220px!important;break-inside:avoid}.chartgrid{grid-template-columns:1fr 1fr}
 .printhead{display:block!important;text-align:right;font-size:11px;color:#555;margin-bottom:4px}}
 .printhead{display:none}
+/* ---- accessibility (ปรับขนาด/คมชัดสูง) ---- */
+.a11y{display:inline-flex;gap:4px}
+.a11y button{padding:6px 9px;min-height:34px;font-size:13px;line-height:1}
+body.hc{--bg:#ffffff;--panel:#ffffff;--panel2:#eaeaea;--soft:#f2f2f2;--line:#4a4a4a;
+  --text:#000000;--muted:#2b2b2b;--teal:#046b5e;--teal-d:#013b34;--gold:#8a5b00;--red:#a3140a}
+body.hc{background:#fff}
+body.hc .card{box-shadow:none;border-width:2px}
+body.hc .opt,body.hc .rcard,body.hc .pcard,body.hc input,body.hc textarea,body.hc select{border-width:2px}
+body.hc .muted,body.hc .small.muted{color:#2b2b2b}
+/* ---- no-mobile batch entry (ครูกรอกแทน) ---- */
+.bgrid .bq{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--soft)}
+.bgrid .bq .qh{font-size:14px;margin-bottom:2px}
+.bseg{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0}
+.bseg .lbl{font-size:12px;color:var(--muted);width:70px;flex:0 0 70px}
+.bbtn{width:40px;height:40px;min-height:40px;padding:0;border-radius:9px;font-family:var(--mono);font-size:15px;background:#fff}
+.bbtn.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+.bbtn.pre.on{background:var(--gold);border-color:var(--gold);color:#3a2b00}
+/* ---- printable paper worksheet ---- */
+.paperbox p{margin:0 0 .3em}.paperbox h3{margin:12px 0 4px}
+@media print{.pitem{break-inside:avoid}.paperbox .card{break-inside:auto}}
 </style>
 
 <div class="wrap">
@@ -134,6 +154,11 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
   <div class="badge" id="whoami">ยังไม่ได้เลือกชื่อ</div>
   <span class="saved" id="savedTag">บันทึกในเครื่อง</span>
   <span class="saved" id="netTag"></span>
+  <span class="a11y noprint" style="margin-left:2px">
+    <button class="ghost" title="ตัวอักษรเล็กลง" aria-label="ตัวอักษรเล็กลง" onclick="bumpZoom(-1)">ก-</button>
+    <button class="ghost" title="ตัวอักษรใหญ่ขึ้น" aria-label="ตัวอักษรใหญ่ขึ้น" onclick="bumpZoom(1)">ก+</button>
+    <button class="ghost" title="โหมดความคมชัดสูง" aria-label="โหมดความคมชัดสูง" onclick="toggleHC()">◐</button>
+  </span>
   <button class="ghost small" onclick="retryNow()">ส่งข้อมูลซ้ำ</button>
   <button class="ghost small" onclick="go('home')">หน้าแรก</button>
 </header>
@@ -149,6 +174,8 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
       <button onclick="needTeacher(openTeacher)">ครู · Dashboard และผลก่อน–หลัง</button>
       <button onclick="needTeacher(()=>{go('semester');renderSemester();})">ภาพรวมภาคเรียน</button>
       <button onclick="needTeacher(openQuick)">ภารกิจด่วนรายวัน (ครู)</button>
+      <button onclick="needTeacher(openBatch)">โหมดไม่มีมือถือ · ครูกรอกแทน</button>
+      <button onclick="needTeacher(openPaper)">พิมพ์ใบงาน / แบบวัด (กระดาษ)</button>
       <button onclick="needTeacher(openSetup)">ตั้งค่าห้องเรียน / คลังภารกิจ</button>
       <button onclick="openResearch()">ฐานงานวิจัยอ้างอิง</button>
     </div>
@@ -186,6 +213,8 @@ h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 <section id="v-interview" class="hide"></section>
 <section id="v-lock" class="hide"></section>
 <section id="v-share" class="hide"></section>
+<section id="v-batch" class="hide"></section>
+<section id="v-paper" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -198,12 +227,15 @@ const ROSTER_DEFAULT = ["นายกำชัย กนกวรกาญจน
 "นายธีรภัทร เจตนะเสน","นายนิปุณ ผลผักแว่น","นายบุณยกร โห้รอด","นายพาณิชย์ บุตรสุวรรณ์",
 "นายสหัสทัย รักษาธรรม","นายก้องฟ้า แจ้งวิถี","นายธิติคุณ ศรีสุระ","นายวรวิทย์ เดชจินดา"];
 const ROOM_DEFAULT = 'ม.4/4';
+const GRADE_DEFAULT = 'ม.4';
 let ROSTER = ROSTER_DEFAULT.slice();
 let ROOM = ROOM_DEFAULT;
+let GRADE = GRADE_DEFAULT;
 function loadClassConfig(){
   try{
     const r=localStorage.getItem('lc:cfg:roster'); if(r){const a=JSON.parse(r); if(Array.isArray(a)&&a.length) ROSTER=a;}
     const m=localStorage.getItem('lc:cfg:room'); if(m) ROOM=m;
+    const g=localStorage.getItem('lc:cfg:grade'); if(g) GRADE=g;
   }catch(e){}
 }
 loadClassConfig();
@@ -440,7 +472,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   if(v==='home') renderMissionList();}
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
@@ -1140,7 +1172,7 @@ async function askCoach(){
   const inp=$('coachIn'), txt=inp.value.trim(); if(!txt)return;
   s.coachLog.push({role:'me',text:txt}); inp.value=''; renderCoach();
   $('coachBtn').disabled=true;
-  const sys=`คุณคือ AI Life Coach ในกิจกรรมโฮมรูมของโรงเรียนไทย ระดับ ม.4
+  const sys=`คุณคือ AI Life Coach ในกิจกรรมโฮมรูมของโรงเรียนไทย ระดับ ${GRADE}
 กฎเหล็ก
 1 ห้ามบอกว่าควรเลือกทางใด ห้ามให้คำตอบสำเร็จรูป ห้ามให้คะแนน
 2 ตอบด้วยคำถามปลายเปิด 1-2 คำถาม สั้น ไม่เกิน 3 บรรทัด ภาษาไทยง่าย สุภาพ
@@ -1275,6 +1307,8 @@ async function openTeacher(){
     <div class="row noprint" style="margin-top:10px">
       ${MISSIONS.filter(m=>m.enabled).map(m=>`<button class="${m.id===curMission?'primary':''}" onclick="curMission=${m.id};openTeacher()">สัปดาห์ ${m.week} · ${m.title}</button>`).join('')}
       <button onclick="needTeacher(()=>{go('semester');renderSemester();})">ภาพรวมภาคเรียน</button>
+      <button onclick="openBatch()">กรอกแทนนักเรียน · ไม่มีมือถือ</button>
+      <button onclick="openPaper()">พิมพ์ใบงานกระดาษ</button>
       <button onclick="lockTeacher()">ออกจากหน้าครู</button>
     </div>
     <h3 style="margin-top:16px;font-size:15px">ผลการดำเนินงาน (ข้อมูลสำหรับบทที่ 4)</h3>
@@ -1344,7 +1378,7 @@ async function openTeacher(){
       return `<tr>
         <td class="mono">${i+1}</td><td>${n}</td>
         <td class="small">${fmtD(d.finished||d.started)}</td>
-        <td class="mono small ${gm!==null&&gm<30?'bad':''}">${gm!==null?gm+' นาที':'-'}</td>
+        <td class="mono small ${!d.paper&&gm!==null&&gm<30?'bad':''}">${d.paper?'<span class="muted">กระดาษ</span>':(gm!==null?gm+' นาที':'-')}</td>
         <td class="mono">${p||'-'}</td><td class="mono">${ok?q:'-'}</td>
         <td class="mono ${ok&&q-p>0?'ok':ok&&q-p<0?'bad':''}">${ok?((q-p>=0?'+':'')+(q-p)):'-'}</td>
         <td class="small">${scored?'<span class="ok">✓ ครบ</span>':'<span class="muted">ยังไม่ครบ</span>'}</td>
@@ -1355,7 +1389,7 @@ async function openTeacher(){
         <td class="noprint"><button class="small" onclick="showReport(window._all[${i}],true)">ดูรายคน</button>
           <button class="small" onclick="openInterview(${i})">สัมภาษณ์</button></td></tr>`;}).join('')}
     </tbody></table>
-    ${(()=>{const short=all.filter(d=>d&&d.done&&gapMin(d.preAt||d.started,d.postAt||d.finished)!==null&&gapMin(d.preAt||d.started,d.postAt||d.finished)<30);
+    ${(()=>{const short=all.filter(d=>d&&d.done&&!d.paper&&gapMin(d.preAt||d.started,d.postAt||d.finished)!==null&&gapMin(d.preAt||d.started,d.postAt||d.finished)<30);
       return short.length?`<div class="notice">มีนักเรียน ${short.length} คนที่ทำแบบวัดก่อนและหลังห่างกันน้อยกว่า 30 นาที ซึ่งอาจถูกตั้งคำถามว่าวัดพัฒนาการได้จริงหรือไม่ ควรตรวจสอบว่ามีกิจกรรมคั่นกลางครบถ้วน</div>`:'';})()}
     ${(()=>{const un=all.filter(d=>d&&d.done&&Object.keys(d.teacher&&d.teacher.score||{}).length<4);
       return un.length?`<div class="notice">เหลือนักเรียน ${un.length} คนที่ครูยังให้ระดับรูบริกไม่ครบ กดปุ่ม ดูรายคน เพื่อประเมินก่อนปิดคาบ</div>`:'';})()}
@@ -1499,12 +1533,12 @@ async function qGenerate(){
   if(topic.length<5){ bad('qTopic','พิมพ์หัวข้อสถานการณ์ให้ชัดเจนก่อน เช่น มีนักเรียนถ่ายคลิปเพื่อนไปโพสต์ในกลุ่ม'); return; }
   const btn=$('qGenBtn'); if(btn){btn.disabled=true;btn.textContent='กำลังให้ AI ร่างภารกิจ…';}
   const resList=RESEARCH.map(r=>r.n+' — '+r.p).join('\n');
-  const sys=`คุณเป็นผู้ช่วยครูไทยออกแบบภารกิจสถานการณ์สั้นสำหรับคาบโฮมรูม ระดับมัธยมศึกษาปีที่ 4
+  const sys=`คุณเป็นผู้ช่วยครูไทยออกแบบภารกิจสถานการณ์สั้นสำหรับคาบโฮมรูม ระดับชั้น ${GRADE}
 ตอบกลับเป็น JSON เท่านั้น ห้ามมีข้อความอื่นนอก JSON ห้ามใส่ markdown หรือ backtick
 โครงสร้าง JSON ที่ต้องการ
 {"situation":"...","options":[{"t":"...","level":1},{"t":"...","level":2},{"t":"...","level":3},{"t":"...","level":4}],"probe":["...","...","..."],"reflect":["...","..."],"rubricName":"...","rubric":["ระดับ1","ระดับ2","ระดับ3","ระดับ4"],"research":["ชื่องานวิจัยที่ใช้อ้างอิง"]}
 กฎเหล็ก
-1 situation ต้องเป็นสถานการณ์ที่ไม่มีคำตอบถูกเพียงข้อเดียว มีข้อจำกัดจริง ยาวไม่เกิน 4 บรรทัด ภาษาไทยที่นักเรียน ม.4 เข้าใจ
+1 situation ต้องเป็นสถานการณ์ที่ไม่มีคำตอบถูกเพียงข้อเดียว มีข้อจำกัดจริง ยาวไม่เกิน 4 บรรทัด ภาษาไทยที่นักเรียนระดับ ${GRADE} เข้าใจ
 2 options ต้องมี 4 ข้อ เรียงจากพฤติกรรมระดับ 1 ถึง 4 ตามเกณฑ์ โดยห้ามให้ข้อใดดูถูกชัดเจนจนเดาได้ทันที ทุกข้อต้องเป็นสิ่งที่นักเรียนจริงอาจเลือก
 3 probe คือคำถามกระตุ้นคิด 3 ข้อ ห้ามเป็นคำถามที่มีคำตอบถูกผิด
 4 rubric 4 ระดับ ต้องเป็นพฤติกรรมที่ครูสังเกตได้จริง ไม่ใช่ความรู้สึก
@@ -1780,8 +1814,12 @@ function renderSetup(){
     <div class="eyebrow">ตั้งค่าห้องเรียน</div>
     <h1>ตั้งค่าก่อนใช้กับห้องของคุณ</h1>
     <p class="muted" style="max-width:64ch">ครูท่านอื่นที่นำระบบนี้ไปใช้ ให้แก้ที่หน้านี้เท่านั้น ไม่ต้องแก้โค้ดในไฟล์ ข้อมูลจะถูกจำไว้ในเครื่องนี้</p>
-    <label for="cfgRoom">ชื่อชั้นเรียน</label>
-    <input id="cfgRoom" value="${esc(ROOM)}" placeholder="เช่น ม.4/4">
+    <div class="grid2">
+      <div><label for="cfgRoom">ชื่อชั้นเรียน / ห้อง</label>
+      <input id="cfgRoom" value="${esc(ROOM)}" placeholder="เช่น ม.4/4"></div>
+      <div><label for="cfgGrade">ระดับชั้น (ใช้กับ AI และการแสดงผล)</label>
+      <input id="cfgGrade" value="${esc(GRADE)}" placeholder="เช่น ป.6, ม.1, ม.4, ปวช.1"></div>
+    </div>
     <label for="cfgRoster">รายชื่อนักเรียน พิมพ์บรรทัดละ 1 ชื่อ</label>
     <textarea id="cfgRoster" style="min-height:280px">${esc(ROSTER.join('\n'))}</textarea>
     <p class="small muted">ขณะนี้มี ${ROSTER.length} คน · การเปลี่ยนรายชื่อจะไม่ลบข้อมูลเดิมที่บันทึกไว้ แต่ลำดับที่ของนักเรียนจะเปลี่ยนตามรายชื่อใหม่ ควรตั้งค่าให้เสร็จก่อนเริ่มเก็บข้อมูลจริง</p>
@@ -1813,24 +1851,28 @@ function renderSetup(){
 
 function saveClassConfig(){
   const room=($('cfgRoom')||{}).value?.trim()||'';
+  const grade=($('cfgGrade')||{}).value?.trim()||'';
   const lines=(($('cfgRoster')||{}).value||'').split('\n').map(x=>x.trim()).filter(x=>x);
   if(!room){ bad('cfgRoom','กรอกชื่อชั้นเรียน เช่น ม.4/4'); return; }
+  if(!grade){ bad('cfgGrade','กรอกระดับชั้น เช่น ป.6 หรือ ม.4'); return; }
   if(lines.length<1){ bad('cfgRoster','ต้องมีรายชื่อนักเรียนอย่างน้อย 1 คน'); return; }
   if(lines.length>60){ bad('cfgRoster','รายชื่อเกิน 60 คน ระบบออกแบบสำหรับ 1 ห้องเรียน'); return; }
   const dup=lines.filter((x,i)=>lines.indexOf(x)!==i);
   if(dup.length){ bad('cfgRoster','มีชื่อซ้ำกัน: '+dup[0]+' กรุณาแก้ให้ไม่ซ้ำ เพราะระบบใช้ชื่อแยกข้อมูลรายคน'); return; }
-  ROOM=room; ROSTER=lines;
+  ROOM=room; ROSTER=lines; GRADE=grade;
   try{
     localStorage.setItem('lc:cfg:room',ROOM);
+    localStorage.setItem('lc:cfg:grade',GRADE);
     localStorage.setItem('lc:cfg:roster',JSON.stringify(ROSTER));
   }catch(e){}
-  toast('บันทึกแล้ว ห้อง '+ROOM+' จำนวน '+ROSTER.length+' คน',1);
+  const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
+  toast('บันทึกแล้ว ห้อง '+ROOM+' ('+GRADE+') จำนวน '+ROSTER.length+' คน',1);
   renderSetup(); renderMissionList();
 }
 function resetClassConfig(){
   if(!confirm('คืนค่ารายชื่อและชื่อห้องกลับเป็นค่าเริ่มต้นหรือไม่ ข้อมูลคำตอบของนักเรียนจะไม่ถูกลบ')) return;
-  ROOM=ROOM_DEFAULT; ROSTER=ROSTER_DEFAULT.slice();
-  try{ localStorage.removeItem('lc:cfg:room'); localStorage.removeItem('lc:cfg:roster'); }catch(e){}
+  ROOM=ROOM_DEFAULT; ROSTER=ROSTER_DEFAULT.slice(); GRADE=GRADE_DEFAULT;
+  try{ localStorage.removeItem('lc:cfg:room'); localStorage.removeItem('lc:cfg:grade'); localStorage.removeItem('lc:cfg:roster'); }catch(e){}
   toast('คืนค่าเริ่มต้นแล้ว',1); renderSetup();
 }
 
@@ -2000,7 +2042,7 @@ function validitySignals(d){
   // 6. คะแนนพุ่งสูงผิดปกติในเวลาสั้น
   const gm=gapMin(d.preAt||d.started,d.postAt||d.finished);
   const diff=total(d.post)-total(d.pre);
-  if(d.done&&diff>=12&&gm!==null&&gm<60)
+  if(d.done&&!d.paper&&diff>=12&&gm!==null&&gm<60)
     sig.push({k:'jump',t:'คะแนนเพิ่มขึ้น '+diff+' ในเวลา '+gm+' นาที ควรตรวจสอบด้วยการสัมภาษณ์',lv:'check'});
 
   // 7. เลือกคำตอบระดับสูงทุกข้อในแบบวัดหลัง (ตอบเต็มทุกข้อ)
@@ -2348,6 +2390,189 @@ async function routeFromURL(){
   return false;
 }
 
+/* ================= การเข้าถึง: ปรับขนาดตัวอักษร และโหมดคมชัดสูง =================
+   ช่วยให้ใช้งานได้ทุกรูปแบบ ทั้งบนจอโปรเจกเตอร์ นักเรียนสายตาเลือนราง
+   หรือครูที่ต้องการตัวอักษรใหญ่ ค่าจะถูกจำไว้ในเครื่อง
+   ============================================================================= */
+let _zoom=parseFloat(LS.get('lc:zoom')||'1')||1;
+let _hc=LS.get('lc:hc')==='1';
+function applyZoom(){ const w=document.querySelector('.wrap'); if(w) w.style.zoom=_zoom; }
+function bumpZoom(dir){
+  _zoom=Math.min(1.6,Math.max(0.85,Math.round((_zoom+dir*0.1)*100)/100));
+  LS.set('lc:zoom',String(_zoom)); applyZoom();
+  toast('ขนาดตัวอักษร '+Math.round(_zoom*100)+'%',1);
+}
+function applyHC(){ document.body.classList.toggle('hc',_hc); }
+function toggleHC(){ _hc=!_hc; LS.set('lc:hc',_hc?'1':'0'); applyHC(); toast(_hc?'เปิดโหมดคมชัดสูงแล้ว':'ปิดโหมดคมชัดสูงแล้ว',1); }
+
+
+/* ================= โหมดไม่มีมือถือ: ครูกรอกคะแนนแทนนักเรียน =================
+   ใช้เมื่อนักเรียนไม่มีมือถือ หรือใช้อุปกรณ์ร่วมกัน
+   นักเรียนทำบนกระดาษ แล้วครูนำคำตอบก่อน–หลังและระดับรูบริกมากรอกที่นี่
+   ข้อมูลจะถูกบันทึกในรูปแบบเดียวกับที่นักเรียนทำเอง จึงเข้าสู่แดชบอร์ด
+   กราฟ รายงานรายบุคคล และ CSV ได้ทั้งหมด (ทำเครื่องหมาย paper:true ไว้
+   เพื่อไม่ให้ระบบเตือนเรื่องเวลาก่อน–หลังที่สั้น)
+   ========================================================================= */
+let B=null;
+function openBatch(){ go('batch'); renderBatch(); }
+function batchMission(id){ curMission=parseInt(id); B=null; renderBatch(); }
+async function batchPick(v){
+  if(v===''){ B=null; renderBatch(); return; }
+  const i=parseInt(v);
+  const raw=await S.get(mKey(i),true);
+  let d=null; try{ d=raw?JSON.parse(raw):null; }catch(e){ d=null; }
+  B={idx:i,
+     pre:Object.assign({},(d&&d.pre)||{}),
+     post:Object.assign({},(d&&d.post)||{}),
+     score:Object.assign({},(d&&d.teacher&&d.teacher.score)||{}),
+     base:d};
+  renderBatch();
+}
+function setBatch(phase,qi,v){ if(!B)return; B[phase]['q'+qi]=v; renderBatchGrid(); }
+function setBatchScore(k,v){ if(!B)return; B.score[k]=(B.score[k]===v?undefined:v); if(B.score[k]===undefined) delete B.score[k]; renderBatchGrid(); }
+function clearBatch(){ B=null; renderBatch(); }
+function renderBatch(){
+  const missionOpts=MISSIONS.filter(m=>m.enabled).map(m=>`<option value="${m.id}" ${m.id===curMission?'selected':''}>สัปดาห์ ${m.week} · ${esc(m.title)}</option>`).join('');
+  const rosterOpts=`<option value="">— เลือกนักเรียน —</option>`+ROSTER.map((n,i)=>`<option value="${i}" ${B&&B.idx===i?'selected':''}>${i+1}. ${esc(n)}</option>`).join('');
+  $('v-batch').innerHTML=`
+  <div class="card">
+    <div class="eyebrow">โหมดไม่มีมือถือ · ครูกรอกแทนนักเรียน</div>
+    <h1>กรอกคะแนนจากใบงานกระดาษ</h1>
+    <p class="muted" style="max-width:66ch">ใช้เมื่อนักเรียนไม่มีมือถือหรือใช้เครื่องร่วมกัน นักเรียนทำแบบวัดและใบงานบนกระดาษ (พิมพ์ได้จากปุ่มด้านล่าง) แล้วครูนำคำตอบมากรอกที่นี่ทีละคน ข้อมูลจะเข้าสู่แดชบอร์ด กราฟ รายงานรายบุคคล และไฟล์ CSV เหมือนนักเรียนทำเองทุกประการ</p>
+    <div class="grid2" style="margin-top:12px">
+      <div><label for="bMis">ภารกิจ</label><select id="bMis" onchange="batchMission(this.value)">${missionOpts}</select></div>
+      <div><label for="bStu">นักเรียน</label><select id="bStu" onchange="batchPick(this.value)">${rosterOpts}</select></div>
+    </div>
+    <div class="row noprint" style="margin-top:12px">
+      <button onclick="openPaper()">พิมพ์ใบงาน / แบบวัดกระดาษ</button>
+      <button onclick="openTeacher()">ไปหน้าติดตามผล</button>
+      <button onclick="go('home')">กลับหน้าแรก</button>
+    </div>
+  </div>
+  <div id="batchGrid"></div>`;
+  renderBatchGrid();
+}
+function renderBatchGrid(){
+  const box=$('batchGrid'); if(!box) return;
+  if(!B){ box.innerHTML=`<div class="card"><p class="muted">เลือกนักเรียนจากช่อง "นักเรียน" ด้านบนเพื่อเริ่มกรอกคะแนน</p></div>`; return; }
+  const seg=(phase,qi)=>{
+    const cur=B[phase]['q'+qi];
+    return `<div class="bseg"><span class="lbl">${phase==='pre'?'ก่อนเรียน':'หลังเรียน'}</span>`+
+      [1,2,3,4].map(v=>`<button class="bbtn ${phase} ${cur===v?'on':''}" onclick="setBatch('${phase}',${qi},${v})" aria-label="ข้อ ${qi+1} ${phase==='pre'?'ก่อน':'หลัง'} เลือก ${v}">${v}</button>`).join('')+`</div>`;
+  };
+  const items=ITEMS.map((it,i)=>`<div class="bq pitem">
+      <div class="qh"><b>${i+1}.</b> ${esc(it.q)}</div>
+      <div class="small muted" style="margin-bottom:2px">1 = ${esc(it.o[0].slice(0,26))}…  ·  4 = ${esc(it.o[3].slice(0,26))}…</div>
+      ${seg('pre',i)}${seg('post',i)}
+    </div>`).join('');
+  const preN=Object.keys(B.pre).length, postN=Object.keys(B.post).length;
+  const ready=preN>=10&&postN>=10;
+  const rub=Object.entries(RUBRICS).map(([k,r])=>`<div style="margin:8px 0">
+      <div class="small" style="margin-bottom:3px">${r.n}</div>
+      ${[1,2,3,4].map(v=>`<button class="bbtn ${B.score[k]===v?'on':''}" onclick="setBatchScore('${k}',${v})" title="${esc(r.l[v-1])}">${v}</button>`).join('')}
+    </div>`).join('');
+  box.innerHTML=`
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2 style="margin:0">${esc(ROSTER[B.idx])}</h2>
+      <span class="pill ${ready?'':''}" style="${ready?'color:var(--teal-d);border-color:var(--teal)':'color:var(--red);border-color:var(--red)'}">ก่อน ${preN}/10 · หลัง ${postN}/10</span>
+    </div>
+    <p class="small muted">กรอกหมายเลขข้อที่นักเรียนเลือก (1 ถึง 4) ทั้งก่อนและหลังเรียน · ปุ่มสีเหลือง = ก่อนเรียน  ปุ่มสีเขียว = หลังเรียน · แตะซ้ำเพื่อยกเลิก</p>
+    <div class="bgrid">${items}</div>
+    <h3 style="margin-top:14px;font-size:15px">ระดับรูบริกที่ครูประเมิน (ไม่บังคับ แตะเลข 1–4 · แตะซ้ำเพื่อยกเลิก)</h3>
+    ${rub}
+    <div class="row navrow">
+      <button class="primary" onclick="saveBatch()">บันทึกคะแนนนักเรียนคนนี้</button>
+      <button onclick="clearBatch()">ล้างและเลือกคนใหม่</button>
+    </div>
+  </div>`;
+}
+async function saveBatch(){
+  if(!B){ toast('เลือกนักเรียนก่อน'); return; }
+  const preN=Object.keys(B.pre).length, postN=Object.keys(B.post).length;
+  if(preN<10||postN<10){ toast('กรอกให้ครบ 10 ข้อทั้งก่อนและหลัง ตอนนี้ ก่อน '+preN+'/10 · หลัง '+postN+'/10'); return; }
+  const now=Date.now();
+  const d=B.base||blank(B.idx);
+  d.idx=B.idx; d.name=ROSTER[B.idx]; d.room=ROOM; d.missionId=curMission;
+  d.pre=Object.assign({},B.pre); d.post=Object.assign({},B.post);
+  d.paper=true; d.done=true; d.phase='post';
+  if(!d.started) d.started=now;
+  d.preAt=d.preAt||now; d.postAt=now; d.finished=now;
+  d.teacher=d.teacher||{score:{},note:''}; d.teacher.score=Object.assign({},d.teacher.score||{},B.score);
+  const key=mKey(B.idx,curMission), j=JSON.stringify(d);
+  LS.set(key,j); queueRemote(key,d.name,j);
+  const ok=await flushRemote(true);
+  toast(ok?('บันทึกคะแนนของ '+d.name+' แล้ว'):'บันทึกในเครื่องแล้ว จะส่งขึ้นระบบเมื่อเน็ตกลับมา',ok);
+  B=null; renderBatch();
+}
+
+
+/* ================= ใบงาน/แบบวัดสำหรับพิมพ์บนกระดาษ =================
+   สำหรับนักเรียนที่ไม่มีมือถือ ครูพิมพ์แจก ทำบนกระดาษ แล้วนำมากรอกที่โหมดไม่มีมือถือ
+   ก = 1, ข = 2, ค = 3, ง = 4 (ตัวเลือกเรียงจากระดับพฤติกรรม 1 ถึง 4)
+   ================================================================== */
+function openPaper(){ go('paper'); renderPaper(); }
+function renderPaper(){
+  const mi=MIS(); const L=['ก','ข','ค','ง'];
+  const line=n=>Array(n||1).fill('<div style="border-bottom:1px solid #999;height:20px;margin:5px 0"></div>').join('');
+  const sjt=ITEMS.map((it,i)=>`<div class="pitem" style="margin-bottom:9px">
+    <div><b>${i+1}.</b> ${esc(it.q)}</div>
+    ${it.o.map((o,j)=>`<div style="margin-left:16px">${L[j]}. ${esc(o)}</div>`).join('')}
+    <div class="small" style="margin-left:16px;margin-top:2px">ก่อนเรียน:  ก ☐  ข ☐  ค ☐  ง ☐      หลังเรียน:  ก ☐  ข ☐  ค ☐  ง ☐</div>
+  </div>`).join('');
+  const ws=`
+    <h2 style="margin-top:4px">ใบงาน UP TO GROW — ${esc(mi.title)}</h2>
+    <p><b>สถานการณ์:</b> ${mi.scenario}</p>
+    <p class="small muted">${esc(mi.consider||'')}</p>
+    <h3>U · เข้าใจสถานการณ์</h3>
+    <p>ความรู้สึกต่อสถานการณ์นี้:</p>${line(2)}
+    <p>${esc(mi.knowLabel)}:</p>${line(2)}
+    <p>ข้อมูลที่ยังไม่รู้และควรรู้ก่อนตัดสินใจ:</p>${line(2)}
+    <h3>P · แยกข้อเท็จจริงกับความคิดเห็น</h3>
+    <p>${esc(mi.factLabel)}:</p>${line(2)}
+    <p>${esc(mi.opLabel)}:</p>${line(2)}
+    <p>${esc(mi.whoLabel)}:</p>${line(2)}
+    <h3>T · คิดอย่างมีหลักฐาน (ทางเลือกอย่างน้อย 2 ทาง)</h3>
+    ${[1,2,3].map(k=>`<p>ทางเลือกที่ ${k} — ${esc(mi.altNameLabel)} / ${esc(mi.costLabel)} / ใครได้ประโยชน์ / ใครเสียประโยชน์:</p>${line(2)}`).join('')}
+    <h3>O · ตัดสินใจและรับผิดชอบ</h3>
+    <p>เลือกทางเลือกที่ ______ เพราะ (อ้างอิงข้อมูล/ตัวเลข):</p>${line(2)}
+    <p>ใครอาจเสียประโยชน์ และจะดูแลอย่างไร:</p>${line(2)}
+    <p>ถ้าผลออกมาไม่ดีจะรับผิดชอบอย่างไร:</p>${line(1)}
+    <p class="small">ถ้าไม่มีใครรู้ จะเลือกแบบเดิมไหม เพราะอะไร:</p>${line(1)}
+    <p class="small">ในชีวิตจริงเคยเจอเรื่องแบบนี้ไหม ตอนนั้นทำอย่างไร:</p>${line(1)}
+    <h3>R · สะท้อนคิด</h3>
+    ${REFLECT_Q.map((q,i)=>`<p>${i+1}. ${esc(q)}</p>${line(1)}`).join('')}
+    <h3>Opt · ประเมินตนเอง (วงกลมรอบระดับ 1–4)</h3>
+    ${Object.values(RUBRICS).map(r=>`<p class="small">${esc(r.n)}:&nbsp;&nbsp; 1&nbsp;&nbsp; 2&nbsp;&nbsp; 3&nbsp;&nbsp; 4</p>`).join('')}
+    <h3>W · ลงมือเพื่อส่วนรวม</h3>
+    <p>ข้อตกลง/แนวปฏิบัติที่เสนอต่อห้อง:</p>${line(2)}
+    <p>สิ่งที่จะลงมือทำเองภายในสัปดาห์นี้:</p>${line(1)}`;
+  $('v-paper').innerHTML=`
+  <div class="card noprint">
+    <div class="eyebrow">ใบงาน/แบบวัดสำหรับพิมพ์ (นักเรียนไม่มีมือถือ)</div>
+    <h1>พิมพ์เอกสารกระดาษ · ${esc(mi.title)}</h1>
+    <p class="muted" style="max-width:66ch">พิมพ์แจกนักเรียนที่ไม่มีมือถือ ให้ทำแบบวัด 10 ข้อ (ทั้งก่อนและหลังเรียน) และใบงาน UP TO GROW บนกระดาษ จากนั้นครูนำคำตอบมากรอกที่ "โหมดไม่มีมือถือ" เพื่อเข้าสู่ระบบ · การแปลงคำตอบ: ก = 1, ข = 2, ค = 3, ง = 4</p>
+    <div class="row">
+      <button class="primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+      <button onclick="openBatch()">ไปหน้ากรอกแทนนักเรียน</button>
+      <button onclick="go('home')">กลับหน้าแรก</button>
+    </div>
+  </div>
+  <div class="card paperbox">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:2px solid #333;padding-bottom:6px;margin-bottom:10px">
+      <b>UP TO GROW · ${esc(GRADE)} ${esc(ROOM)} · ${esc(mi.title)}</b>
+      <span class="small">ชื่อ–สกุล ______________________ เลขที่ ____ วันที่ ________</span>
+    </div>
+    <h2 style="margin-top:2px">แบบวัดสถานการณ์ 10 ข้อ</h2>
+    <p class="small muted">เลือกข้อที่ตรงกับสิ่งที่จะทำจริงมากที่สุด ไม่มีคำตอบถูกหรือผิด และไม่มีผลต่อคะแนนเก็บ · ทำทั้งก่อนเรียนและหลังเรียนโดยใช้ช่องแยกกัน</p>
+    ${sjt}
+    <div style="page-break-before:always;break-before:page"></div>
+    ${ws}
+    <p class="small muted" style="margin-top:14px;border-top:1px solid #999;padding-top:6px">Life Competency UP TO GROW · LIFECRAFT AI</p>
+  </div>`;
+}
+
+
 /* ---------- boot ---------- */
 async function checkResume(){
   const lastRaw=await S.get('lc:last',false); if(lastRaw===null)return;
@@ -2359,6 +2584,7 @@ async function checkResume(){
     <button class="small" style="margin-left:10px" onclick="curMission=${lastMid};startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
 }
 loadImportedMissions();
+applyZoom(); applyHC();
 routeFromURL();
 const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
 renderMissionList(); renderPick(); checkResume();
