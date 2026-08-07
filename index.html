@@ -1063,32 +1063,34 @@ function stU(){
   <h2>สถานการณ์ของห้อง</h2>
   <p>${mi.scenario}</p>
   <p class="muted small">${mi.consider}</p>
-  <label for="feel">ตอนนี้นักเรียนรู้สึกอย่างไรกับสถานการณ์นี้</label>
+  <label for="feel">ตอนนี้นักเรียนรู้สึกอย่างไรกับสถานการณ์นี้ <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
   <textarea id="feel">${esc(s.plan.feel||'')}</textarea>
   <label for="know">${mi.knowLabel}</label>
   <textarea id="know">${esc(s.plan.know||'')}</textarea>
-  <label for="need">ข้อมูลที่ฉันยังไม่รู้ และควรรู้ก่อนตัดสินใจ</label>
+  <label for="need">ข้อมูลที่ฉันยังไม่รู้ และควรรู้ก่อนตัดสินใจ <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
   <textarea id="need">${esc(s.plan.need||'')}</textarea>
   <div class="row" style="margin-top:14px"><button class="primary" onclick="okU()">ขั้นต่อไป</button></div></div>`;
   ['feel','know','need'].forEach(k=>$(k).oninput=e=>{s.plan[k]=e.target.value;});
 }
-function okU(){ if((s.plan.need||'').trim().length<5){bad('need','เขียนข้อมูลที่ยังไม่รู้อย่างน้อย 1 อย่าง การรู้ว่าตัวเองยังไม่รู้อะไร คือจุดเริ่มของการคิดอย่างมีหลักฐาน');return;} logEv('U','ระบุข้อมูลที่ยังขาด'); nextStep(); }
+/* ขั้น U ไม่บังคับกรอก เพื่อลดเวลาในคาบ ผู้เรียนที่ตอบจะถูกบันทึกเป็นหลักฐานตามปกติ */
+function okU(){ logEv('U',(s.plan.need||'').trim()?'ระบุข้อมูลที่ยังขาด':'ผ่านขั้นเข้าใจสถานการณ์'); nextStep(); }
 
 function stP(){
   const mi=MIS();
   $('body').innerHTML=`<div class="card"><div class="eyebrow">P — Perceive the problem</div>
   <h2>แยกข้อเท็จจริงออกจากความคิดเห็น</h2>
-  <label for="fact">${mi.factLabel}</label>
+  <label for="fact">${mi.factLabel} <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
   <textarea id="fact">${esc(s.plan.fact||'')}</textarea>
-  <label for="op">${mi.opLabel}</label>
+  <label for="op">${mi.opLabel} <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
   <textarea id="op">${esc(s.plan.op||'')}</textarea>
-  <label for="who">${mi.whoLabel}</label>
+  <label for="who">${mi.whoLabel} <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
   <textarea id="who">${esc(s.plan.who||'')}</textarea>
   <div class="row" style="margin-top:14px"><button onclick="back()">ย้อนกลับ</button><button class="primary" onclick="okP()">ขั้นต่อไป</button></div></div>`;
   ['fact','op','who'].forEach(k=>$(k).oninput=e=>{s.plan[k]=e.target.value;});
 }
-function okP(){ if((s.plan.fact||'').trim().length<5){bad('fact','กรอกข้อเท็จจริงที่ตรวจสอบได้ก่อน นี่คือฐานของการตัดสินใจที่เป็นธรรม');return;}
-  if((s.plan.who||'').trim().length<5){bad('who','ระบุผู้ได้รับผลกระทบก่อน เพราะเป็นเงินของทุกคนในห้อง');return;} logEv('P','แยกข้อเท็จจริงและระบุผู้มีส่วนได้ส่วนเสีย'); nextStep(); }
+/* ขั้น P ไม่บังคับกรอก ผู้เรียนยังได้ฝึกแยกข้อเท็จจริงจากความคิดเห็นตามกระบวนการเดิม */
+function okP(){ const f=(s.plan.fact||'').trim(), w=(s.plan.who||'').trim();
+  logEv('P', (f||w)?'แยกข้อเท็จจริงและระบุผู้มีส่วนได้ส่วนเสีย':'ผ่านขั้นเห็นปัญหา'); nextStep(); }
 
 function stT(){
   const p=s.plan; p.alt=p.alt||[{},{},{}];
@@ -1104,11 +1106,11 @@ function stT(){
       <div class="eyebrow">ทางเลือกที่ ${i+1}${i===2?' (ไม่บังคับ)':''}</div>
       <label for="a${i}n">${MIS().altNameLabel}</label><input id="a${i}n" value="${esc(a.n||'')}">
       <div class="grid2">
-        <div><label for="a${i}c">${MIS().costLabel}</label><input id="a${i}c" class="mono" value="${a.c||''}"></div>
-        <div><label for="a${i}g">ใครได้ประโยชน์ กี่คน</label><input id="a${i}g" value="${esc(a.g||'')}"></div>
+        <div><label for="a${i}c">${MIS().costLabel} <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label><input id="a${i}c" class="mono" value="${a.c||''}"></div>
+        <div><label for="a${i}g">ใครได้ประโยชน์ กี่คน <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label><input id="a${i}g" value="${esc(a.g||'')}"></div>
       </div>
       <label for="a${i}l">ใครอาจไม่ได้ประโยชน์หรือเสียประโยชน์</label><input id="a${i}l" value="${esc(a.l||'')}">
-      <label for="a${i}r">ความเสี่ยงหรือข้อควรระวัง</label><input id="a${i}r" value="${esc(a.r||'')}">
+      <label for="a${i}r">ความเสี่ยงหรือข้อควรระวัง <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label><input id="a${i}r" value="${esc(a.r||'')}">
     </div>`);
   });
   [0,1,2].forEach(i=>['n','c','g','l','r'].forEach(k=>{
@@ -1116,8 +1118,9 @@ function stT(){
   }));
 }
 function okT(){
-  const done=s.plan.alt.filter(a=>(a.n||'').trim()&&(a.g||'').trim()&&(a.l||'').trim()).length;
-  if(done<2){toast('ต้องมีอย่างน้อย 2 ทางเลือกที่ระบุครบว่าทำอะไร ใครได้ และใครไม่ได้');return;}
+  /* บังคับเฉพาะ 2 ช่องที่เป็นหลักฐานสำคัญ คือทำอะไร และใครเสียประโยชน์ */
+  const done=s.plan.alt.filter(a=>(a.n||'').trim()&&(a.l||'').trim()).length;
+  if(done<2){toast('ระบุอย่างน้อย 2 ทางเลือก โดยบอกว่าจะทำอะไร และใครอาจเสียประโยชน์');return;}
   logEv('T','วิเคราะห์ '+done+' ทางเลือก'); nextStep();
 }
 
@@ -1138,7 +1141,7 @@ function stO(){
     <textarea id="pv1">${esc(p.pv1||'')}</textarea>
     <label for="pv2">ในชีวิตจริง เคยเจอเรื่องคล้ายแบบนี้ไหม ตอนนั้นทำจริงว่าอย่างไร</label>
     <textarea id="pv2">${esc(p.pv2||'')}</textarea>
-    <label for="pv3">ถ้าเพื่อนส่วนใหญ่ในห้องไม่เห็นด้วยกับนักเรียน จะทำอย่างไร</label>
+    <label for="pv3">ถ้าเพื่อนส่วนใหญ่ในห้องไม่เห็นด้วยกับนักเรียน จะทำอย่างไร <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
     <textarea id="pv3">${esc(p.pv3||'')}</textarea>
   </div>
 
@@ -1185,7 +1188,7 @@ function stG(){
     box.insertAdjacentHTML('beforeend',`<div class="card tight" style="background:var(--soft);margin-top:12px">
       <div class="eyebrow">เหตุการณ์ที่ ${i+1}</div><h3>${ev.t}</h3><p class="small">${ev.b}</p>
       <div id="ev${i}"></div>
-      <label for="er${i}">เหตุผลของการตัดสินใจนี้</label><input id="er${i}" value="${esc(d[i].r||'')}">
+      <label for="er${i}">เหตุผลของการตัดสินใจนี้ <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label><input id="er${i}" value="${esc(d[i].r||'')}">
       <div class="coach" style="margin-top:10px"><div class="who">Coach</div>
         <div class="small">${ev.c[d[i].pick??0]}</div></div></div>`);
     const g=$('ev'+i);
@@ -1196,9 +1199,10 @@ function stG(){
 }
 function pickEv(i,j){ const d=s.decisions[i]; if(d.pick!==undefined&&d.pick!==j){d.ch=(d.ch||0)+1;} d.pick=j; stG(); mountChips(); }
 function okG(){
-  const n=Object.values(s.decisions).filter(d=>d.pick!==undefined&&(d.r||'').length>4).length;
+  /* บังคับเฉพาะการเลือกตัวเลือก ส่วนเหตุผลเป็นทางเลือก เพื่อลดเวลาพิมพ์ในคาบ */
+  const n=Object.values(s.decisions).filter(d=>d.pick!==undefined).length;
   const evn=MIS().events.length;
-  if(n<evn){toast('ตอบให้ครบทั้ง '+evn+' เหตุการณ์ พร้อมเหตุผลสั้น ๆ');return;}
+  if(n<evn){toast('เลือกคำตอบให้ครบทั้ง '+evn+' เหตุการณ์');return;}
   if(!(s.contrib||'').trim()){bad('contrib','เขียนสิ่งที่ทำจริงในบทบาทของตัวเอง เพื่อให้ครูให้คะแนนรายบุคคลได้');return;}
   logEv('G','ตัดสินใจครบทุกเหตุการณ์ บทบาท: '+s.role); nextStep();
 }
@@ -1219,7 +1223,7 @@ function stOpt(){
   <h2>ประเมินตนเองและปรับแผน</h2>
   <p class="muted small">เลือกระดับที่ตรงกับสิ่งที่ทำจริงในภารกิจนี้ ครูจะประเมินซ้ำจากหลักฐาน</p>
   <div id="rub"></div>
-  <label for="fix">หลังจากได้ฟังคำถามของโค้ชและความเห็นของเพื่อน ฉันจะปรับอะไรในแผนของตัวเอง</label>
+  <label for="fix">หลังจากได้ฟังคำถามของโค้ชและความเห็นของเพื่อน ฉันจะปรับอะไรในแผนของตัวเอง <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
   <textarea id="fix">${esc(s.fix||'')}</textarea>
   <div class="row" style="margin-top:14px"><button onclick="back()">ย้อนกลับ</button><button class="primary" onclick="okOpt()">ขั้นต่อไป</button></div></div>`;
   $('rub').innerHTML=Object.entries(RUBRICS).map(([k,r])=>
@@ -1229,8 +1233,9 @@ function stOpt(){
   $('fix').oninput=e=>{s.fix=e.target.value;};
 }
 function setSelf(k,v){ s.self[k]=v; stOpt(); mountChips(); }
+/* คงการประเมินตนเอง 4 ด้านไว้ (แตะเลือก ใช้เวลาน้อย) ส่วนช่องพิมพ์เป็นทางเลือก */
 function okOpt(){ if(Object.keys(s.self).length<4){toast('ประเมินตนเองให้ครบทั้ง 4 ด้าน');return;}
-  if((s.fix||'').length<5){bad('fix','เขียนสิ่งที่จะปรับอย่างน้อย 1 อย่าง');return;} logEv('Opt','ประเมินตนเองและระบุสิ่งที่จะปรับ'); nextStep(); }
+  logEv('Opt',(s.fix||'').trim()?'ประเมินตนเองและระบุสิ่งที่จะปรับ':'ประเมินตนเอง'); nextStep(); }
 
 function stW(){
   $('body').innerHTML=`<div class="card"><div class="eyebrow">W — Work for the common good</div>
@@ -1238,7 +1243,7 @@ function stW(){
   <p class="muted small">ขั้นนี้คือหลักฐานว่าภารกิจไม่ได้จบที่สถานการณ์จำลอง แต่กลายเป็นข้อตกลงหรือการกระทำจริงของห้อง</p>
   <label for="w1">ข้อตกลงหรือแนวปฏิบัติที่ฉันเสนอให้ห้อง</label><textarea id="w1">${esc(s.action.w1||'')}</textarea>
   <label for="w2">สิ่งที่ฉันจะลงมือทำเองภายในสัปดาห์นี้</label><textarea id="w2">${esc(s.action.w2||'')}</textarea>
-  <label for="w3">จะรู้ได้อย่างไรว่าสิ่งที่ทำเกิดผลจริง</label><textarea id="w3">${esc(s.action.w3||'')}</textarea>
+  <label for="w3">จะรู้ได้อย่างไรว่าสิ่งที่ทำเกิดผลจริง <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label><textarea id="w3">${esc(s.action.w3||'')}</textarea>
   <div class="row" style="margin-top:14px"><button onclick="back()">ย้อนกลับ</button>
   <button class="primary" onclick="okW()">จบภารกิจ · ทำแบบวัดหลัง</button></div></div>`;
   ['w1','w2','w3'].forEach(k=>$(k).oninput=e=>{s.action[k]=e.target.value;});
