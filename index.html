@@ -606,14 +606,27 @@ function queueRemote(key,name,json){
   _pend={key,name,json};
   clearTimeout(_timer); _timer=setTimeout(flushRemote,4000);
 }
+/* ส่งข้อมูลที่ค้างขึ้นระบบ
+   ถ้ามีหลายรายการจะพยายามส่งทีเดียวด้วยคำสั่ง saveMany (backend เวอร์ชัน 2)
+   ถ้า backend ยังเป็นเวอร์ชันเดิมที่ไม่รู้จักคำสั่งนี้ จะถอยไปส่งทีละรายการเอง */
 async function flushRemote(force){
   const keys=LS.keys('pending:');
   if(!keys.length){return;}
   setNet('send');
-  for(const pk of keys){
+  const items=keys.map(pk=>{
     const key=pk.slice(8), json=LS.get(pk);
     let name=''; try{name=JSON.parse(json).name||'';}catch(e){}
-    try{ await apiCall({action:'save',key,name,json}); localStorage.removeItem(pk); }
+    return {pk,key,name,json};
+  });
+  if(items.length>1){
+    try{
+      await apiCall({action:'saveMany',items:items.map(x=>({key:x.key,name:x.name,json:x.json}))});
+      items.forEach(x=>localStorage.removeItem(x.pk));
+      setNet('ok'); return true;
+    }catch(e){ /* backend เดิมไม่รู้จัก saveMany ใช้วิธีทีละรายการแทน */ }
+  }
+  for(const x of items){
+    try{ await apiCall({action:'save',key:x.key,name:x.name,json:x.json}); localStorage.removeItem(x.pk); }
     catch(e){ setNet('fail'); return false; }
   }
   setNet('ok'); return true;
@@ -630,8 +643,11 @@ const S={
   },
   async list(p,sh=false){ return LS.keys(p); }
 };
-async function pullAll(){
-  try{ const j=await apiCall({action:'all'});
+/* ดึงข้อมูลจากระบบมาเก็บในเครื่อง
+   ระบุ prefix ได้เพื่อดึงเฉพาะส่วนที่ต้องใช้ ลดเวลาและปริมาณข้อมูล
+   backend เวอร์ชันเดิมจะไม่สนใจ prefix และคืนทุกแถวเหมือนเดิม ซึ่งยังทำงานได้ */
+async function pullAll(prefix){
+  try{ const j=await apiCall(prefix?{action:'all',prefix}:{action:'all'});
     (j.rows||[]).forEach(r=>{ if(r.key&&r.json) LS.set(r.key,r.json); });
     return true;
   }catch(e){ return false; }
@@ -1887,7 +1903,7 @@ async function openQDash(){
   QCODE=code;
   go('qdash');
   $('v-qdash').innerHTML=`<div class="card"><h2>กำลังโหลดผล…</h2></div>`;
-  await pullAll();
+  await pullAll('lc:q');
   if(!QDEF||QDEF.code!==code){ const r=await S.get(qDefKey(code),true); if(r) QDEF=JSON.parse(r); }
   if(!QDEF){ $('v-qdash').innerHTML='<div class="card"><h2>ไม่พบภารกิจด่วน</h2></div>'; return; }
   const rows=[];
@@ -3717,7 +3733,7 @@ function pulseFlags(hist){
 async function openPulseDash(){
   go('pulsedash');
   $('v-pulsedash').innerHTML=`<div class="card"><h2>กำลังรวบรวมข้อมูลสุขภาวะ…</h2></div>`;
-  await pullAll();
+  await pullAll('lc:pulse:');
   const WKS=[-7,-6,-5,-4,-3,-2,-1,0].map(weekKeyShift);
   const data=[];           // data[i] = ประวัติเรียงสัปดาห์ของนักเรียน i
   for(let i=0;i<ROSTER.length;i++){
