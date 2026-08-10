@@ -12,7 +12,7 @@
  * Service Worker จึงไม่แตะข้อมูลผู้เรียน ทำหน้าที่แคชเฉพาะตัวโปรแกรม
  */
 
-const VERSION    = 'v3';
+const VERSION    = 'v4';
 const SHELL      = `uptogrow-shell-${VERSION}`;
 const RUNTIME    = `uptogrow-runtime-${VERSION}`;
 const FONTS      = `uptogrow-fonts-${VERSION}`;

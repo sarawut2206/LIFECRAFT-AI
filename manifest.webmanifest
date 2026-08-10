@@ -42,6 +42,13 @@
   ],
   "shortcuts": [
     {
+      "name": "เช็คอินใจ 60 วินาที",
+      "short_name": "เช็คอินใจ",
+      "description": "บอกความรู้สึกสัปดาห์นี้ และขอความช่วยเหลือจากครูได้",
+      "url": "/LIFECRAFT-AI/?src=pwa&go=pulse",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
       "name": "ทำภารกิจของฉัน",
       "short_name": "ทำภารกิจ",
       "description": "เข้าทำภารกิจประจำสัปดาห์",
