@@ -1,0 +1,59 @@
+{
+  "id": "/LIFECRAFT-AI/",
+  "name": "Life Competency UP TO GROW",
+  "short_name": "UP TO GROW",
+  "description": "ห้องเรียนภารกิจพลเมืองดี พัฒนาทักษะชีวิตและความเป็นพลเมืองดีด้วยภารกิจสถานการณ์ วัดผลก่อน-หลัง พร้อมระบบวิเคราะห์สถิติสำหรับครู",
+  "lang": "th",
+  "dir": "ltr",
+  "start_url": "/LIFECRAFT-AI/?src=pwa",
+  "scope": "/LIFECRAFT-AI/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#F2FAF7",
+  "theme_color": "#0A7A6C",
+  "categories": ["education", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "ทำภารกิจของฉัน",
+      "short_name": "ทำภารกิจ",
+      "description": "เข้าทำภารกิจประจำสัปดาห์",
+      "url": "/LIFECRAFT-AI/?src=pwa&go=mission",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "หน้าครู",
+      "short_name": "หน้าครู",
+      "description": "ติดตามผลและประเมินนักเรียน",
+      "url": "/LIFECRAFT-AI/?src=pwa&go=teacher",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,6 +1,28 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Life Competency UP TO GROW — LIFECRAFT AI</title>
+
+<!-- ===== Progressive Web App (มาตรฐาน W3C) ติดตั้งบนมือถือได้โดยไม่ผ่าน App Store ===== -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0A7A6C">
+<meta name="color-scheme" content="light">
+<meta name="description" content="ห้องเรียนภารกิจพลเมืองดี พัฒนาทักษะชีวิตและความเป็นพลเมืองดีด้วยภารกิจสถานการณ์ วัดผลก่อน-หลัง พร้อมระบบวิเคราะห์สถิติสำหรับครู">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon-16.png" sizes="16x16" type="image/png">
+<!-- iOS ยังไม่รองรับ manifest เต็มรูปแบบ ต้องใช้ meta เฉพาะของ Apple -->
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="UP TO GROW">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<!-- แชร์ลิงก์ในไลน์/เฟซบุ๊กให้ขึ้นการ์ดสวยงาม -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Life Competency UP TO GROW">
+<meta property="og:description" content="ห้องเรียนภารกิจพลเมืองดี พัฒนาทักษะชีวิตด้วยภารกิจสถานการณ์ วัดผลก่อน-หลังจริง">
+<meta property="og:image" content="icons/icon-512.png">
+<meta property="og:locale" content="th_TH">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@500;600;700&family=Sarabun:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -118,7 +140,19 @@ tr.click:hover{background:var(--panel2);cursor:pointer}
 .saved.bad{color:var(--red);opacity:1}
 footer{color:var(--muted);font-size:14px;text-align:center;padding:22px 0}
 @media(max-width:640px){.wrap{padding:12px 10px 70px}.card{padding:15px 13px}button{min-height:48px}
-input,textarea,select{font-size:17px}th,td{padding:8px 6px;font-size:14.5px}}
+input,textarea,select{font-size:17px}th,td{padding:8px 6px;font-size:14.5px}
+/* ส่วนหัวบนมือถือต้องกระชับ ไม่ให้กินพื้นที่จอเกินจำเป็น */
+header.top{gap:7px;padding:10px 0 11px;margin-bottom:14px}
+header.top .logo{font-size:16.5px}
+header.top .tagline{font-size:12px}
+header.top button{min-height:40px;padding:7px 12px;font-size:14.5px}
+header.top .a11y button{min-height:40px;padding:6px 10px;font-size:14px}
+#whoami{font-size:12.5px;padding:4px 10px}
+/* ยังไม่ได้เลือกชื่อ ไม่ใช่ข้อมูลที่ต้องใช้พื้นที่จอมือถือ */
+#whoami.empty{display:none}
+#installBar{font-size:14.5px;padding:11px 13px;gap:9px;flex-wrap:wrap}
+#installBar .sp{flex:1 1 100%;order:3}
+#demoBar{font-size:12.5px;padding:8px 11px}}
 @media print{body{background:#fff;color:#000}.noprint{display:none!important}.card{background:#fff;border-color:#bbb;box-shadow:none;break-inside:avoid}
 h1,h2,h3{color:#000}.muted,.small{color:#333}th,td{border-color:#999}
 .chartwrap{height:220px!important;break-inside:avoid}.chartgrid{grid-template-columns:1fr 1fr}
@@ -189,12 +223,33 @@ body.hc .hero .eyebrow,body.hc .hero .lead,body.hc .herostat .s span{color:#fff}
 .mstage.st-pr{border-top:3px solid var(--teal)}
 .mstage.st-ou{border-top:3px solid var(--mint)}
 .mstage.st-oc{border-top:3px solid var(--violet)}
+/* ---- PWA: รองรับจอบาก และโหมดติดตั้งเป็นแอป ---- */
+@supports(padding:max(0px)){
+  .wrap{padding-left:max(16px,env(safe-area-inset-left));
+        padding-right:max(16px,env(safe-area-inset-right));
+        padding-bottom:max(80px,calc(env(safe-area-inset-bottom) + 60px))}
+}
+body.pwa header.top{padding-top:max(12px,env(safe-area-inset-top))}
+body.pwa .navrow,body.pwa #body .card>.row:last-of-type{
+  padding-bottom:max(4px,env(safe-area-inset-bottom))}
+#installBar{position:fixed;left:50%;transform:translateX(-50%);z-index:98;
+  bottom:max(16px,calc(env(safe-area-inset-bottom) + 10px));
+  background:var(--panel);border:1px solid var(--teal);border-left:4px solid var(--teal);
+  box-shadow:0 12px 34px #0e402f2e;border-radius:12px;padding:12px 16px;
+  max-width:min(560px,92vw);display:none;align-items:center;gap:12px;font-size:15px}
+#installBar.show{display:flex}
+#installBar b{font-family:var(--display)}
+#installBar .sp{flex:1}
+#installBar button{padding:8px 14px;font-size:15px;min-height:auto}
+@media print{#installBar{display:none!important}}
 /* ---- demo mode banner ---- */
 #demoBar{background:#FFF4D6;border:1px solid var(--amber);border-left:4px solid var(--gold);
   border-radius:10px;padding:9px 14px;margin:0 0 14px;font-size:13px;color:#6B4A00;
   display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 #demoBar b{font-family:var(--display)}
 #demoBar .sp{flex:1}
+/* แก้บั๊ก: #demoBar เป็น ID จึงทับ .hide ที่เป็น class ต้องระบุให้ชนะ */
+#demoBar.hide{display:none}
 body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 @media print{#demoBar{background:#fff;border:2px solid #000;color:#000}}
 </style>
@@ -204,7 +259,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
   <div><div class="logo">Life Competency <span>UP TO GROW</span></div>
   <div class="tagline" id="tagRoom">LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี</div></div>
   <div class="spacer"></div>
-  <div class="badge" id="whoami">ยังไม่ได้เลือกชื่อ</div>
+  <div class="badge empty" id="whoami">ยังไม่ได้เลือกชื่อ</div>
   <span class="saved" id="savedTag">บันทึกในเครื่อง</span>
   <span class="saved" id="netTag"></span>
   <span class="a11y noprint" style="margin-left:2px">
@@ -306,6 +361,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
 <div id="toast"></div>
+<div id="installBar" class="noprint"></div>
 
 <script>
 /* รายชื่อและชื่อห้องตั้งต้น ครูแก้ไขได้เองที่หน้าตั้งค่า โดยไม่ต้องแก้โค้ด */
@@ -970,7 +1026,7 @@ function filterRoster(q){
 async function startStudent(i){
   const raw=await S.get(mKey(i),true);
   if(raw){try{s=JSON.parse(raw);curMission=(s.missionId!==undefined)?s.missionId:curMission;}catch(e){s=blank(i);}}else s=blank(i);
-  $('whoami').textContent=s.name+' · '+MIS().title;
+  $('whoami').textContent=s.name+' · '+MIS().title; $('whoami').classList.remove('empty');
   route();
 }
 function route(){
@@ -3385,6 +3441,110 @@ function openDemoPanel(){
   go('more'); renderMore();
 }
 
+/* ================= PWA: ติดตั้งเป็นแอปบนมือถือ และทำงานออฟไลน์ =================
+   ใช้มาตรฐาน Web App Manifest + Service Worker ของ W3C
+   จึงติดตั้งได้ทั้ง Android และ iOS โดยไม่ต้องผ่าน App Store
+   ============================================================================ */
+const isStandalone = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true;
+const isIOS = () =>
+  /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+if (isStandalone()) document.body.classList.add('pwa');
+
+let _deferredPrompt = null;
+const INSTALL_HIDE_KEY = 'lc:installHidden';
+
+function installBar(html){
+  const el = $('installBar'); if(!el) return;
+  el.innerHTML = html; el.classList.add('show');
+}
+function hideInstallBar(remember){
+  const el = $('installBar'); if(el) el.classList.remove('show');
+  if(remember) LS.set(INSTALL_HIDE_KEY,'1');
+}
+
+/* Android / Chrome / Edge: ระบบยิง event ให้เมื่อแอปติดตั้งได้ */
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredPrompt = e;
+  if (LS.get(INSTALL_HIDE_KEY) === '1' || isStandalone()) return;
+  installBar(`<b>ติดตั้งเป็นแอป</b>
+    <span class="sp">ใช้งานออฟไลน์ได้ เปิดเร็วขึ้น ไม่ต้องพิมพ์ลิงก์</span>
+    <button class="primary" onclick="doInstall()">ติดตั้ง</button>
+    <button class="ghost" onclick="hideInstallBar(true)">ไว้ทีหลัง</button>`);
+});
+
+async function doInstall(){
+  if(!_deferredPrompt){ hideInstallBar(); return; }
+  _deferredPrompt.prompt();
+  const { outcome } = await _deferredPrompt.userChoice;
+  _deferredPrompt = null;
+  hideInstallBar(outcome === 'accepted');
+  if(outcome === 'accepted') toast('ติดตั้งแอปเรียบร้อย เปิดจากหน้าจอหลักได้เลย',1);
+}
+
+window.addEventListener('appinstalled', () => {
+  _deferredPrompt = null; hideInstallBar(true);
+  toast('ติดตั้งแอปเรียบร้อย',1);
+});
+
+/* iOS ไม่มี beforeinstallprompt ต้องบอกวิธีเพิ่มลงหน้าจอหลักเอง */
+function maybeShowIOSHint(){
+  if(!isIOS() || isStandalone() || LS.get(INSTALL_HIDE_KEY)==='1') return;
+  setTimeout(()=>{
+    if(document.getElementById('installBar').classList.contains('show')) return;
+    installBar(`<b>เพิ่มลงหน้าจอหลัก</b>
+      <span class="sp">กดปุ่มแชร์ <b>&#x2191;</b> ด้านล่าง แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”</span>
+      <button class="ghost" onclick="hideInstallBar(true)">ปิด</button>`);
+  }, 2500);
+}
+
+/* ลงทะเบียน Service Worker และแจ้งเมื่อมีเวอร์ชันใหม่ */
+function initSW(){
+  if(!('serviceWorker' in navigator)) return;
+  if(location.protocol === 'file:') return;   // ทดสอบจากไฟล์ในเครื่องจะลงทะเบียนไม่ได้
+  window.addEventListener('load', async () => {
+    try{
+      const reg = await navigator.serviceWorker.register('sw.js', { scope: './' });
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing; if(!nw) return;
+        nw.addEventListener('statechange', () => {
+          if(nw.state === 'installed' && navigator.serviceWorker.controller){
+            installBar(`<b>มีเวอร์ชันใหม่</b>
+              <span class="sp">กดอัปเดตเพื่อใช้ความสามารถล่าสุด</span>
+              <button class="primary" onclick="applyUpdate()">อัปเดต</button>
+              <button class="ghost" onclick="hideInstallBar()">ภายหลัง</button>`);
+            window._swWaiting = reg.waiting || nw;
+          }
+        });
+      });
+      /* เช็กเวอร์ชันใหม่ทุกครั้งที่กลับมาที่แอป */
+      document.addEventListener('visibilitychange', () => {
+        if(document.visibilityState === 'visible') reg.update().catch(()=>{});
+      });
+    }catch(e){ /* ไม่กระทบการใช้งานหลัก */ }
+  });
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if(reloading) return; reloading = true; location.reload();
+  });
+}
+function applyUpdate(){
+  const w = window._swWaiting;
+  if(w) w.postMessage('SKIP_WAITING');
+  hideInstallBar();
+}
+
+/* ทางลัดจากไอคอนแอป เช่น ?go=teacher */
+function routeShortcut(){
+  const g = new URLSearchParams(location.search).get('go');
+  if(g === 'teacher') needTeacher(openTeacher);
+  else if(g === 'mission'){ const m = MISSIONS.find(x=>x.enabled); if(m) enterMission(m.id); }
+}
+
 /* ---------- boot ---------- */
 async function checkResume(){
   const lastRaw=await S.get('lc:last',false); if(lastRaw===null)return;
@@ -3397,6 +3557,7 @@ async function checkResume(){
 }
 loadImportedMissions();
 applyZoom(); applyHC(); paintDemoBar();
+initSW(); maybeShowIOSHint(); routeShortcut();
 routeFromURL();
 const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
 renderMissionList(); renderPick(); checkResume();
