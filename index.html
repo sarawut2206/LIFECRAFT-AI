@@ -327,6 +327,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
       <p class="small muted" style="margin:2px 0 0">ติดตามผล ประเมิน และจัดการห้องเรียน (มีรหัสป้องกัน)</p>
       <div class="btncol">
         <button class="mbtn" onclick="needTeacher(openTeacher)"><span class="mi">📊</span><span class="mt">Dashboard และผลก่อน–หลัง<small>กราฟ ตารางคะแนน ส่งออก CSV</small></span></button>
+        <button class="mbtn" onclick="needTeacher(openEvid)"><span class="mi">🏅</span><span class="mt">หลักฐานความสำเร็จ 5 ด้าน<small>ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม · ครูยืนยันการลงมือทำจริง</small></span></button>
         <button class="mbtn" onclick="needTeacher(openPulseDash)"><span class="mi">💚</span><span class="mt">แดชบอร์ดสุขภาวะ · เช็คอินใจ<small>ใครขอความช่วยเหลือ · แนวโน้มรายสัปดาห์</small></span></button>
         <button class="mbtn" onclick="needTeacher(openSchool)"><span class="mi">🏫</span><span class="mt">แดชบอร์ดผู้บริหาร · ทั้งโรงเรียน<small>เทียบทุกห้อง · ผลตามพระบรมราโชบาย 4 ด้าน</small></span></button>
         <button class="mbtn" onclick="needTeacher(openQuick)"><span class="mi">⚡</span><span class="mt">สร้างภารกิจด่วนรายวัน<small>AI ร่างสถานการณ์ ครูอนุมัติ</small></span></button>
@@ -389,6 +390,8 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <section id="v-pulse" class="hide"></section>
 <section id="v-pulsedash" class="hide"></section>
 <section id="v-school" class="hide"></section>
+<section id="v-evid" class="hide"></section>
+<section id="v-act" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -722,7 +725,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar();
   if(v==='home') renderMissionList();}
@@ -1139,6 +1142,10 @@ async function startStudent(i){
 function route(){
   if(s.done){showReport(s,false);return;}
   if(s.phase==='pre'||s.phase==='post'){renderTest();return;}
+  /* กู้ข้อมูลที่ค้างอยู่ในสถานะที่เป็นไปไม่ได้ (ทำครบทุกขั้นแล้วแต่ phase ยังเป็น 'mission')
+     ถ้าปล่อยผ่าน renderMission จะอ่าน STEPS[8] แล้วพังทั้งหน้า
+     พานักเรียนไปทำแบบวัดหลังซึ่งเป็นขั้นที่ถูกต้องแทน */
+  if(s.step>=STEPS.length){ s.phase='post'; save(true); renderTest(); return; }
   renderMission();
 }
 
@@ -1218,7 +1225,28 @@ function renderMission(){
   $('v-mission').innerHTML=stepBar()+'<div id="body"></div>';
   fn(); mountChips(); save();
 }
-function nextStep(){ s.step++; save(true); if(s.step>=STEPS.length){s.phase='post';save();renderTest();return;} renderMission(); }
+/* ข้อความสถานะความคืบหน้าของนักเรียนหนึ่งคน ใช้ในหน้าครู
+   ต้องทนกับ step ที่เกินขอบเขต เพราะมีข้อมูลจริงในชีตที่ step = จำนวนขั้นทั้งหมด
+   ค้างคู่กับ phase='mission' อยู่ (เกิดจากลำดับการบันทึกเดิมใน nextStep ที่แก้แล้วด้านล่าง)
+   เดิมเข้าถึง STEPS[step] ตรง ๆ ทำให้นักเรียนคนเดียวทำให้หน้าครูพังทั้งหน้า */
+function progressText(d){
+  if(!d) return 'ยังไม่เริ่ม';
+  if(d.done) return 'ส่งครบแล้ว';
+  if(d.phase==='pre') return 'แบบวัดก่อน ข้อ '+((d.qi||0)+1);
+  if(d.phase==='post') return 'แบบวัดหลัง ข้อ '+((d.qi||0)+1);
+  const st=STEPS[d.step];
+  return st?('ขั้น '+st[0]+' '+st[1]):'ทำครบทุกขั้น รอทำแบบวัดหลัง';
+}
+/* ตั้ง phase ให้สอดคล้องกับ step ก่อนบันทึกเสมอ
+   เดิมบันทึกและส่งขึ้นชีตตอน step เพิ่มแล้วแต่ phase ยังเป็น 'mission'
+   ทำให้ชีตเก็บสถานะที่เป็นไปไม่ได้ค้างไว้ถาวรถ้านักเรียนปิดแอปตอนนั้นพอดี */
+function nextStep(){
+  s.step++;
+  if(s.step>=STEPS.length) s.phase='post';
+  save(true);
+  if(s.phase==='post'){ renderTest(); return; }
+  renderMission();
+}
 
 function stU(){
   const mi=MIS();
@@ -1562,7 +1590,23 @@ async function tSave(){const st=window._r;const j=JSON.stringify(st);const key=m
   const ok=await flushRemote(true);toast(ok?'บันทึกผลประเมินขึ้นระบบแล้ว':'บันทึกในเครื่องแล้ว แต่ยังส่งขึ้น Sheet ไม่ได้ กดปุ่มส่งซ้ำที่มุมบน',ok);}
 
 /* ---------- teacher ---------- */
+/* เปลือกดักข้อผิดพลาด: ถ้าการวาดหน้าครูพังกลางทาง ข้อความ "กำลังดึงข้อมูล…" จะค้างอยู่ตลอด
+   ทำให้ครูเข้าใจผิดว่าต่อ Google Sheet ไม่ได้ ทั้งที่ข้อมูลมาครบแล้ว
+   ตัวครอบนี้เปลี่ยนอาการค้างให้กลายเป็นข้อความที่บอกสาเหตุจริงและกดลองใหม่ได้ */
 async function openTeacher(){
+  try{ await openTeacher_(); }
+  catch(e){
+    $('v-teacher').innerHTML=`<div class="card">
+      <div class="eyebrow">หน้าครู</div><h1>แสดงผลไม่สำเร็จ</h1>
+      <div class="notice"><b>ดึงข้อมูลจาก Google Sheet ได้แล้ว แต่แสดงผลไม่สำเร็จ</b><br>
+        <span class="small">ข้อมูลของนักเรียนไม่ได้หายไป ยังอยู่ครบทั้งในเครื่องและในชีต
+        · รายละเอียดทางเทคนิค: ${esc(e.message||e)}</span></div>
+      <div class="row"><button class="primary" onclick="openTeacher()">ลองใหม่</button>
+        <button onclick="openStats()">ไปหน้าสถิติ</button>
+        <button onclick="go('home')">หน้าแรก</button></div></div>`;
+  }
+}
+async function openTeacher_(){
   go('teacher');
   $('v-teacher').innerHTML=`<div class="card"><h2>กำลังดึงข้อมูลจาก Google Sheet…</h2></div>`;
   const mi=MIS();
@@ -1598,6 +1642,7 @@ async function openTeacher(){
       <button onclick="needTeacher(()=>{go('semester');renderSemester();})">ภาพรวมภาคเรียน</button>
       <button onclick="openBatch()">กรอกแทนนักเรียน · ไม่มีมือถือ</button>
       <button class="primary" onclick="openStats()">ผลวิเคราะห์สถิติ (บทที่ 4)</button>
+      <button onclick="openEvid()">หลักฐานความสำเร็จ 5 ด้าน</button>
       <button onclick="openMoreTeacher()">เอกสาร / ภาคผนวก</button>
       <button onclick="lockTeacher()">ออกจากหน้าครู</button>
     </div>
@@ -1654,7 +1699,7 @@ async function openTeacher(){
   <div class="card"><h2>ความคืบหน้าของห้องตอนนี้</h2>
     <p class="small muted noprint">ใช้ดูระหว่างคาบว่าใครติดอยู่ขั้นไหน จะได้เดินไปช่วยได้ถูกคน</p>
     <div class="grid5">${ROSTER.map((n,i)=>{const d=all[i];
-      const st=!d?'ยังไม่เริ่ม':d.done?'ส่งครบแล้ว':d.phase==='pre'?('แบบวัดก่อน ข้อ '+((d.qi||0)+1)):d.phase==='post'?('แบบวัดหลัง ข้อ '+((d.qi||0)+1)):('ขั้น '+STEPS[d.step][0]+' '+STEPS[d.step][1]);
+      const st=progressText(d);
       const cls=!d?'':d.done?'ok':'go';
       return `<div class="pcard ${cls}"><div class="n">${n.replace('นาย','')}</div><div class="s">${st}</div></div>`;}).join('')}</div>
     <div class="row noprint" style="margin-top:12px">
@@ -3027,6 +3072,7 @@ function renderMore(){
     <h3 style="font-size:14px;margin-top:14px;color:var(--teal-d)">เอกสารสำหรับรายงานและภาคผนวก</h3>
     <div>
       ${it('📐','ผลวิเคราะห์ทางสถิติ (บทที่ 4)','t-test · ดัชนีประสิทธิผล E.I. · ขนาดอิทธิพล',"openStats()")}
+      ${it('🏅','หลักฐานความสำเร็จ 5 ด้าน','ตัวชี้วัด เกณฑ์ แหล่งหลักฐาน ครบทุกด้านของงานพลเมืองดี',"openEvid()")}
       ${it('✅','ค่าดัชนีความสอดคล้อง IOC (ภาคผนวก ก)','กรอกผลผู้เชี่ยวชาญ ระบบคำนวณให้',"openIOC()")}
       ${it('📋','แผนการจัดกิจกรรมโฮมรูม (ภาคผนวก ก)','แผนต้นแบบพร้อมพิมพ์แนบรายงาน',"openPlan()")}
       ${it('🖨️','เครื่องมือวัดฉบับจริง / ใบงาน (ภาคผนวก ข)','แบบวัด '+ITEMS.length+' ข้อ + เกณฑ์ให้คะแนน',"openPaper()")}
@@ -3997,6 +4043,268 @@ function schoolCSV(){
   a.download='uptogrow_school_summary.csv'; a.click();
 }
 
+/* ================= ติดตามการลงมือทำ (Action Follow-up) =================
+   ปิดวงจรของขั้น W: ขั้น W เก็บได้แค่ "คำสัญญา" (w1 ข้อตกลงต่อห้อง, w2 สิ่งที่จะทำเอง)
+   โมดูลนี้เก็บ "ผลการลงมือทำจริง" ในสัปดาห์ถัดไป + การยืนยันหลักฐานโดยครู
+   เป็นหลักฐานเชิงพฤติกรรมของเสาที่ 5 (ลงมือทำสิ่งที่เป็นประโยชน์ต่อส่วนรวม)
+   ตามกรอบความสำเร็จของงานพลเมืองดีที่ไม่นับแค่คะแนนหลังเรียน
+
+   คีย์ข้อมูล lc:act:<mid>:<idx> ซิงก์ขึ้นชีต responses ผ่านกลไกเดิม ไม่ต้องแก้ backend */
+const actKey=(idx,mid)=>'lc:act:'+((mid===undefined||mid===null)?curMission:mid)+':'+idx;
+async function loadAct(idx,mid){
+  const raw=await S.get(actKey(idx,mid),true); if(!raw) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+const ACT_STATUS={done:'ทำแล้ว',partial:'ทำได้บางส่วน',not:'ยังไม่ได้ทำ'};
+let A=null;
+async function openAct(mid,idx){
+  go('act');
+  $('v-act').innerHTML='<div class="card"><h2>กำลังโหลด…</h2></div>';
+  const raw=await S.get(mKey(idx,mid),true);
+  let d=null; try{ d=raw?JSON.parse(raw):null; }catch(e){}
+  if(!d||!d.done){ $('v-act').innerHTML=`<div class="card"><h2>ยังไม่มีข้อมูลภารกิจ</h2><div class="row"><button onclick="go('home')">กลับหน้าแรก</button></div></div>`; return; }
+  A=await loadAct(idx,mid)||{v:1,idx,mid,name:d.name,room:ROOM,
+    pledge:{w1:(d.action||{}).w1||'',w2:(d.action||{}).w2||'',w3:(d.action||{}).w3||''},
+    status:null,note:'',impact:'',at:null,teacher:{ok:null,note:'',at:null}};
+  renderAct();
+}
+function renderAct(){
+  const mi=MISSIONS[A.mid]||{};
+  $('v-act').innerHTML=`<div class="card">
+    <div class="eyebrow">ติดตามการลงมือทำ · ${esc(A.name)}</div>
+    <h1>สิ่งที่ตั้งใจไว้ เกิดขึ้นจริงหรือยัง</h1>
+    <p class="muted small" style="max-width:64ch">จากภารกิจ "${esc(mi.title||'')}" เธอได้ตั้งใจไว้ว่าจะลงมือทำสิ่งนี้
+      การกลับมาบันทึกตรงนี้คือหลักฐานว่าการเรียนรู้ไม่ได้จบที่สถานการณ์จำลอง
+      ตอบตามความจริง ยังไม่ได้ทำก็ตอบได้ ไม่มีผลต่อคะแนน</p>
+    <div class="notice good" style="margin-top:10px"><b>สิ่งที่ฉันจะลงมือทำเอง:</b> ${esc(A.pledge.w2||'—')}<br>
+      <span class="small"><b>ข้อตกลงที่เสนอต่อห้อง:</b> ${esc(A.pledge.w1||'—')}</span></div>
+
+    <h3 style="margin-top:16px">1. ได้ลงมือทำแล้วหรือยัง</h3>
+    ${Object.entries(ACT_STATUS).map(([k,t])=>
+      `<div class="opt ${A.status===k?'sel':''}" onclick="actSet('${k}')"><b class="mono">${k==='done'?'✓':k==='partial'?'◐':'○'}</b> ${t}</div>`).join('')}
+
+    <div id="actMore" class="${A.status&&A.status!=='not'?'':'hide'}">
+      <h3 style="margin-top:14px">2. เล่าสิ่งที่เกิดขึ้นจริง</h3>
+      <p class="small muted">ทำอะไร ที่ไหน กับใคร ผลเป็นอย่างไร ยิ่งเจาะจงยิ่งเป็นหลักฐานที่ดี</p>
+      <textarea id="actNote" placeholder="เช่น ทำตารางบัญชีติดหน้าห้องตั้งแต่วันจันทร์ เพื่อนมาดูแล้ว 8 คน">${esc(A.note||'')}</textarea>
+      <h3 style="margin-top:12px">3. รู้ได้อย่างไรว่าเกิดผล <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></h3>
+      ${A.pledge.w3?`<p class="small muted">ตอนนั้นเธอวางแผนไว้ว่าจะวัดผลแบบนี้: ${esc(A.pledge.w3)}</p>`:''}
+      <textarea id="actImpact" placeholder="เช่น สัปดาห์นี้ไม่มีใครทะเลาะเรื่องเงินห้องเลย">${esc(A.impact||'')}</textarea>
+    </div>
+    <div id="actWhy" class="${A.status==='not'?'':'hide'}">
+      <h3 style="margin-top:14px">2. ติดขัดอะไร <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></h3>
+      <p class="small muted">บอกครูได้ตรง ๆ จะได้ช่วยกันหาทาง</p>
+      <textarea id="actNote2" placeholder="เช่น ยังไม่กล้าเสนอในห้อง กลัวเพื่อนไม่เห็นด้วย">${esc(A.note||'')}</textarea>
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <button class="primary" onclick="saveAct()">บันทึกผลการลงมือทำ</button>
+      <button onclick="go('home')">ไว้ทีหลัง</button>
+    </div>
+    ${A.teacher&&A.teacher.ok?`<div class="notice ${A.teacher.ok==='yes'?'good':''}" style="margin-top:12px">
+      ครู${A.teacher.ok==='yes'?'ยืนยันแล้วว่าเกิดขึ้นจริง':'ยังไม่เห็นหลักฐาน'}${A.teacher.note?' · '+esc(A.teacher.note):''}</div>`:''}
+  </div>`;
+}
+function actSet(k){
+  const keep=($('actNote')||$('actNote2')||{}).value; if(keep!==undefined) A.note=keep;
+  A.status=k; renderAct();
+}
+async function saveAct(){
+  if(!A.status){ toast('เลือกก่อนว่าได้ลงมือทำแล้วหรือยัง'); return; }
+  A.note=(($('actNote')||$('actNote2')||{}).value||'').trim();
+  A.impact=(($('actImpact')||{}).value||'').trim();
+  if(A.status!=='not'&&A.note.length<5){ toast('เล่าสิ่งที่เกิดขึ้นสั้น ๆ เพื่อเป็นหลักฐาน'); return; }
+  A.at=Date.now();
+  const j=JSON.stringify(A); LS.set(actKey(A.idx,A.mid),j); queueRemote(actKey(A.idx,A.mid),A.name,j);
+  const ok=await flushRemote(true);
+  toast(ok?'บันทึกแล้ว ขอบคุณที่กลับมาเล่าให้ฟัง':'บันทึกในเครื่องแล้ว จะส่งขึ้นระบบเมื่อมีเน็ต',1);
+  go('home'); checkResume();
+}
+/* ครูยืนยันหลักฐานจากหน้าหลักฐานความสำเร็จ */
+async function actVerify(mid,idx,ok){
+  const a=await loadAct(idx,mid); if(!a){ toast('นักเรียนยังไม่ได้รายงานผล'); return; }
+  const note=prompt(ok==='yes'?'บันทึกหลักฐานที่ครูเห็น (เช่น เห็นบัญชีติดหน้าห้องจริง)':'บอกนักเรียนสั้น ๆ ว่ายังขาดอะไร','');
+  if(note===null) return;
+  a.teacher={ok,note:note.trim(),at:Date.now()};
+  const j=JSON.stringify(a); LS.set(actKey(idx,mid),j); queueRemote(actKey(idx,mid),a.name,j);
+  await flushRemote(true); openEvid();
+}
+
+/* ================= หลักฐานความสำเร็จ 5 ด้าน (Evidence of Success) =================
+   กรอบ: ความสำเร็จของงานพลเมืองดีต้องมีหลักฐานอย่างน้อย 5 ด้าน ไม่ใช่แค่คะแนนหลังเรียนสูงขึ้น
+   1 ความรู้ความเข้าใจ  2 คิดวิเคราะห์ตัดสินใจด้วยเหตุผล  3 เคารพความแตกต่างและสิทธิผู้อื่น
+   4 พฤติกรรมรับผิดชอบและจิตสาธารณะ  5 ลงมือทำจริงต่อห้อง/โรงเรียน/ชุมชน
+   ทุกตัวชี้วัดคำนวณจากข้อมูลจริงในระบบ ระบุแหล่งหลักฐานกำกับ ไม่มีตัวเลขสมมติ
+   เกณฑ์ร้อยละอิงเกณฑ์ประเมินโครงการที่นิยมใช้ (ผ่านเกณฑ์ = ระดับสามารถ 2.51 ขึ้นไป) */
+async function openEvid(){
+  go('evid');
+  $('v-evid').innerHTML='<div class="card"><h2>กำลังรวบรวมหลักฐานจากทุกแหล่ง…</h2></div>';
+  await pullAll();
+  const all=await loadAllForMission(curMission);
+  const done=all.filter(x=>x&&x.done);
+  const n=done.length, mi=MIS();
+  if(!n){
+    $('v-evid').innerHTML=`<div class="card"><div class="eyebrow">หลักฐานความสำเร็จ 5 ด้าน</div>
+      <h1>ยังไม่มีข้อมูล</h1><div class="notice">ยังไม่มีนักเรียนทำภารกิจนี้ครบ หลักฐานทุกด้านคำนวณจากข้อมูลจริงเท่านั้น</div>
+      <div class="row"><button onclick="openTeacher()">กลับหน้าครู</button></div></div>`;
+    return;
+  }
+  /* ดึงบันทึกติดตามการลงมือทำของภารกิจนี้ */
+  const acts=[]; for(const d of done){ acts.push(await loadAct(d.idx,curMission)); }
+  const actOf=i=>acts[done.findIndex(d=>d.idx===i)]||null;
+
+  const pct=(k,tot)=>tot?Math.round(k/tot*100):0;
+  const fil=t=>String(t||'').trim().length>=5;
+  /* แถวตัวชี้วัด: [ชื่อ, ค่า(ข้อความ), ผ่าน true/false/null(รอข้อมูล), เกณฑ์] */
+  const row=(ind,val,pass,crit)=>({ind,val,pass,crit});
+  const pctRow=(ind,k,tot,critPct)=>row(ind,`${k}/${tot} คน (${pct(k,tot)}%)`,tot?pct(k,tot)>=critPct:null,`≥ ${critPct}%`);
+  const AVG_PASS=2.51; /* ค่าเฉลี่ยระดับพฤติกรรมที่ถือว่า "ระดับสามารถ" */
+  const dimAvg=k=>stMean(done.map(d=>dimScore(d.post||{},k)));
+  const dimRow=(ind,k)=>{const v=dimAvg(k);return row(ind,v.toFixed(2)+' / 4',v>=AVG_PASS,`เฉลี่ย ≥ ${AVG_PASS}`);};
+  const obsRow=(ind,keys)=>{ /* % นักเรียน(ที่ครูประเมินด้านนั้นแล้ว)ได้ระดับ 3 ขึ้นไปทุกด้านใน keys */
+    const rated=done.filter(d=>keys.every(k=>tobsLv(d,k)));
+    if(!rated.length) return row(ind,'ครูยังไม่ได้ประเมิน',null,'≥ 70% ได้ระดับ 3 ขึ้นไป');
+    const ok=rated.filter(d=>keys.every(k=>tobsLv(d,k)>=3)).length;
+    return row(ind,`${ok}/${rated.length} คน (${pct(ok,rated.length)}%)`,pct(ok,rated.length)>=70,'≥ 70% ได้ระดับ 3 ขึ้นไป');
+  };
+  const R=pairedT(done.map(d=>total(d.pre)),done.map(d=>total(d.post)));
+
+  const pillars=[
+   {icon:'📘',t:'1. ความรู้และความเข้าใจในหน้าที่และสิทธิ',obj:'ความเป็นพลเมืองดี',
+    src:'แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ ก่อน–หลัง (ตารางที่ 1 และ 5 หน้าสถิติ)',
+    rows:[
+      pctRow('นักเรียนมีคะแนนหลังเรียนถึงระดับ "สามารถ" (เฉลี่ยรายข้อ ≥ '+AVG_PASS+')',
+        done.filter(d=>{const c=answeredCount(d.post);return c&&total(d.post)/c>=AVG_PASS;}).length,n,70),
+      row('คะแนนหลังเรียนสูงกว่าก่อนเรียนอย่างมีนัยสำคัญ',
+        isFinite(R.p)?`t = ${R.t.toFixed(3)}, p ${pTxt(R.p)}`:'ข้อมูลยังไม่พอ',
+        isFinite(R.p)?R.p<0.05:null,'p < .05'),
+    ]},
+   {icon:'🧠',t:'2. คิดวิเคราะห์และตัดสินใจด้วยเหตุผล',obj:'ทักษะชีวิต',
+    src:'หลักฐานกระบวนการในขั้น T (ทางเลือก) และ O (เหตุผลการตัดสินใจ) + บันทึกสนทนากับ AI โค้ช',
+    rows:[
+      /* นิยาม "ทางเลือกที่วิเคราะห์แล้ว" ใช้เกณฑ์เดียวกับที่ขั้น T บังคับจริง
+         คือระบุทั้งชื่อทางเลือกและผู้ที่เสียประโยชน์ ไม่ใช่แค่พิมพ์ชื่อทิ้งไว้ */
+      pctRow('เปรียบเทียบทางเลือกอย่างน้อย 2 ทาง พร้อมระบุผู้เสียประโยชน์',
+        done.filter(d=>((d.plan||{}).alt||[]).filter(a=>a&&String(a.n||'').trim()&&String(a.l||'').trim()).length>=2).length,n,80),
+      pctRow('ให้เหตุผลประกอบการตัดสินใจโดยอ้างข้อมูล',
+        done.filter(d=>fil((d.plan||{}).why)).length,n,80),
+      pctRow('ทบทวนการตัดสินใจหลังฟังคำถามโค้ชหรือความเห็นเพื่อน',
+        done.filter(d=>((d.plan||{}).changed||0)>0||((d.coachLog||[]).filter(c=>c.role==='me').length>0)).length,n,50),
+      dimRow('คะแนนรายด้าน "การคิดและแก้ปัญหา" หลังเรียน','think'),
+    ]},
+   {icon:'🤝',t:'3. เคารพความแตกต่างและสิทธิของผู้อื่น',obj:'ความเป็นพลเมืองดี',
+    src:'แบบวัดรายด้าน (resp2, divers) + แบบสังเกตพฤติกรรมของครู 9 ด้าน (ตารางที่ 6 ความเที่ยงตรง)',
+    rows:[
+      dimRow('คะแนนรายด้าน "การเคารพสิทธิผู้อื่น" หลังเรียน','resp2'),
+      dimRow('คะแนนรายด้าน "การยอมรับความแตกต่าง" หลังเรียน','divers'),
+      obsRow('ครูสังเกตเห็นพฤติกรรมจริง (เคารพสิทธิ + ยอมรับความแตกต่าง)',['resp2','divers']),
+    ]},
+   {icon:'🌟',t:'4. พฤติกรรมรับผิดชอบและมีจิตสาธารณะ',obj:'ความเป็นพลเมืองดี',
+    src:'แบบสังเกตพฤติกรรมของครู + บทบาทที่ทำจริงในขั้น G (งานกลุ่ม)',
+    rows:[
+      dimRow('คะแนนรายด้าน "ความรับผิดชอบ" หลังเรียน','resp'),
+      dimRow('คะแนนรายด้าน "ประโยชน์ส่วนรวม" หลังเรียน','common'),
+      obsRow('ครูสังเกตเห็นพฤติกรรมจริง (รับผิดชอบ + ส่วนรวม + วินัย)',['resp','common','disc']),
+      pctRow('มีบทบาทและระบุสิ่งที่ทำจริงในงานกลุ่ม',done.filter(d=>fil(d.contrib)).length,n,80),
+    ]},
+   {icon:'🌱',t:'5. ลงมือทำสิ่งที่เป็นประโยชน์ต่อห้องเรียน โรงเรียน หรือชุมชน',obj:'ความเป็นพลเมืองดี',
+    src:'ขั้น W (ข้อตกลง+เป้าหมาย) + โมดูลติดตามการลงมือทำ + การยืนยันหลักฐานโดยครู',
+    rows:[
+      pctRow('เสนอข้อตกลงหรือแนวปฏิบัติต่อห้อง (ขั้น W)',done.filter(d=>fil((d.action||{}).w1)).length,n,90),
+      pctRow('กลับมารายงานผลการลงมือทำ (สัปดาห์ถัดไป)',acts.filter(Boolean).length,n,60),
+      pctRow('ลงมือทำจริงทั้งหมดหรือบางส่วน',acts.filter(a=>a&&(a.status==='done'||a.status==='partial')).length,n,60),
+      pctRow('ครูยืนยันหลักฐานว่าเกิดขึ้นจริง',acts.filter(a=>a&&a.teacher&&a.teacher.ok==='yes').length,n,50),
+    ]},
+  ];
+  const st=p=>p===null?'<span class="pill" style="color:var(--gold);border-color:var(--gold)">รอข้อมูล</span>'
+            :p?'<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ผ่านเกณฑ์</span>'
+            :'<span class="pill" style="color:var(--red);border-color:var(--red)">ยังไม่ถึงเกณฑ์</span>';
+  /* สรุปสถานะรายเสา: มีแถวใดไม่ผ่าน = ยังไม่ถึงเกณฑ์ · มีแถวใดยังไม่มีข้อมูล = รอข้อมูล
+     เสาจะ "ผ่านเกณฑ์" ได้ก็ต่อเมื่อมีหลักฐานครบทุกตัวชี้วัด
+     จงใจไม่ยอมให้เสาผ่านด้วยคะแนนที่นักเรียนตอบเองเพียงอย่างเดียว
+     ทั้งที่หลักฐานพฤติกรรมจากครูยังว่าง เพราะขัดกับหลักของกรอบนี้ */
+  const pSum=pillars.map(P=>{
+    const vals=P.rows.map(r=>r.pass);
+    return vals.some(v=>v===false)?false : vals.some(v=>v===null)?null : true;
+  });
+  const passed=pSum.filter(v=>v===true).length, waiting=pSum.filter(v=>v===null).length;
+
+  /* รายการติดตามรายคน สำหรับครูยืนยัน (เสา 5) */
+  const actRows=done.map(d=>{
+    const a=actOf(d.idx);
+    return `<tr><td>${esc(d.name)}</td>
+      <td class="small">${esc((d.action||{}).w2||'—')}</td>
+      <td class="small">${!a?'<span class="muted">ยังไม่รายงาน</span>':`<b>${ACT_STATUS[a.status]||'—'}</b>${a.note?'<br>'+esc(a.note):''}${a.impact?'<br><span class="muted">ผล: '+esc(a.impact)+'</span>':''}`}</td>
+      <td class="small">${a&&a.teacher&&a.teacher.ok?(a.teacher.ok==='yes'?'<span class="ok">✓ ยืนยันแล้ว</span>':'<span style="color:var(--gold)">ยังไม่เห็นหลักฐาน</span>')+(a.teacher.note?'<br>'+esc(a.teacher.note):''):'<span class="muted">—</span>'}</td>
+      <td class="noprint">${a?`<button class="small" onclick="actVerify(${curMission},${d.idx},'yes')">ยืนยัน</button>
+        <button class="small" onclick="actVerify(${curMission},${d.idx},'no')">ยังไม่เห็น</button>`
+        :`<button class="small" onclick="openAct(${curMission},${d.idx})">กรอกแทน</button>`}</td></tr>`;}).join('');
+
+  $('v-evid').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · หลักฐานความสำเร็จ 5 ด้าน</div>
+  <div class="card">
+    <div class="eyebrow">หลักฐานความสำเร็จของงานพลเมืองดี</div>
+    <h1>หลักฐาน 5 ด้าน · ${esc(mi.title)}</h1>
+    <p class="muted small" style="max-width:70ch">ความสำเร็จของงานพัฒนาพลเมืองดีไม่ได้ดูแค่คะแนนหลังเรียนสูงขึ้น
+      หน้านี้รวบรวมหลักฐานทั้ง 5 ด้านจากข้อมูลจริงในระบบ ระบุตัวชี้วัด เกณฑ์ และแหล่งหลักฐานกำกับทุกแถว
+      ใช้ตอบวัตถุประสงค์ทั้งการพัฒนา<b>ทักษะชีวิต</b>และ<b>ความเป็นพลเมืองดี</b>ของนวัตกรรม</p>
+    <div class="grid3" style="margin-top:12px">
+      <div class="card tight"><div class="eyebrow">ผ่านเกณฑ์แล้ว</div><div class="bignum ${passed>=3?'ok':''}">${passed}/5 ด้าน</div></div>
+      <div class="card tight"><div class="eyebrow">รอหลักฐานเพิ่ม</div><div class="bignum">${waiting} ด้าน</div>
+        <div class="small muted">${waiting?'ยังสรุปไม่ได้ ไม่ใช่ไม่ผ่าน':'มีข้อมูลครบทุกด้าน'}</div></div>
+      <div class="card tight"><div class="eyebrow">คำนวณจาก</div><div class="bignum">${n} คน</div><div class="small muted">ที่ทำภารกิจครบ</div></div>
+    </div>
+    <div class="row noprint" style="margin-top:10px">
+      ${MISSIONS.filter(m=>m.enabled).map(m=>`<button class="${m.id===curMission?'primary':''}" onclick="curMission=${m.id};openEvid()">สัปดาห์ ${m.week}</button>`).join('')}
+      <button onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+      <button onclick="evidCSV()">ส่งออก CSV</button>
+      <button onclick="openTeacher()">กลับหน้าครู</button>
+    </div>
+  </div>
+  ${pillars.map((P,i)=>`
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <h2 style="margin:0">${P.icon} ${esc(P.t)}</h2>${st(pSum[i])}
+    </div>
+    <p class="small muted" style="margin:4px 0 8px">ตอบวัตถุประสงค์: ${P.obj} · แหล่งหลักฐาน: ${esc(P.src)}</p>
+    <table><thead><tr><th>ตัวชี้วัด</th><th style="width:20%">ค่าที่วัดได้</th><th style="width:14%">เกณฑ์</th><th style="width:14%">สถานะ</th></tr></thead>
+      <tbody>${P.rows.map(r=>`<tr><td>${esc(r.ind)}</td><td class="mono">${r.val}</td><td class="small mono">${esc(r.crit)}</td><td>${st(r.pass)}</td></tr>`).join('')}</tbody></table>
+  </div>`).join('')}
+
+  <div class="card">
+    <h2>🌱 การติดตามการลงมือทำรายบุคคล (หลักฐานเสาที่ 5)</h2>
+    <p class="small muted">นักเรียนกลับมารายงานผลเองจากหน้าแรก (การ์ดจะขึ้นอัตโนมัติเมื่อทำภารกิจเสร็จ)
+      หรือครูกรอกแทนจากการพูดคุย จากนั้นครูกดยืนยันเมื่อเห็นหลักฐานจริง เช่น เห็นบัญชีติดหน้าห้อง เห็นพฤติกรรมในคาบ</p>
+    <table><thead><tr><th>ชื่อ</th><th>สิ่งที่ตั้งใจจะทำ (ขั้น W)</th><th>ผลการลงมือทำ</th><th>ครูยืนยัน</th><th class="noprint">จัดการ</th></tr></thead>
+      <tbody>${actRows}</tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>วิธีอ่านหน้านี้ในการรายงานผล</h2>
+    <p class="small" style="max-width:72ch">ด้านที่ 1 ใช้ผลวิเคราะห์เชิงปริมาณ (t-test) · ด้านที่ 2 ใช้หลักฐานกระบวนการคิดที่ระบบบันทึกอัตโนมัติระหว่างทำภารกิจ
+      · ด้านที่ 3–4 ใช้สองแหล่งไขว้กัน (นักเรียนตอบเอง + ครูสังเกต ดูความสอดคล้องได้จากตารางความเที่ยงตรงเชิงสภาพ)
+      · ด้านที่ 5 ใช้พฤติกรรมจริงหลังจบภารกิจที่ครูยืนยันหลักฐานได้ ทั้งหมดนี้เทียบเคียงแนวปฏิบัติการประเมินงานพลเมืองศึกษาที่ให้น้ำหนักหลักฐานพฤติกรรมมากกว่าคะแนนสอบอย่างเดียว
+      สถานะ "รอข้อมูล" หมายถึงยังไม่มีข้อมูลพอจะสรุป ไม่ใช่ไม่ผ่าน</p>
+  </div>
+  <div class="row noprint" style="margin-bottom:26px">
+    <button class="primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+    <button onclick="openTeacher()">กลับหน้าครู</button>
+    <button onclick="go('home')">หน้าแรก</button></div>`;
+}
+function evidCSV(){
+  const el=$('v-evid'); if(!el) return;
+  const rows=[];
+  el.querySelectorAll('.card').forEach(c=>{
+    const h=c.querySelector('h1,h2'); if(h) rows.push([h.textContent.trim()]);
+    c.querySelectorAll('table tr').forEach(tr=>rows.push([...tr.querySelectorAll('th,td')].map(x=>x.textContent.trim())));
+    rows.push(['']);
+  });
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='uptogrow_evidence_week'+MIS().week+'.csv'; a.click();
+}
+
 /* ================= เช็คอินใจ · Pulse: ตรวจสุขภาวะรายสัปดาห์ 60 วินาที =================
    ออกแบบเทียบมาตรฐานสากลของระบบตรวจสุขภาวะนักเรียน (เช่น Linewize Pulse)
    ปรับให้เข้ากับบริบทนักเรียนไทยและระบบดูแลช่วยเหลือนักเรียนของ สพฐ.
@@ -4410,13 +4718,30 @@ function routeShortcut(){
 
 /* ---------- boot ---------- */
 async function checkResume(){
+  /* ล้างกล่องก่อนทุกครั้ง ไม่งั้นการ์ดเดิมจะค้างอยู่เมื่อเงื่อนไขไม่เข้าแล้ว
+     เช่น นักเรียนรายงานว่าลงมือทำแล้ว การ์ดชวนรายงานผลต้องหายไป */
+  const el=$('resumeBox'); if(el) el.innerHTML='';
   const lastRaw=await S.get('lc:last',false); if(lastRaw===null)return;
   const parts=String(lastRaw).split(':'); const lastMid=parts.length>1?parseInt(parts[0]):0; const last=parts.length>1?parts[1]:parts[0];
   const raw=await S.get(mKey(last,lastMid),true); if(!raw)return;
   let d;try{d=JSON.parse(raw);}catch(e){return;}
-  const el=$('resumeBox');if(!el)return;
-  el.innerHTML=`<div class="notice good" style="margin:0">มีงานที่ทำค้างไว้ของ ${esc(d.name)} · ${(MISSIONS[lastMid]||{}).title||''}
-    <button class="small" style="margin-left:10px" onclick="curMission=${lastMid};startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
+  if(!el)return;
+  if(!d.done){
+    el.innerHTML=`<div class="notice good" style="margin:0">มีงานที่ทำค้างไว้ของ ${esc(d.name)} · ${(MISSIONS[lastMid]||{}).title||''}
+      <button class="small" style="margin-left:10px" onclick="curMission=${lastMid};startStudent(${last})">ทำต่อจากที่ค้าง</button></div>`;
+    return;
+  }
+  /* ภารกิจเสร็จแล้วและมีคำสัญญาในขั้น W: ชวนกลับมารายงานผลการลงมือทำ (หลักฐานเสาที่ 5)
+     ถามซ้ำได้ถ้ายังไม่ทำหรือทำได้บางส่วน เพื่อให้อัปเดตจนสำเร็จ */
+  if((d.action||{}).w2){
+    const a=await loadAct(last,lastMid);
+    if(!a||a.status!=='done'){
+      el.innerHTML=`<div class="notice good" style="margin:0">🌱 ${esc(d.name)} เคยตั้งใจไว้ว่า
+        "${esc(String(d.action.w2).slice(0,60))}${String(d.action.w2).length>60?'…':''}"
+        ${a?'— อัปเดตความคืบหน้าหน่อยไหม':'— ได้ลงมือทำแล้วหรือยัง'}
+        <button class="small" style="margin-left:10px" onclick="openAct(${lastMid},${last})">${a?'อัปเดตผล':'รายงานผล'}</button></div>`;
+    }
+  }
 }
 loadImportedMissions();
 applyZoom(); applyHC(); paintDemoBar();
