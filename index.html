@@ -414,7 +414,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
       <button class="htile acc" onclick="openDaily()"><span class="ic">📅</span>
         <b>ภารกิจวันนี้</b><small id="hsDaily">ครบ 8 ขั้น 10 นาที · ทำทุกวันจันทร์ถึงศุกร์</small></button>
       <button class="htile" onclick="openWeekMissions()"><span class="ic">🎯</span>
-        <b>ภารกิจสัปดาห์นี้</b><small>สถานการณ์เต็มรูปแบบ 8 ขั้น</small></button>
+        <b>ภารกิจสัปดาห์นี้</b><small>8 ขั้นเต็มรูปแบบ ไม่เกิน 20 นาที รวมแบบวัด</small></button>
       <button class="htile" onclick="openPulse()"><span class="ic">💚</span>
         <b>เช็คอินใจ</b><small id="hsPulse">ทำทุกวัน 30 วินาที · ขอให้ครูช่วยได้</small></button>
       <button class="htile" onclick="qStart()"><span class="ic">⚡</span>
@@ -464,7 +464,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
     <div class="card tight"><div class="eyebrow">Process</div><h3>UP TO GROW 8 ขั้น</h3>
       <p class="small muted">Understand · Perceive · Think · Own · Group · Reflect · Optimize · Work for the common good · ใช้ซ้ำได้ทุกภารกิจ</p></div>
     <div class="card tight"><div class="eyebrow">Input / Output</div><h3>วัดก่อนและหลังจริง</h3>
-      <p class="small muted">แบบวัดสถานการณ์ 12 ข้อ ชุดเดียวกันทุกภารกิจ ทำให้เทียบพัฒนาการข้ามภารกิจได้</p></div>
+      <p class="small muted">แบบวัดสถานการณ์ 10 ข้อ ชุดเดียวกันทุกภารกิจ ทำให้เทียบพัฒนาการข้ามภารกิจได้</p></div>
     <div class="card tight"><div class="eyebrow">Teacher in the loop</div><h3>AI ถาม ครูตัดสิน</h3>
       <p class="small muted">AI ห้ามให้คำตอบและห้ามให้คะแนนขั้นสุดท้าย ครูเป็นผู้ยืนยันระดับสมรรถนะทุกครั้ง</p></div>
   </div>
@@ -561,6 +561,25 @@ const ROYAL = {
       d:'เห็นอะไรที่จะทำเพื่อส่วนรวมได้ก็ลงมือทำ ด้วยความมีน้ำใจ',
       dims:['common','resp','disc','resp2']}
 };
+/* ================= ระดับความสอดคล้องกับพระบรมราโชบาย =================
+   ต้องไม่อ้างเกินหลักฐานที่โปรแกรมนี้เก็บได้จริง จึงระบุระดับกำกับทุกด้าน
+     full = ตรงชัด        มีทั้งข้อวัด ข้อฝึกรายวัน และแบบสังเกตของครูรองรับโดยตรง
+     part = ตรงบางส่วน    แตะบางแง่มุม แต่ยังไม่ครอบคลุมทั้งด้าน
+     none = ไม่ใช่จุดเน้น  โปรแกรมนี้ไม่ได้ออกแบบมาเพื่อด้านนี้ ไม่ควรนำไปอ้างผล
+   ถ้อยคำมาตรฐานที่ใช้ทั้งระบบ: "สนับสนุนการดำเนินงานตามพระบรมราโชบาย
+   โดยเน้นด้านคุณธรรมและการเป็นพลเมืองดี" — ห้ามใช้คำว่า "ครอบคลุมครบทั้ง 4 ด้าน" */
+const ROYAL_FIT={
+  r1:{lv:'part',t:'ตรงบางส่วน',d:'แตะผ่านการเคารพสิทธิผู้อื่น การยอมรับความต่าง และการคำนึงถึงส่วนรวมในระดับห้องเรียน ยังไม่ได้ครอบคลุมมิติบ้านเมืองโดยตรง'},
+  r2:{lv:'full',t:'ตรงชัด',d:'เป็นจุดเน้นของโปรแกรม มีข้อวัดสถานการณ์ ข้อฝึกรายวัน และแบบสังเกตของครูรองรับโดยตรง'},
+  r3:{lv:'none',t:'ไม่ใช่จุดเน้น',d:'โปรแกรมนี้ไม่ได้ออกแบบเพื่อการมีงานทำหรือมีอาชีพ ไม่ควรนำผลไปอ้างในด้านนี้'},
+  r4:{lv:'full',t:'ตรงชัด',d:'เป็นจุดเน้นของโปรแกรม มีข้อวัดสถานการณ์ ข้อฝึกรายวัน และแบบสังเกตของครูรองรับโดยตรง'}
+};
+const ROYAL_CLAIM='สนับสนุนการดำเนินงานตามพระบรมราโชบายด้านการศึกษา โดยเน้นด้านคุณธรรมและการเป็นพลเมืองดี';
+const royalPill=rk=>{const f=ROYAL_FIT[rk];
+  const c=f.lv==='full'?'color:var(--teal-d);border-color:var(--teal)'
+        :f.lv==='part'?'color:var(--gold);border-color:var(--gold)'
+        :'color:var(--muted)';
+  return `<span class="pill" style="${c}" title="${esc(f.d)}">${f.t}</span>`;};
 /* คะแนนพระบรมราโชบายรายด้าน = ค่าเฉลี่ยของสมรรถนะที่รองรับด้านนั้น */
 function royalScore(a,rk){
   const ds=ROYAL[rk].dims.map(k=>dimScore(a,k)).filter(v=>v>0);
@@ -597,15 +616,17 @@ const ITEMS = [
      'บอกเพื่อนให้หยุดล้อ และชวนคนที่ถูกกันเข้ากลุ่ม','บอกให้หยุด ชวนเข้ากลุ่ม พูดคุยกับคนที่ถูกล้อ และเสนอข้อตกลงของห้องเพื่อไม่ให้เกิดซ้ำ']},
  {d:'common',q:'ห้องได้งบ 1,500 บาท มีข้อเสนอให้ซื้อของที่คนเพียง 5 คนได้ใช้ แต่เสียงข้างมากเห็นด้วยเพราะเกรงใจ',
   o:['เห็นด้วยตามเสียงส่วนใหญ่','เห็นด้วยเพราะไม่อยากขัดใจเพื่อน',
-     'ทักท้วงว่ายังมีคนอีกหลายคนที่ไม่ได้ประโยชน์','เสนอข้อมูลว่าใครได้และไม่ได้ประโยชน์ ขอให้ทบทวนทางเลือกอื่น และเสนอวิธีใช้งบที่ทุกคนได้ร่วมใช้']},
- {d:'disc',q:'โรงเรียนประกาศห้ามนำโทรศัพท์เข้าห้องสอบ วันนั้นนักเรียนลืมฝากไว้ และไม่มีครูตรวจกระเป๋า',
-  o:['เก็บไว้ในกระเป๋าแล้วเข้าสอบเลย เพราะไม่มีใครรู้','พกเข้าไปแต่ปิดเครื่อง คิดว่าไม่ได้ใช้ก็ไม่ผิดกติกา',
-     'แจ้งครูคุมสอบก่อนเข้าห้อง แล้วปฏิบัติตามที่ครูบอก','แจ้งครูก่อนเข้าห้อง และเสนอให้มีจุดฝากโทรศัพท์หน้าห้องสอบ เพื่อไม่ให้เพื่อนคนอื่นเจอปัญหาเดิม']},
- {d:'divers',q:'มีเพื่อนใหม่ย้ายมาจากต่างจังหวัด พูดสำเนียงต่างจากเพื่อนในห้อง และมักเสนอความคิดที่ไม่เหมือนกลุ่ม',
-  o:['ไม่ค่อยคุยด้วย เพราะรู้สึกเข้ากันยาก','คุยด้วยเมื่อจำเป็น แต่ไม่ชวนเข้ากลุ่มทำงาน',
-     'ชวนเข้ากลุ่มและรับฟังความคิดเห็นของเขา','ชวนเข้ากลุ่ม รับฟัง และช่วยอธิบายให้เพื่อนคนอื่นเข้าใจมุมมองที่ต่างของเขาด้วย']}
+     'ทักท้วงว่ายังมีคนอีกหลายคนที่ไม่ได้ประโยชน์','เสนอข้อมูลว่าใครได้และไม่ได้ประโยชน์ ขอให้ทบทวนทางเลือกอื่น และเสนอวิธีใช้งบที่ทุกคนได้ร่วมใช้']}
 ];
-/* จำนวนข้อของแบบวัดฉบับปัจจุบัน ใช้ตรวจว่าข้อมูลเก่าที่เก็บด้วยฉบับ 10 ข้อปนกันหรือไม่ */
+/* แบบวัด 10 ข้อ ครอบคลุมสมรรถนะ 7 ด้าน (self think comm resp hon resp2 common)
+   ตรงกับฉบับที่ระบุในรายงาน 5 บท และตรงกับฉบับที่ข้อมูลจริงของนักเรียนใช้เก็บ
+   จึงเทียบก่อน-หลังกับข้อมูลเดิมได้โดยไม่ต้องมีหมายเหตุกำกับ
+
+   ส่วนอีก 2 ด้าน (วินัยและการเคารพกติกา `disc` · การยอมรับความแตกต่าง `divers`)
+   ไม่ได้อยู่ในแบบวัดฉบับนี้ แต่เก็บหลักฐานผ่านสองทางที่เป็นพฤติกรรมจริงมากกว่า คือ
+   แบบสังเกตพฤติกรรมของครู (TOBS 9 ด้าน) และภารกิจรายวัน (DAILY_SIT ครบ 9 ด้าน)
+   เวลารายงานผลจึงต้องแยกให้ชัดว่าค่าไหนมาจากแบบวัด และค่าไหนมาจากการสังเกต */
+const ITEM_DIMS=[...new Set(ITEMS.map(x=>x.d))];
 const FULL_SCORE = ITEMS.length * 4;
 const answeredCount = a => Object.keys(a||{}).length;
 
@@ -860,7 +881,7 @@ const NAV_MENUS={
     {sep:1},
     {h:'สำหรับนักเรียน'},
     {i:'▶',t:'ทำภารกิจวันนี้',d:'นักเรียนแตะชื่อตัวเองแล้วเริ่มได้เลย',fn:"openDaily()"},
-    {i:'🎯',t:'ทำภารกิจประจำสัปดาห์',d:'สถานการณ์เต็มรูปแบบ 8 ขั้น',fn:"scrollToMissions()"},
+    {i:'🎯',t:'ทำภารกิจประจำสัปดาห์',d:'8 ขั้นเต็มรูปแบบ ไม่เกิน 20 นาที รวมแบบวัดก่อน–หลัง',fn:"scrollToMissions()"},
     {i:'⚡',t:'ทำภารกิจด่วน',d:'เฉพาะที่ครูเปิดไว้',fn:"qStart()"},
   ],
   teacher:[
@@ -880,7 +901,7 @@ const NAV_MENUS={
   ],
   admin:[
     {h:'ระดับโรงเรียน'},
-    {i:'🏫',t:'แดชบอร์ดผู้บริหาร',d:'เทียบทุกห้อง · พระบรมราโชบาย 4 ด้าน',fn:"needTeacher(openSchool)"},
+    {i:'🏫',t:'แดชบอร์ดผู้บริหาร',d:'เทียบทุกห้อง · เน้นคุณธรรมและพลเมืองดี',fn:"needTeacher(openSchool)"},
     {i:'🎓',t:'สรุปผลรายเทอมของห้อง',d:'ตารางตัวชี้วัดสะสม พิมพ์แนบรายงานได้',fn:"needTeacher(()=>openLevel('term'))"},
     {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ใช้ประกอบการประเมินโครงการ',fn:"needTeacher(openEvid)"},
     {sep:1},
@@ -1428,7 +1449,12 @@ function groupScore(a,g){
 /* ---------- mission (UP TO GROW) ---------- */
 const STEPS=[['U','เข้าใจ'],['P','เห็นปัญหา'],['T','คิดมีหลักฐาน'],['O','ตัดสินใจ'],
              ['G','ทำงานกลุ่ม'],['R','สะท้อนคิด'],['O','ปรับปรุง'],['W','เพื่อส่วนรวม']];
-const STEPMIN=[5,8,10,7,10,5,3,5];
+/* งบเวลาของกิจกรรม: 8 ขั้นรวม 14 นาที + แบบวัดก่อนและหลังอย่างละ 3 นาที = 20 นาที
+   ออกแบบให้จบใน 1 คาบโฮมรูมโดยรวมแบบวัดก่อน-หลังไว้แล้ว
+   ขั้นที่ใช้เวลามากที่สุดคือ T คิดมีหลักฐาน O ตัดสินใจ และ G ทำงานกลุ่ม */
+const STEPMIN=[2,2,2,2,2,2,1,1];
+const TESTMIN=3;                                   /* แบบวัดก่อนหรือหลัง อย่างละ 3 นาที */
+const TOTALMIN=STEPMIN.reduce((a,b)=>a+b,0)+TESTMIN*2;
 function stepBar(){
   const pct=(s.step/STEPS.length)*100;
   const left=STEPMIN.slice(s.step).reduce((a,b)=>a+b,0);
@@ -1558,7 +1584,9 @@ function stO(){
     <textarea id="pv3">${esc(p.pv3||'')}</textarea>
   </div>
 
-  <div class="card tight" style="margin-top:14px"><div class="eyebrow">AI Life Coach</div>
+  <div class="card tight" style="margin-top:14px"><div class="eyebrow">AI Life Coach · เครื่องมือช่วยตั้งคำถาม</div>
+    <p class="small muted" style="margin:0 0 8px">โค้ชจะ<b>ตั้งคำถามให้คิดต่อเท่านั้น ไม่บอกว่าควรเลือกทางใด และไม่ให้คะแนน</b>
+      การตัดสินใจเป็นของนักเรียน การประเมินผลเป็นของครู</p>
     <div id="coachBox"></div>
     <div class="row" style="margin-top:8px"><input id="coachIn" placeholder="พิมพ์ความคิดของนักเรียนให้โค้ชช่วยตั้งคำถามต่อ" style="flex:1;min-width:200px">
     <button onclick="askCoach()" id="coachBtn">ส่งให้โค้ช</button></div></div>
@@ -1709,7 +1737,7 @@ async function askCoach(){
 function showReport(st,tv){
   st.self=st.self||{};st.teacher=st.teacher||{score:{},note:''};st.teacher.score=st.teacher.score||{};
   const pre=total(st.pre),post=total(st.post),diff=post-pre;
-  const rows=Object.keys(DIMS).map(k=>{
+  const rows=ITEM_DIMS.map(k=>{
     const a=dimScore(st.pre,k),b=dimScore(st.post,k);
     return `<tr><td>${DIMS[k].n}</td><td class="mono">${a.toFixed(2)}</td><td class="mono">${b.toFixed(2)}</td>
       <td class="mono ${b-a>0?'ok':b-a<0?'bad':''}">${(b-a>=0?'+':'')+(b-a).toFixed(2)}</td></tr>`;}).join('');
@@ -1731,7 +1759,7 @@ function showReport(st,tv){
     </div>
     <table style="margin-top:14px"><thead><tr><th>ด้าน</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th></tr></thead><tbody>${rows}</tbody></table>
     <p class="small muted" style="margin-top:8px">คะแนนรายด้านเป็นค่าเฉลี่ยระดับพฤติกรรม 1–4</p>
-    ${svgRadar(Object.keys(DIMS).map(k=>DIMS[k].n),Object.keys(DIMS).map(k=>dimScore(st.pre,k)),Object.keys(DIMS).map(k=>dimScore(st.post,k)))}
+    ${svgRadar(ITEM_DIMS.map(k=>DIMS[k].n),ITEM_DIMS.map(k=>dimScore(st.pre,k)),ITEM_DIMS.map(k=>dimScore(st.post,k)))}
     <p class="small muted" style="margin-top:6px">แผนภูมิเรดาร์ช่วยให้เห็นจุดแข็งจุดอ่อนของนักเรียนคนนี้ในคราวเดียว ยิ่งจุดออกไปไกลจากศูนย์กลาง ยิ่งแสดงระดับสูง</p>
   </div>
   <div class="card"><h2>หลักฐานจากภารกิจ</h2>
@@ -1898,9 +1926,9 @@ async function openTeacher_(){
   <div class="card"><h2>ภาพรวมทั้งห้อง</h2>
     <p class="small muted">ใช้ดูผลได้ในคาบเลย ไม่ต้องรอเปิดตารางตัวเลข</p>
     <h3 style="font-size:14px;margin-top:14px">คะแนนเฉลี่ยรายด้าน ก่อน–หลัง (แผนภูมิแท่ง)</h3>
-    ${svgBar(Object.keys(DIMS).map(k=>DIMS[k].n),
-             Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.pre,k)))),
-             Object.keys(DIMS).map(k=>m(done.map(x=>dimScore(x.post,k)))),{max:4})}
+    ${svgBar(ITEM_DIMS.map(k=>DIMS[k].n),
+             ITEM_DIMS.map(k=>m(done.map(x=>dimScore(x.pre,k)))),
+             ITEM_DIMS.map(k=>m(done.map(x=>dimScore(x.post,k)))),{max:4})}
     <div class="chartgrid" style="margin-top:22px">
       <div>
         <h3 style="font-size:14px">สัดส่วนระดับสมรรถนะที่ครูให้ (แผนภูมิวงกลม)</h3>
@@ -1968,7 +1996,7 @@ async function openTeacher_(){
 
   <div class="card"><h2>ผลรายด้าน (ค่าเฉลี่ยทั้งห้อง)</h2>
     <table><thead><tr><th>ด้าน</th><th>ก่อน</th><th>หลัง</th><th>ต่าง</th></tr></thead><tbody>
-    ${Object.keys(DIMS).map(k=>{
+    ${ITEM_DIMS.map(k=>{
       const a=m(done.map(x=>dimScore(x.pre,k))),b=m(done.map(x=>dimScore(x.post,k)));
       return `<tr><td>${DIMS[k].n}</td><td class="mono">${a.toFixed(2)}</td><td class="mono">${b.toFixed(2)}</td>
         <td class="mono ${b-a>0?'ok':''}">${(b-a>=0?'+':'')+(b-a).toFixed(2)}</td></tr>`;}).join('')}
@@ -3175,9 +3203,9 @@ function scoringKey(){
 
     <h3>2. ข้อคำถามจำแนกตามด้านที่วัด</h3>
     <table><thead><tr><th style="width:34%">ด้านที่วัด</th><th style="width:22%">กลุ่มสมรรถนะ</th><th>ข้อที่</th></tr></thead><tbody>
-      ${Object.entries(DIMS).map(([k,v])=>`<tr><td>${esc(v.n)}</td>
+      ${ITEM_DIMS.map(k=>{const v=DIMS[k];return `<tr><td>${esc(v.n)}</td>
         <td class="small">${v.g==='life'?'ทักษะชีวิต':'ความเป็นพลเมืองดี'}</td>
-        <td class="mono">${(byDim[k]||[]).join(', ')}</td></tr>`).join('')}
+        <td class="mono">${(byDim[k]||[]).join(', ')}</td></tr>`;}).join('')}
     </tbody></table>
 
     <h3>3. เกณฑ์การแปลผลคะแนนรวม</h3>
@@ -3288,11 +3316,34 @@ function renderPaper(){
    ใช้อ้างอิงในรายงานบทที่ 3 และใช้เปิดนำเสนอต่อกรรมการได้โดยตรง
    ================================================================= */
 const MODEL={
-  input:['สภาพปัญหาพฤติกรรมในชั้นเรียน','แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (ก่อนเรียน)','รายชื่อและบริบทของห้องเรียน','ฐานงานวิจัย '+28+' รายการ'],
-  process:['ภารกิจสถานการณ์รายสัปดาห์','กระบวนการ UP TO GROW 8 ขั้น','AI Coach ตั้งคำถาม ไม่ให้คำตอบ','ครูสังเกตพฤติกรรมและให้รูบริก'],
-  output:['แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (หลังเรียน)','หลักฐานการตัดสินใจรายบุคคล','แบบสังเกตพฤติกรรม '+Object.keys(TOBS).length+' ด้านที่ครูยืนยัน','ข้อตกลงและการลงมือจริงของห้อง'],
-  outcome:['ทักษะชีวิตและพลเมืองดีสูงขึ้น','พัฒนาการสะสมรายเดือน/ภาคเรียน','ข้อตกลงของห้องที่ยั่งยืน','เครือข่ายครูแลกเปลี่ยนภารกิจ']
+  input:['สภาพปัญหาพฤติกรรมในชั้นเรียน',
+         'แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (ก่อนเรียน)',
+         'เช็คอินใจรายวัน 30 วินาที ก่อนทุกภารกิจ',
+         'รายชื่อและบริบทของห้องเรียน',
+         'ฐานงานวิจัย '+28+' รายการ'],
+  process:['ภารกิจรายวัน จ–ศ ครบ 8 ขั้น วันละ 10 นาที',
+           'ภารกิจสถานการณ์รายสัปดาห์ 8 ขั้น ไม่เกิน '+TOTALMIN+' นาที',
+           'ครูเป็นผู้ดำเนินกิจกรรมและตั้งประเด็นสนทนา',
+           'นักเรียนเป็นผู้คิด ตัดสินใจ และลงมือทำเอง',
+           'AI Coach ตั้งคำถามเท่านั้น ไม่ให้คำตอบและไม่ให้คะแนน'],
+  output:['แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (หลังเรียน)',
+          'หลักฐานการตัดสินใจและเหตุผลรายบุคคล',
+          'แบบสังเกตพฤติกรรม '+Object.keys(TOBS).length+' ด้านที่ครูเป็นผู้ให้ระดับ',
+          'ข้อตกลงของห้องและบันทึกการลงมือทำจริง',
+          'ข้อมูลสุขภาวะรายวันและคำขอความช่วยเหลือ'],
+  outcome:['ครูมีหลักฐานเชิงประจักษ์สำหรับตัดสินพัฒนาการผู้เรียน',
+           'ผู้เรียนได้ฝึกคิด ตัดสินใจ และลงมือทำซ้ำอย่างต่อเนื่อง',
+           'พัฒนาการสะสมรายสัปดาห์ เดือน และภาคเรียน',
+           'ข้อตกลงของห้องที่นักเรียนร่วมสร้างและใช้จริง',
+           'เครือข่ายครูแลกเปลี่ยนภารกิจและแนวปฏิบัติ']
 };
+/* ใครทำอะไร — ต้องระบุให้ชัดเพื่อไม่ให้อ่านผลผิดว่าเครื่องมือเป็นผู้พัฒนาผู้เรียน */
+const MODEL_ROLES=[
+  ['🧩','กระบวนการ UP TO GROW','เป็น<b>กระบวนการจัดกิจกรรม</b>พัฒนาความเป็นพลเมืองดี 8 ขั้น ใช้ซ้ำได้กับทุกภารกิจ นี่คือตัวนวัตกรรม'],
+  ['🎒','ผู้เรียน','เป็น<b>ผู้ลงมือคิด ตัดสินใจ และรับผิดชอบผล</b>ด้วยตนเอง พัฒนาการที่เกิดขึ้นเป็นผลจากการลงมือของผู้เรียน'],
+  ['🧑‍🏫','ครู','เป็น<b>ผู้ดำเนินกิจกรรม สังเกตพฤติกรรม และยืนยันผล</b> คำตัดสินสุดท้ายเรื่องระดับพัฒนาการเป็นของครูเสมอ'],
+  ['💻','LIFECRAFT AI (ตัวโปรแกรม)','เป็น<b>เครื่องมือสนับสนุน</b> ทำหน้าที่ตั้งคำถาม เก็บหลักฐาน คำนวณสถิติ และจัดรูปแบบรายงาน <b>ไม่ให้คำตอบ ไม่ตัดสิน และไม่ให้คะแนนขั้นสุดท้าย</b>'],
+];
 function openModel(){ go('model'); renderModel(); }
 function renderModel(){
   const col=(tag,title,cls,items)=>`<div class="mstage ${cls}"><div class="tag">${tag}</div><h4>${title}</h4>
@@ -3302,7 +3353,10 @@ function renderModel(){
   <div class="card">
     <div class="eyebrow">แบบจำลองนวัตกรรมเชิงระบบ (บทที่ 3)</div>
     <h1>Input → Process → Output → Outcome</h1>
-    <p class="muted" style="max-width:66ch">โครงสร้างการทำงานของนวัตกรรม Life Competency UP TO GROW แสดงความสัมพันธ์เชิงสาเหตุจากปัจจัยนำเข้า สู่กระบวนการจัดกิจกรรมโฮมรูม ผลผลิต และผลลัพธ์ปลายทาง พร้อมกลไกป้อนกลับที่ทำให้ระบบพัฒนาตนเองได้ต่อเนื่อง</p>
+    <p class="muted" style="max-width:70ch"><b>กิจกรรม UP TO GROW เป็นกระบวนการพัฒนาความเป็นพลเมืองดี
+      โดยมี LIFECRAFT AI เป็นเครื่องมือสนับสนุน และมีครูเป็นผู้ประเมินผล</b><br>
+      แผนภาพนี้แสดงความสัมพันธ์เชิงสาเหตุจากปัจจัยนำเข้า สู่กระบวนการจัดกิจกรรมโฮมรูม ผลผลิต และผลลัพธ์ปลายทาง
+      พร้อมกลไกป้อนกลับที่ทำให้ระบบพัฒนาตนเองได้ต่อเนื่อง</p>
     <div class="modelmap">
       ${col('Input','ปัจจัยนำเข้า','st-in',MODEL.input)}
       ${col('Process','กระบวนการ','st-pr',MODEL.process)}
@@ -3311,8 +3365,25 @@ function renderModel(){
     </div>
     <div class="notice good" style="margin-top:14px">
       <b>Feedback Loop · กลไกป้อนกลับ</b><br>
-      <span class="small">ผลจากแบบวัดหลังเรียนและระดับรูบริกที่ครูให้ จะถูกส่งกลับเข้าสู่ปัจจัยนำเข้าของภารกิจถัดไป ครูใช้ข้อมูลนี้เลือกประเด็นที่ต้องเสริม ปรับความยากของภารกิจ และคัดกรองนักเรียนที่ต้องดูแลก่อน ทำให้แต่ละสัปดาห์ไม่ใช่กิจกรรมเดี่ยว แต่เป็นวงจรพัฒนาต่อเนื่องตลอดภาคเรียน</span>
+      <span class="small">ผลจากแบบวัดหลังเรียน ระดับที่ครูให้จากแบบสังเกต และคะแนนจากภารกิจรายวัน
+      จะถูกส่งกลับเข้าสู่ปัจจัยนำเข้าของภารกิจถัดไป ครูใช้ข้อมูลนี้เลือกประเด็นที่ต้องเสริม ปรับความยากของภารกิจ
+      และคัดกรองนักเรียนที่ต้องดูแลก่อน · เมื่อครูกดปิดรอบ ระบบจะหาด้านที่อ่อนที่สุดแล้วตั้งเป็นเป้าของรอบถัดไปให้อัตโนมัติ
+      ทำให้แต่ละวันและแต่ละสัปดาห์ไม่ใช่กิจกรรมเดี่ยว แต่เป็นวงจรพัฒนาต่อเนื่องตลอดภาคเรียน</span>
     </div>
+  </div>
+
+  <div class="card">
+    <h2>ใครทำอะไรในนวัตกรรมนี้</h2>
+    <p class="small muted" style="max-width:70ch">แยกให้ชัดว่าอะไรคือกระบวนการ อะไรคือเครื่องมือ และใครเป็นผู้ตัดสิน
+      เพื่อไม่ให้อ่านผลผิดไปว่าโปรแกรมเป็นผู้พัฒนาผู้เรียน</p>
+    <table style="margin-top:8px"><thead><tr><th style="width:26%">องค์ประกอบ</th><th>บทบาท</th></tr></thead><tbody>
+      ${MODEL_ROLES.map(([ic,t,d])=>`<tr><td><b>${ic} ${esc(t)}</b></td><td class="small">${d}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="notice" style="margin-top:10px"><span class="small">
+      <b>ข้อความที่ควรใช้:</b> "กิจกรรม UP TO GROW เป็นกระบวนการพัฒนาพลเมืองดี
+      โดยมี LIFECRAFT AI เป็นเครื่องมือสนับสนุน และมีครูเป็นผู้ประเมินผล"<br>
+      <b>ข้อความที่ไม่ควรใช้:</b> "AI ทำให้นักเรียนเป็นพลเมืองดี" หรือ "ระบบประเมินว่านักเรียนเป็นคนดีขึ้น"
+      เพราะเกินบทบาทจริงของเครื่องมือ และขัดกับหลักที่ตั้งไว้ว่า AI ห้ามให้คำตอบและห้ามให้คะแนนขั้นสุดท้าย</span></div>
   </div>
   <div class="card">
     <h2>กระบวนการจัดกิจกรรมโฮมรูม (Syntax) 8 ขั้น</h2>
@@ -3330,7 +3401,7 @@ function renderModel(){
         'เสนอข้อตกลงต่อห้อง และสิ่งที่จะลงมือทำจริงในสัปดาห์นี้'][i])}</td>
       <td class="mono small">${STEPMIN[i]} น.</td></tr>`).join('')}
     </tbody></table>
-    <p class="small muted" style="margin-top:8px">รวมประมาณ ${STEPMIN.reduce((a,b)=>a+b,0)} นาที ไม่รวมแบบวัดก่อน–หลัง</p>
+    <p class="small muted" style="margin-top:8px">รวม 8 ขั้น ประมาณ ${STEPMIN.reduce((a,b)=>a+b,0)} นาที · เมื่อรวมแบบวัดก่อนและหลังอย่างละ ${TESTMIN} นาที ทั้งกิจกรรมใช้เวลา<b>ไม่เกิน ${TOTALMIN} นาที</b> จบใน 1 คาบโฮมรูม</p>
   </div>
   <div class="row noprint" style="margin-bottom:26px">
     <button onclick="window.print()">พิมพ์ / บันทึก PDF</button>
@@ -3520,8 +3591,8 @@ async function openStats(){
   const mixedVersion = nSet.length>1 || (nSet.length===1 && nSet[0]!==ITEMS.length);
   const EI=effIndex(pre,post,FULL_SCORE);
   const growth=R.mPre?((R.mPost-R.mPre)/R.mPre*100):0;
-  /* รายด้าน 7 ด้าน */
-  const dimRows=Object.keys(DIMS).map(k=>{
+  /* รายด้านเฉพาะด้านที่แบบวัดวัดจริง */
+  const dimRows=ITEM_DIMS.map(k=>{
     const a=done.map(d=>dimScore(d.pre,k)), b=done.map(d=>dimScore(d.post,k));
     const r=pairedT(a,b);
     return `<tr><td>${DIMS[k].n}</td>
@@ -3626,23 +3697,29 @@ async function openStats(){
   </div>
 
   <div class="card">
-    <h2>ตารางที่ 3 ผลตามพระบรมราโชบายด้านการศึกษา ในหลวงรัชกาลที่ 10</h2>
-    <p class="small muted">คะแนนแต่ละด้านคำนวณจากค่าเฉลี่ยของสมรรถนะที่รองรับด้านนั้น (ระดับพฤติกรรม 1–4)</p>
-    <table style="margin-top:8px"><thead><tr><th style="width:26%">พระบรมราโชบาย</th><th>สมรรถนะที่รองรับ</th>
-      <th>x̄ ก่อน</th><th>x̄ หลัง</th><th>ผลต่าง</th><th>t</th><th>p</th></tr></thead><tbody>
+    <h2>ตารางที่ 3 การสนับสนุนพระบรมราโชบายด้านการศึกษา ในหลวงรัชกาลที่ 10</h2>
+    <p class="small muted">คะแนนแต่ละด้านคำนวณจากค่าเฉลี่ยของสมรรถนะที่รองรับด้านนั้น (ระดับพฤติกรรม 1–4)
+      · คอลัมน์ <b>ความสอดคล้อง</b> ระบุว่าโปรแกรมนี้ให้หลักฐานรองรับด้านนั้นได้มากเพียงใด
+      อ่านค่าคะแนนประกอบระดับความสอดคล้องเสมอ อย่าอ่านคะแนนโดด ๆ</p>
+    <table style="margin-top:8px"><thead><tr><th style="width:24%">พระบรมราโชบาย</th><th>สมรรถนะที่รองรับ</th>
+      <th>ความสอดคล้อง</th><th>x̄ ก่อน</th><th>x̄ หลัง</th><th>ผลต่าง</th><th>t</th><th>p</th></tr></thead><tbody>
     ${Object.entries(ROYAL).map(([rk,r])=>{
       const a=done.map(d=>royalScore(d.pre,rk)), b=done.map(d=>royalScore(d.post,rk));
-      const x=pairedT(a,b);
-      return `<tr><td><b>${esc(r.n)}</b><br><span class="small muted">${esc(r.d)}</span></td>
+      const x=pairedT(a,b), fit=ROYAL_FIT[rk];
+      return `<tr${fit.lv==='none'?' style="opacity:.62"':''}><td><b>${esc(r.n)}</b><br><span class="small muted">${esc(r.d)}</span></td>
         <td class="small">${r.dims.map(k=>esc(DIMS[k].n)).join(' · ')}</td>
+        <td>${royalPill(rk)}<br><span class="small muted">${esc(fit.d)}</span></td>
         <td class="mono">${x.mPre.toFixed(2)}</td><td class="mono">${x.mPost.toFixed(2)}</td>
         <td class="mono ${x.mD>0?'ok':x.mD<0?'bad':''}">${(x.mD>=0?'+':'')+x.mD.toFixed(2)}</td>
         <td class="mono">${isFinite(x.t)?x.t.toFixed(3):'-'}</td><td class="mono">${pTxt(x.p)}</td></tr>`;
     }).join('')}
     </tbody></table>
     <div class="notice good" style="margin-top:10px"><span class="small">
-      ตารางนี้ตอบวัตถุประสงค์ของโครงการโดยตรง คือการส่งเสริมการดำเนินงานตามพระบรมราโชบายด้านการศึกษา
-      ทั้ง 4 ด้าน โดยแปลงจากพฤติกรรมที่วัดได้จริงของผู้เรียน มิใช่การประเมินตามความรู้สึก</span></div>
+      <b>ข้อความที่ควรใช้อ้างอิงผล:</b> โครงการนี้<b>${esc(ROYAL_CLAIM)}</b>
+      <br>ด้าน <b>พื้นฐานชีวิตที่มั่นคง มีคุณธรรม</b> และ <b>เป็นพลเมืองดี</b> คือด้านที่โปรแกรมมีหลักฐานรองรับโดยตรง
+      · ด้าน <b>ทัศนคติที่ถูกต้องต่อบ้านเมือง</b> สอดคล้องเพียงบางส่วน
+      · ด้าน <b>มีงานทำ มีอาชีพ</b> ไม่ใช่จุดเน้นของโปรแกรมนี้ ไม่ควรนำผลไปอ้าง
+      <br><b>ไม่ควรเขียนว่า</b> "ครอบคลุมพระบรมราโชบายครบทั้ง 4 ด้าน" เพราะเกินกว่าหลักฐานที่เก็บได้จริง</span></div>
   </div>
 
   <div class="card">
@@ -3653,7 +3730,7 @@ async function openStats(){
   </div>
 
   <div class="card">
-    <h2>ตารางที่ 5 ผลการเปรียบเทียบรายด้าน ${Object.keys(DIMS).length} ด้าน</h2>
+    <h2>ตารางที่ 5 ผลการเปรียบเทียบรายด้าน ${ITEM_DIMS.length} ด้านที่แบบวัดครอบคลุม</h2>
     <table style="margin-top:8px"><thead><tr><th>ด้าน</th><th>x̄ ก่อน</th><th>S.D.</th><th>x̄ หลัง</th><th>S.D.</th><th>ผลต่าง</th><th>t</th><th>p</th><th></th></tr></thead>
       <tbody>${dimRows}</tbody></table>
     <p class="small muted" style="margin-top:6px">df = ${R.df} · * p &lt; .05 · ** p &lt; .01 · ns = ไม่มีนัยสำคัญ</p>
@@ -3849,7 +3926,7 @@ const STEP_ACT=[
 function openPlan(){ go('plan'); renderPlan(); }
 function renderPlan(){
   const mi=MIS();
-  const totMin=STEPMIN.reduce((a,b)=>a+b,0);
+  const totMin=STEPMIN.reduce((a,b)=>a+b,0);   /* เฉพาะ 8 ขั้น · TOTALMIN คือรวมแบบวัดแล้ว */
   $('v-plan').innerHTML=`
   <div class="card noprint">
     <div class="eyebrow">ภาคผนวก ก · แผนการจัดกิจกรรมโฮมรูมต้นแบบ</div>
@@ -3868,7 +3945,7 @@ function renderPlan(){
       <tr><td style="width:28%"><b>ชื่อกิจกรรม</b></td><td>ภารกิจที่ ${mi.week} · ${esc(mi.title)}</td></tr>
       <tr><td><b>สมรรถนะเป้าหมาย</b></td><td>${esc(mi.theme)}</td></tr>
       <tr><td><b>ระดับชั้น</b></td><td>${esc(GRADE)} ห้อง ${esc(ROOM)} จำนวน ${ROSTER.length} คน</td></tr>
-      <tr><td><b>เวลา</b></td><td>${totMin} นาที (1 คาบโฮมรูม) ไม่รวมแบบวัดก่อน–หลัง</td></tr>
+      <tr><td><b>เวลา</b></td><td><b>ไม่เกิน ${TOTALMIN} นาที</b> ต่อ 1 คาบโฮมรูม (8 ขั้น ${totMin} นาที + แบบวัดก่อน ${TESTMIN} นาที + แบบวัดหลัง ${TESTMIN} นาที)</td></tr>
     </tbody></table>
 
     <h3>1. สาระสำคัญ</h3>
@@ -3890,7 +3967,10 @@ function renderPlan(){
     <table><thead><tr><th style="width:8%">ขั้น</th><th style="width:20%">ชื่อขั้น</th><th>กิจกรรม</th><th style="width:10%">เวลา</th></tr></thead><tbody>
       ${STEPS.map((x,i)=>`<tr class="pitem"><td class="mono">${x[0]}</td><td>${x[1]}</td>
         <td class="small">${esc(STEP_ACT[i])}</td><td class="mono">${STEPMIN[i]} น.</td></tr>`).join('')}
-      <tr><td colspan="3" style="text-align:right"><b>รวม</b></td><td class="mono"><b>${totMin} น.</b></td></tr>
+      <tr><td colspan="3" style="text-align:right"><b>รวม 8 ขั้น</b></td><td class="mono"><b>${totMin} น.</b></td></tr>
+      <tr><td colspan="3" style="text-align:right">แบบวัดก่อนเรียน</td><td class="mono">${TESTMIN} น.</td></tr>
+      <tr><td colspan="3" style="text-align:right">แบบวัดหลังเรียน</td><td class="mono">${TESTMIN} น.</td></tr>
+      <tr><td colspan="3" style="text-align:right"><b>รวมทั้งกิจกรรม</b></td><td class="mono"><b>${TOTALMIN} น.</b></td></tr>
     </tbody></table>
 
     <h3>6. สื่อและแหล่งการเรียนรู้</h3>
@@ -4193,7 +4273,7 @@ async function buildRoomSummary(){
       mPre:+R.mPre.toFixed(2), mPost:+R.mPost.toFixed(2), mD:+R.mD.toFixed(2),
       t:isFinite(R.t)?+R.t.toFixed(3):null, p:isFinite(R.p)?R.p:null,
       ei:+effIndex(pre,post,FULL_SCORE).toFixed(4),
-      dims:Object.fromEntries(Object.keys(DIMS).map(k=>[k,
+      dims:Object.fromEntries(ITEM_DIMS.map(k=>[k,
         [+stMean(done.map(d=>dimScore(d.pre,k))).toFixed(2),
          +stMean(done.map(d=>dimScore(d.post,k))).toFixed(2)]])),
       royal:Object.fromEntries(Object.keys(ROYAL).map(k=>[k,
@@ -4251,7 +4331,7 @@ async function openSchool(){
       <div class="eyebrow">ระดับโรงเรียน · แดชบอร์ดผู้บริหาร</div>
       <h1>ยังไม่มีห้องส่งข้อมูล</h1>
       <p class="muted" style="max-width:64ch">แดชบอร์ดนี้รวมผลจากทุกห้องเรียนที่ครูเปิดใช้ระบบ
-      เพื่อให้ผู้บริหารเห็นภาพรวมทั้งโรงเรียนตามพระบรมราโชบาย 4 ด้าน</p>
+      เพื่อให้ผู้บริหารเห็นภาพรวมทั้งโรงเรียน โดยเน้นด้านคุณธรรมและการเป็นพลเมืองดี</p>
       <div class="notice good"><b>วิธีให้ห้องเรียนเข้าสู่ระบบโรงเรียน</b><br><span class="small">
         ครูประจำห้องเปิดเมนู ตั้งค่าห้องเรียน → กรอก <b>ชื่อโรงเรียน</b> และ <b>รหัสห้อง</b> → บันทึก
         → แล้วกดปุ่ม <b>ส่งสรุปให้ผู้บริหาร</b> เพียงเท่านี้ห้องนั้นจะปรากฏในแดชบอร์ดนี้ทันที</span></div>
@@ -4295,14 +4375,23 @@ async function openSchool(){
   </div>
 
   <div class="card">
-    <h2>ผลตามพระบรมราโชบายด้านการศึกษา ระดับโรงเรียน</h2>
-    <p class="small muted">ถ่วงน้ำหนักตามจำนวนผู้เรียนของแต่ละห้อง · ระดับพฤติกรรม 1–4</p>
+    <h2>การสนับสนุนพระบรมราโชบายด้านการศึกษา ระดับโรงเรียน</h2>
+    <p class="small muted"><b>${esc(ROYAL_CLAIM)}</b><br>
+      ถ่วงน้ำหนักตามจำนวนผู้เรียนของแต่ละห้อง · ระดับพฤติกรรม 1–4
+      · อ่านคะแนนคู่กับคอลัมน์ความสอดคล้องเสมอ</p>
     ${svgBar(royalAgg.map(r=>ROYAL[r.rk].s), royalAgg.map(r=>r.pre), royalAgg.map(r=>r.post),{max:4})}
-    <table style="margin-top:12px"><thead><tr><th>พระบรมราโชบาย</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th></tr></thead><tbody>
-      ${royalAgg.map(r=>`<tr><td>${esc(ROYAL[r.rk].n)}<br><span class="small muted">${esc(ROYAL[r.rk].d)}</span></td>
+    <table style="margin-top:12px"><thead><tr><th>พระบรมราโชบาย</th><th>ความสอดคล้อง</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th></tr></thead><tbody>
+      ${royalAgg.map(r=>{const fit=ROYAL_FIT[r.rk];
+        return `<tr${fit.lv==='none'?' style="opacity:.62"':''}><td>${esc(ROYAL[r.rk].n)}<br><span class="small muted">${esc(ROYAL[r.rk].d)}</span></td>
+        <td>${royalPill(r.rk)}</td>
         <td class="mono">${r.pre.toFixed(2)}</td><td class="mono">${r.post.toFixed(2)}</td>
-        <td class="mono ${r.post-r.pre>0?'ok':''}">${(r.post-r.pre>=0?'+':'')+(r.post-r.pre).toFixed(2)}</td></tr>`).join('')}
+        <td class="mono ${r.post-r.pre>0?'ok':''}">${(r.post-r.pre>=0?'+':'')+(r.post-r.pre).toFixed(2)}</td></tr>`;}).join('')}
     </tbody></table>
+    <div class="notice good" style="margin-top:10px"><span class="small">
+      ด้านที่โปรแกรมมีหลักฐานรองรับโดยตรงคือ <b>พื้นฐานชีวิตที่มั่นคง มีคุณธรรม</b> และ <b>เป็นพลเมืองดี</b>
+      · <b>ทัศนคติที่ถูกต้องต่อบ้านเมือง</b> สอดคล้องบางส่วน
+      · <b>มีงานทำ มีอาชีพ</b> ไม่ใช่จุดเน้นของโปรแกรมนี้
+      เวลารายงานต่อผู้บังคับบัญชา ควรระบุขอบเขตนี้ไว้ด้วยเสมอ</span></div>
   </div>
 
   <div class="card">
@@ -4465,7 +4554,7 @@ async function actVerify(mid,idx,ok){
    4 ศุกร์มีขั้น "เล่าให้คนที่บ้านฟัง" เพราะกลุ่มที่คุยต่อที่บ้านได้ผลยั่งยืนที่สุด (Vercelloti & Matto 2016)
    5 สกศ. 2558: ความเป็นพลเมืองเกิดจาก คิด วิเคราะห์ ฝึกฝน ผ่านกิจกรรม ไม่ใช่การบรรยาย
    ข้อมูล 1 แถวต่อคนต่อสัปดาห์ คีย์ lc:daily:<YYYY-Www>:<idx> ผ่านกลไกซิงก์เดิม ไม่ต้องแก้ backend
-   ข้อคำถามฝึกรายวันเป็นคนละชุดกับแบบวัด 12 ข้อโดยเจตนา เพื่อไม่ให้การฝึกปนเปื้อนเครื่องมือวัด */
+   ข้อคำถามฝึกรายวันเป็นคนละชุดกับแบบวัด 10 ข้อโดยเจตนา เพื่อไม่ให้การฝึกปนเปื้อนเครื่องมือวัด */
 
 const dailyKey=(wk,i)=>'lc:daily:'+wk+':'+i;
 const DAILY_DAYS=[[1,'จ','รู้และเข้าใจ','📘'],[2,'อ','คิดวิเคราะห์','🧠'],[3,'พ','ลงมือทำ','🌱'],[4,'พฤ','เคารพผู้อื่น','🤝'],[5,'ศ','สะท้อนและบอกต่อ','🪞']];
@@ -4482,7 +4571,7 @@ function dailyDims(wk){
 const dailyPickIdx=(len,wk,salt)=>{const r=rng_(dailyWeekNum(wk)*104729+salt*7919);return Math.floor(r()*len);};
 
 /* ===== คลังสถานการณ์ภารกิจรายวัน 5 วัน =====
-   ยึดมาตรฐานการออกแบบข้อคำถามเดียวกับแบบวัด 12 ข้อและภารกิจรายสัปดาห์
+   ยึดมาตรฐานการออกแบบข้อคำถามเดียวกับแบบวัด 10 ข้อและภารกิจรายสัปดาห์
      1 เป็นสถานการณ์จริงที่นักเรียนเจอได้ในโรงเรียนหรือชีวิตประจำวัน
      2 ตัวเลือก 4 ข้อเป็น "การกระทำที่สังเกตได้" ไม่ใช่ความรู้สึกหรือความรู้
      3 ระดับ 1 คิดถึงตัวเองหรือเลี่ยงปัญหา · 2 ทำถูกบางส่วนหรือรอให้คนอื่นจัดการ
@@ -4490,7 +4579,7 @@ const dailyPickIdx=(len,wk,salt)=>{const r=rng_(dailyWeekNum(wk)*104729+salt*791
      4 ไม่มีข้อถูกข้อผิดแบบข้อสอบ แต่ให้ระดับพฤติกรรม เพื่อไม่ให้นักเรียนเดาใจผู้ออกข้อสอบ
      5 แต่ละข้อผูกกับสมรรถนะหนึ่งด้านใน DIMS
    ทั้ง 5 วันจึงให้คะแนนระดับ 1-4 ได้เหมือนกัน ทำให้รวมขึ้นเป็นภารกิจรายสัปดาห์ได้จริง
-   ข้อเหล่านี้เป็นคนละชุดกับแบบวัด 12 ข้อโดยเจตนา เพื่อไม่ให้การฝึกปนเปื้อนเครื่องมือวัด */
+   ข้อเหล่านี้เป็นคนละชุดกับแบบวัด 10 ข้อโดยเจตนา เพื่อไม่ให้การฝึกปนเปื้อนเครื่องมือวัด */
 const DAILY_SIT={
  /* วันจันทร์ · รู้และเข้าใจหน้าที่และสิทธิ */
  1:[
@@ -5241,11 +5330,13 @@ function renderDailyRep(period,weeks,st){
     ['บันทึกการเคารพ/รับฟังผู้อื่น (พฤหัสบดี)', st.resp.length+' ครั้ง', st.anyone?pct(st.resp.length,st.weeks*n):null, 50, 'บันทึกวันพฤหัสบดีในระบบ'],
     ['นำไปเล่าต่อที่บ้าน (ศุกร์) — ตัวคูณความยั่งยืน', st.friAll?pct(st.told,st.friAll)+'% ('+st.told+'/'+st.friAll+')':'—', st.friAll?pct(st.told,st.friAll):null, 50, 'คำตอบ "บอกต่อที่บ้าน" วันศุกร์'],
   ];
-  /* ครอบคลุมพระบรมราโชบาย 4 ด้าน จากด้านที่ฝึกในช่วงเวลา */
+  /* การสนับสนุนพระบรมราโชบาย จากด้านที่ฝึกในช่วงเวลา พร้อมระดับความสอดคล้อง (ROYAL_FIT) */
   const royalRows=Object.entries(ROYAL).map(([rk,r])=>{
-    const hit=r.dims.filter(d=>st.dimsCovered.has(d));
-    return `<tr><td>${esc(r.n)}</td><td class="small">${r.dims.map(d=>st.dimsCovered.has(d)?'<b>'+esc(DIMS[d].n)+'</b>':'<span class="muted">'+esc(DIMS[d].n)+'</span>').join(' · ')}</td>
-      <td class="mono">${hit.length}/${r.dims.length}</td></tr>`; }).join('');
+    const hit=r.dims.filter(d=>st.dimsCovered.has(d)), fit=ROYAL_FIT[rk];
+    return `<tr${fit.lv==='none'?' style="opacity:.62"':''}><td>${esc(r.n)}</td>
+      <td class="small">${r.dims.map(d=>st.dimsCovered.has(d)?'<b>'+esc(DIMS[d].n)+'</b>':'<span class="muted">'+esc(DIMS[d].n)+'</span>').join(' · ')}</td>
+      <td class="mono">${hit.length}/${r.dims.length}</td>
+      <td>${royalPill(rk)}</td></tr>`; }).join('');
   const topStu=st.byStu.map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).slice(0,3).filter(x=>x.v>0);
   const lowStu=st.byStu.map((v,i)=>({i,v})).sort((a,b)=>a.v-b.v).slice(0,3).filter(x=>x.v<st.weeks*5*0.4);
   $('v-dailyrep').innerHTML=`
@@ -5276,9 +5367,14 @@ function renderDailyRep(period,weeks,st){
     ${goalRows.map(g=>`<tr><td>${esc(g[0])}</td><td class="mono">${esc(g[1])}</td><td class="mono">≥ ${g[3]}%</td>
       <td>${stPill(g[2],g[3])}</td><td class="small">${esc(g[4])}</td></tr>`).join('')}
     </tbody></table></div>
-  <div class="card"><h2>ความครอบคลุมพระบรมราโชบายด้านการศึกษา 4 ด้าน</h2>
-    <p class="small muted">จากด้านสมรรถนะที่ฝึกในช่วงเวลานี้ (ตัวหนา = ได้ฝึกแล้ว) · ครบ 9 ด้านอัตโนมัติทุก 5 สัปดาห์</p>
-    <table><thead><tr><th>พระบรมราโชบาย</th><th>สมรรถนะที่รองรับ</th><th>ฝึกแล้ว</th></tr></thead><tbody>${royalRows}</tbody></table></div>
+  <div class="card"><h2>การสนับสนุนพระบรมราโชบายด้านการศึกษา</h2>
+    <p class="small muted"><b>${esc(ROYAL_CLAIM)}</b><br>
+      ตารางนี้แสดงว่าในช่วงเวลานี้ได้ฝึกสมรรถนะใดไปแล้วบ้าง (ตัวหนา = ฝึกแล้ว) และแต่ละด้านมีหลักฐานรองรับมากเพียงใด
+      · สมรรถนะครบ 9 ด้านอัตโนมัติทุก 5 สัปดาห์ แต่<b>ระดับความสอดคล้องไม่เปลี่ยนตามจำนวนสัปดาห์</b>
+      เพราะขึ้นกับขอบเขตที่โปรแกรมออกแบบมาวัด</p>
+    <table><thead><tr><th>พระบรมราโชบาย</th><th>สมรรถนะที่รองรับ</th><th>ฝึกแล้ว</th><th>ความสอดคล้อง</th></tr></thead><tbody>${royalRows}</tbody></table>
+    <p class="small muted" style="margin-top:8px">ในการเขียนรายงานให้ใช้ถ้อยคำว่า "สนับสนุนการดำเนินงานตามพระบรมราโชบาย
+      โดยเน้นด้านคุณธรรมและการเป็นพลเมืองดี" · หลีกเลี่ยงคำว่า "ครอบคลุมครบทั้ง 4 ด้าน"</p></div>
   ${(st.rDiff+st.rSame+st.rNever)?`<div class="card"><h2>กลไกตรวจสอบความตรง (ขั้น R สะท้อนคิด)</h2>
     <p class="small muted">ทุกวันระบบถามว่า "เคยเจอเรื่องแบบนี้จริงไหม แล้วตอนนั้นทำเหมือนที่เลือกวันนี้หรือเปล่า"
       คำตอบนี้ไม่ใช่คะแนน แต่บอกครูว่าคำตอบในระบบใกล้พฤติกรรมจริงแค่ไหน</p>
