@@ -318,6 +318,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
       <p class="small muted" style="margin:2px 0 0">เลือกภารกิจของสัปดาห์นี้ แล้วเริ่มได้ทันที ระบบจะจำที่ค้างไว้ให้</p>
       <div class="btncol">
         <button class="primary mbtn" onclick="scrollToMissions()"><span class="mi">▶</span><span class="mt">เริ่มทำภารกิจประจำสัปดาห์<small>เลือกจากรายการภารกิจด้านล่าง</small></span></button>
+        <button class="mbtn" onclick="openDaily()"><span class="mi">📅</span><span class="mt">ภารกิจวันนี้ · 5 นาที<small>จันทร์-ศุกร์ · รู้ คิด ลงมือ เคารพผู้อื่น สะท้อน</small></span></button>
         <button class="mbtn" onclick="qStart()"><span class="mi">⚡</span><span class="mt">ทำภารกิจด่วนที่ครูเปิดไว้<small>สำหรับสถานการณ์เร่งด่วนในคาบ</small></span></button>
         <button class="mbtn" onclick="openPulse()"><span class="mi">💚</span><span class="mt">เช็คอินใจ 60 วินาที<small>บอกความรู้สึกสัปดาห์นี้ · ขอความช่วยเหลือจากครูได้</small></span></button>
       </div>
@@ -328,6 +329,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
       <div class="btncol">
         <button class="mbtn" onclick="needTeacher(openTeacher)"><span class="mi">📊</span><span class="mt">Dashboard และผลก่อน–หลัง<small>กราฟ ตารางคะแนน ส่งออก CSV</small></span></button>
         <button class="mbtn" onclick="needTeacher(openEvid)"><span class="mi">🏅</span><span class="mt">หลักฐานความสำเร็จ 5 ด้าน<small>ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม · ครูยืนยันการลงมือทำจริง</small></span></button>
+        <button class="mbtn" onclick="needTeacher(openDailyTeach)"><span class="mi">📅</span><span class="mt">ติดตามภารกิจรายวัน · รายงานผล<small>ใครทำวันนี้ · สรุปรายสัปดาห์ / เดือน / ภาคเรียน</small></span></button>
         <button class="mbtn" onclick="needTeacher(openPulseDash)"><span class="mi">💚</span><span class="mt">แดชบอร์ดสุขภาวะ · เช็คอินใจ<small>ใครขอความช่วยเหลือ · แนวโน้มรายสัปดาห์</small></span></button>
         <button class="mbtn" onclick="needTeacher(openSchool)"><span class="mi">🏫</span><span class="mt">แดชบอร์ดผู้บริหาร · ทั้งโรงเรียน<small>เทียบทุกห้อง · ผลตามพระบรมราโชบาย 4 ด้าน</small></span></button>
         <button class="mbtn" onclick="needTeacher(openQuick)"><span class="mi">⚡</span><span class="mt">สร้างภารกิจด่วนรายวัน<small>AI ร่างสถานการณ์ ครูอนุมัติ</small></span></button>
@@ -389,6 +391,9 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <section id="v-plan" class="hide"></section>
 <section id="v-pulse" class="hide"></section>
 <section id="v-pulsedash" class="hide"></section>
+<section id="v-daily" class="hide"></section>
+<section id="v-dailyteach" class="hide"></section>
+<section id="v-dailyrep" class="hide"></section>
 <section id="v-school" class="hide"></section>
 <section id="v-evid" class="hide"></section>
 <section id="v-act" class="hide"></section>
@@ -725,7 +730,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar();
   if(v==='home') renderMissionList();}
@@ -3072,6 +3077,7 @@ function renderMore(){
     <h3 style="font-size:14px;margin-top:14px;color:var(--teal-d)">เอกสารสำหรับรายงานและภาคผนวก</h3>
     <div>
       ${it('📐','ผลวิเคราะห์ทางสถิติ (บทที่ 4)','t-test · ดัชนีประสิทธิผล E.I. · ขนาดอิทธิพล',"openStats()")}
+      ${it('📅','รายงานภารกิจรายวัน','สรุปรายสัปดาห์ / รายเดือน / รายภาคเรียน พร้อมตารางแนบรายงานโครงการฯ',"openDailyRep('week')")}
       ${it('🏅','หลักฐานความสำเร็จ 5 ด้าน','ตัวชี้วัด เกณฑ์ แหล่งหลักฐาน ครบทุกด้านของงานพลเมืองดี',"openEvid()")}
       ${it('✅','ค่าดัชนีความสอดคล้อง IOC (ภาคผนวก ก)','กรอกผลผู้เชี่ยวชาญ ระบบคำนวณให้',"openIOC()")}
       ${it('📋','แผนการจัดกิจกรรมโฮมรูม (ภาคผนวก ก)','แผนต้นแบบพร้อมพิมพ์แนบรายงาน',"openPlan()")}
@@ -4130,6 +4136,530 @@ async function actVerify(mid,idx,ok){
   await flushRemote(true); openEvid();
 }
 
+/* ================= ภารกิจรายวัน (Daily Civic Practice) จันทร์–ศุกร์ =================
+   ฐานคิดจากหลักฐานวิจัยในโฟลเดอร์โครงการ
+   1 "dosage" การฝึกที่ถี่และต่อเนื่องให้ผลมากกว่ากิจกรรมครั้งเดียว และผลสะสมเพิ่มทุกรอบ
+     (Keating et al. 2010; See et al. 2017; Blevins et al. 2021 — ACT Evidence Review 2022)
+   2 หนึ่งสัปดาห์ = วงจรพลเมืองที่สมบูรณ์ ระบุประเด็น→คิดวิเคราะห์→ลงมือ→เคารพผู้อื่น→สะท้อน
+     (ACT Active Citizenship cycle) และฝึกแบบหมุนเวียนให้ครบ 9 ด้าน เพราะฝึกด้านไหนได้เฉพาะด้านนั้น
+   3 นักเรียนเลือกเป้าหมายเอง การบังคับทำลายผลระยะยาว (ACT §5) งานเล็ก-ใกล้ตัว-ทำได้จริง ได้ผลดีที่สุด
+   4 ศุกร์มีขั้น "เล่าให้คนที่บ้านฟัง" เพราะกลุ่มที่คุยต่อที่บ้านได้ผลยั่งยืนที่สุด (Vercelloti & Matto 2016)
+   5 สกศ. 2558: ความเป็นพลเมืองเกิดจาก คิด วิเคราะห์ ฝึกฝน ผ่านกิจกรรม ไม่ใช่การบรรยาย
+   ข้อมูล 1 แถวต่อคนต่อสัปดาห์ คีย์ lc:daily:<YYYY-Www>:<idx> ผ่านกลไกซิงก์เดิม ไม่ต้องแก้ backend
+   ข้อคำถามฝึกรายวันเป็นคนละชุดกับแบบวัด 12 ข้อโดยเจตนา เพื่อไม่ให้การฝึกปนเปื้อนเครื่องมือวัด */
+
+const dailyKey=(wk,i)=>'lc:daily:'+wk+':'+i;
+const DAILY_DAYS=[[1,'จ','รู้และเข้าใจ','📘'],[2,'อ','คิดวิเคราะห์','🧠'],[3,'พ','ลงมือทำ','🌱'],[4,'พฤ','เคารพผู้อื่น','🤝'],[5,'ศ','สะท้อนและบอกต่อ','🪞']];
+/* ด้านเป้าหมายหมุนเวียน 5 สัปดาห์ครบทั้ง 9 ด้าน (common ซ้ำเพราะเป็นแก่นของโครงการพลเมืองดี) */
+const DAILY_ROT=[['resp','common'],['think','hon'],['comm','divers'],['self','disc'],['resp2','common']];
+const dailyWeekNum=wk=>parseInt(String(wk).slice(-2),10)||1;
+const dailyDims=wk=>DAILY_ROT[dailyWeekNum(wk)%5];
+const dailyPickIdx=(len,wk,salt)=>{const r=rng_(dailyWeekNum(wk)*104729+salt*7919);return Math.floor(r()*len);};
+
+/* จันทร์ · ความรู้และความเข้าใจหน้าที่-สิทธิ (เสา 1) — ข้อเท็จจริงสั้น + คำถาม 1 ข้อ */
+const DAILY_MON=[
+ {f:'รัฐธรรมนูญกำหนดให้ทุกคนมีสิทธิได้รับการศึกษา 12 ปีโดยไม่เก็บค่าใช้จ่าย และการมาเรียนก็เป็นหน้าที่ของเราด้วย สิทธิกับหน้าที่จึงมาคู่กันเสมอ',
+  q:'ข้อใดอธิบายความสัมพันธ์ของสิทธิกับหน้าที่ได้ถูกต้องที่สุด',
+  o:['สิทธิคือสิ่งที่ได้มาฟรี ไม่ต้องทำอะไรตอบแทน','มีสิทธิแล้วจะใช้หรือไม่ใช้ก็ได้ ไม่เกี่ยวกับใคร','สิทธิของเราจะเกิดจริงได้ เมื่อทุกฝ่ายรวมถึงเราทำหน้าที่ของตัวเอง','หน้าที่เป็นเรื่องของผู้ใหญ่ นักเรียนมีแต่สิทธิ'],a:2,dim:'resp'},
+ {f:'กฎหมายคุ้มครองข้อมูลส่วนบุคคล (PDPA) คุ้มครองรูปถ่าย ชื่อ และข้อมูลของทุกคน การเอารูปเพื่อนไปโพสต์โดยไม่ขออนุญาตอาจละเมิดสิทธิของเขา',
+  q:'ก่อนโพสต์รูปที่มีเพื่อนติดอยู่ด้วย ควรทำอย่างไร',
+  o:['โพสต์ได้เลยเพราะเราเป็นคนถ่าย','ขอความยินยอมจากเพื่อนที่อยู่ในรูปก่อน','ติดแท็กเพื่อนไว้ถือว่าบอกแล้ว','ลบหน้าเพื่อนออกแล้วโพสต์ได้ทุกกรณี'],a:1,dim:'think'},
+ {f:'ประชาธิปไตยใช้เสียงข้างมากตัดสิน แต่ต้องเคารพและรับฟังเสียงข้างน้อยด้วย เสียงข้างน้อยวันนี้อาจเป็นเสียงข้างมากในวันหน้า',
+  q:'เมื่อห้องโหวตแล้วฝ่ายเราแพ้ ท่าทีแบบพลเมืองดีคือข้อใด',
+  o:['ไม่ให้ความร่วมมือ เพราะไม่ได้เลือกทางนี้','ยอมรับผลโหวต และยังเสนอความเห็นผ่านช่องทางที่ถูกต้องได้','ชวนเพื่อนกดดันให้โหวตใหม่จนกว่าจะชนะ','เงียบไว้ ไม่ต้องยุ่งกับกิจกรรมห้องอีก'],a:1,dim:'resp2'},
+ {f:'ภาษีที่ประชาชนจ่าย กลายมาเป็นถนน โรงพยาบาล และโรงเรียนที่เราใช้ ของส่วนรวมทุกชิ้นมีคนทั้งประเทศร่วมกันจ่าย',
+  q:'การใช้ของส่วนรวมอย่างรับผิดชอบหมายถึงข้อใดมากที่สุด',
+  o:['ใช้ให้คุ้มที่สุดเพราะเราก็มีส่วนจ่าย','ใครทำพังก็เป็นเรื่องของโรงเรียน ไม่ใช่เรื่องเรา','ใช้อย่างระมัดระวัง เพราะคนอื่นต้องใช้ต่อจากเรา','ไม่ใช้เลยจะได้ไม่ต้องรับผิดชอบ'],a:2,dim:'common'},
+ {f:'ผู้บริโภคมีสิทธิได้รับข้อมูลที่เป็นจริงของสินค้า และร้องเรียนได้เมื่อถูกเอาเปรียบ (สคบ. สายด่วน 1166) การเช็กฉลากและวันหมดอายุคือการใช้สิทธิของเรา',
+  q:'ซื้อขนมมาแล้วพบว่าหมดอายุ ควรทำอย่างไรเป็นอันดับแรก',
+  o:['ทิ้งไป ถือว่าโชคร้าย','โพสต์ด่าร้านทันทีให้คนเห็นเยอะ ๆ','เก็บหลักฐานแล้วแจ้งร้านค้าให้รับผิดชอบ','กินต่อได้ถ้ายังไม่เสีย'],a:2,dim:'think'},
+ {f:'การล้อเลียน ข่มขู่ หรือประจานผู้อื่น ทั้งต่อหน้าและในโลกออนไลน์ เป็นการละเมิดสิทธิในร่างกายและชื่อเสียง บางกรณีผิดกฎหมายด้วย',
+  q:'เห็นเพื่อนถูกล้อในกลุ่มแชทของห้อง เราทำอะไรได้บ้างที่ช่วยได้จริง',
+  o:['ส่งสติกเกอร์ขำ ๆ ตามน้ำไปก่อน','อยู่เฉย ๆ เดี๋ยวก็หยุดเอง','ไม่ตามน้ำ ทักเพื่อนที่ถูกล้อเป็นการส่วนตัว และบอกครูถ้าไม่หยุด','ออกจากกลุ่มไปเลย'],a:2,dim:'divers'},
+ {f:'กติกาของห้องคือข้อตกลงที่ทุกคนร่วมกันสร้าง ถ้าเห็นว่ากติกาไม่เป็นธรรม เราเสนอแก้ผ่านการพูดคุยได้ ไม่ใช่ฝ่าฝืนเอาเอง',
+  q:'ถ้าคิดว่าเวรทำความสะอาดแบ่งไม่เป็นธรรม ควรทำอย่างไร',
+  o:['ไม่ทำเวรจนกว่าจะแก้','เสนอในที่ประชุมห้องให้ทบทวนการแบ่งเวรใหม่','ให้คนอื่นทำแทนไปเรื่อย ๆ','ย้ายห้องหนีปัญหา'],a:1,dim:'disc'},
+ {f:'ทุกคนมีเสรีภาพในการแสดงความคิดเห็น แต่เสรีภาพนั้นมีขอบเขต คือต้องไม่ใส่ร้ายด้วยข้อมูลเท็จ และไม่ละเมิดสิทธิของคนอื่น',
+  q:'ข้อใดคือการใช้เสรีภาพอย่างรับผิดชอบ',
+  o:['พูดอะไรก็ได้เพราะเป็นสิทธิของเรา','วิจารณ์ด้วยข้อเท็จจริง โดยไม่ด่าตัวบุคคล','แชร์ก่อน จริงไม่จริงค่อยว่ากัน','เห็นต่างเมื่อไรให้บล็อกทันที'],a:1,dim:'hon'},
+ {f:'พลเมืองตื่นรู้ไม่ได้แปลว่าต้องทำเรื่องใหญ่ แค่เห็นปัญหาใกล้ตัวแล้วไม่เดินผ่าน เช่น แจ้งไฟฟ้าสาธารณะดับที่สายด่วนเขต แยกขยะ หรือช่วยงานห้อง ก็คือการลงมือแล้ว',
+  q:'เห็นก๊อกน้ำในโรงเรียนปิดไม่สนิท น้ำหยดทั้งวัน การกระทำแบบพลเมืองตื่นรู้คือข้อใด',
+  o:['เดินผ่านไป เพราะไม่ใช่หน้าที่เรา','ถ่ายคลิปโพสต์ประชด','ปิดให้สนิท ถ้าเสียให้แจ้งครูหรือฝ่ายอาคาร','รอให้ภารโรงมาเจอเอง'],a:2,dim:'common'},
+ {f:'เมื่ออายุครบ 18 ปี เราจะมีสิทธิเลือกตั้ง หน้าที่ของผู้มีสิทธิคือศึกษาข้อมูลผู้สมัครและนโยบายจากหลายแหล่ง ไม่เชื่อการชี้นำหรือข่าวปลอม',
+  q:'การเตรียมตัวเป็นผู้มีสิทธิเลือกตั้งที่ดีที่สุดคือข้อใด',
+  o:['เลือกตามที่บ้านบอก สะดวกดี','ฝึกตรวจสอบข้อมูลจากหลายแหล่งตั้งแต่วันนี้','ไม่ต้องสนใจการเมืองจนกว่าจะอายุครบ','เลือกคนที่เพื่อนส่วนใหญ่เลือก'],a:1,dim:'self'},
+];
+
+/* อังคาร · สถานการณ์ฝึกคิดสั้น (เสา 2) — คนละชุดกับแบบวัด 12 ข้อ ระดับ 1-4 ติดไว้กับตัวเลือก */
+const DAILY_TUE=[
+ {s:'เดินเข้าห้องมาเจอขยะกองอยู่หน้าประตู ไม่ใช่ของเรา และไม่มีใครเห็น',
+  o:[{t:'เดินข้ามไป ของใครคนนั้นก็ต้องเก็บเอง',l:1},{t:'เก็บทิ้งให้ เพราะห้องเป็นของทุกคน',l:3},{t:'บอกเวรวันนี้ให้มาเก็บ',l:2},{t:'เก็บทิ้ง แล้วเสนอห้องหาจุดวางถังเพิ่มตรงนั้น',l:4}]},
+ {s:'เพื่อนสนิทขอลอกการบ้านที่เราทำทั้งคืน เขาบอกว่าไม่ทันจริง ๆ',
+  o:[{t:'ให้ลอกเลย เพื่อนกัน',l:1},{t:'ไม่ให้ และไม่พูดอะไรต่อ',l:2},{t:'ไม่ให้ลอก แต่ชวนติวช่วงพักแล้วให้เขาทำเอง',l:4},{t:'ให้ดูเฉพาะข้อที่ยาก',l:2}]},
+ {s:'ต่อแถวซื้อข้าวมานาน มีรุ่นพี่มาแทรกแถวข้างหน้าเฉย ๆ',
+  o:[{t:'บอกอย่างสุภาพว่าแถวต่อท้ายตรงโน้น',l:4},{t:'เงียบไว้ เป็นรุ่นพี่',l:1},{t:'บ่นดัง ๆ ให้ได้ยินแต่ไม่พูดตรง ๆ',l:2},{t:'แจ้งครูเวรที่ยืนอยู่ใกล้ ๆ',l:3}]},
+ {s:'ในกลุ่มแชทมีคนเริ่มนินทาเพื่อนคนหนึ่งด้วยเรื่องที่เราไม่แน่ใจว่าจริง',
+  o:[{t:'อ่านเฉย ๆ ไม่พิมพ์อะไร',l:2},{t:'ถามกลับในกลุ่มว่าเรื่องนี้มีหลักฐานไหม อย่าเพิ่งตัดสิน',l:4},{t:'ช่วยแชร์ต่อ สนุกดี',l:1},{t:'ทักหาเพื่อนที่ถูกนินทาให้รู้ตัว',l:3}]},
+ {s:'ยืมเงินเพื่อน 20 บาทเมื่อสัปดาห์ก่อนแล้วลืมคืน เพิ่งนึกได้ตอนเห็นหน้าเขา แต่เขาไม่เคยทวง',
+  o:[{t:'ทำเป็นลืมต่อไป เขาคงไม่ซีเรียส',l:1},{t:'คืนทันทีพร้อมขอโทษที่ช้า',l:4},{t:'รอให้เขาทวงก่อนค่อยคืน',l:2},{t:'เลี้ยงขนมแทน ถือว่าหายกัน',l:2}]},
+ {s:'วันนี้เป็นเวรทำความสะอาดของเรา แต่นัดสำคัญกับที่บ้านไว้หลังเลิกเรียนพอดี',
+  o:[{t:'กลับเลย ค่อยว่ากันพรุ่งนี้',l:1},{t:'ขอแลกเวรกับเพื่อนล่วงหน้า แล้วทำคืนให้เขาจริง',l:4},{t:'ฝากเพื่อนบอกครูว่าไม่สบาย',l:1},{t:'ทำแบบเร่งรีบพอเป็นพิธีแล้วรีบกลับ',l:2}]},
+ {s:'ช่วงติวสอบในห้อง เพื่อนกลุ่มข้าง ๆ คุยเสียงดังจนไม่มีสมาธิ',
+  o:[{t:'ตะโกนบอกให้เงียบ',l:2},{t:'เดินไปขอความร่วมมืออย่างสุภาพว่าขอเสียงเบาลงหน่อย',l:4},{t:'ทนเอา เดี๋ยวก็เลิกคุย',l:1},{t:'ย้ายที่นั่งไปมุมที่เงียบกว่า',l:3}]},
+ {s:'เก็บมือถือได้ในโรงอาหาร หน้าจอยังไม่ล็อก',
+  o:[{t:'วางไว้ที่เดิม เดี๋ยวเจ้าของก็กลับมาหา',l:2},{t:'นำส่งครูหรือประชาสัมพันธ์ทันที',l:4},{t:'เปิดดูก่อนว่าของใครแล้วค่อยตัดสินใจ',l:2},{t:'ประกาศตามหาเจ้าของในโรงอาหารตรงนั้น',l:3}]},
+ {s:'ห้องโหวตเลือกกิจกรรมกีฬาสี ทางที่เราเชียร์แพ้ไป 2 เสียง',
+  o:[{t:'ประกาศว่าจะไม่ร่วมกิจกรรม',l:1},{t:'ร่วมกิจกรรมตามผลโหวตอย่างเต็มที่',l:3},{t:'ร่วมเต็มที่ และอาสาช่วยงานส่วนที่เราถนัด',l:4},{t:'ร่วมแบบเสียไม่ได้',l:2}]},
+ {s:'มีเพื่อนย้ายมาใหม่พูดสำเนียงต่างถิ่น มีคนเริ่มล้อเลียนสำเนียงเขา',
+  o:[{t:'ขำตาม ๆ กันไป ไม่ได้ตั้งใจร้าย',l:1},{t:'ไม่ขำด้วย และชวนเพื่อนใหม่คุยเรื่องอื่น',l:3},{t:'บอกกลุ่มตรง ๆ ว่าล้อแบบนี้ไม่โอเค แล้วชวนเพื่อนใหม่เข้ากลุ่ม',l:4},{t:'เฉย ๆ ไม่ใช่เรื่องของเรา',l:2}]},
+];
+
+/* พุธ · เมนูการลงมือทำเล็ก-ใกล้ตัว-ทำได้วันนี้ ตามด้านเป้าหมายของสัปดาห์ (เสา 4-5)
+   งานเล็กที่ทำสำเร็จจริงสร้าง "ความเชื่อว่าตัวเองทำได้" ได้ดีกว่างานใหญ่ที่ไม่เกิด (ACT §4) */
+const DAILY_ACTS={
+ self:['จัดตารางอ่านหนังสือของตัวเองสำหรับ 3 วันข้างหน้า','มาโรงเรียน/เข้าคาบให้ตรงเวลาทั้งวัน','จดบันทึกรายรับ-รายจ่ายของตัวเองวันนี้'],
+ think:['ตรวจสอบข่าวที่เห็นในฟีดวันนี้ 1 เรื่องก่อนเชื่อหรือแชร์','ถามคำถาม "ทำไม" ในคาบเรียนอย่างน้อย 1 ครั้ง','เปรียบเทียบราคาก่อนซื้อของ 1 อย่าง'],
+ comm:['อธิบายการบ้านหรือบทเรียนให้เพื่อน 1 คนเข้าใจ','ฟังเพื่อนพูดจนจบโดยไม่ขัดอย่างน้อย 1 บทสนทนา','กล่าวขอบคุณคนที่ช่วยเรา 1 คนแบบบอกเหตุผล'],
+ resp:['ทำเวรหรือหน้าที่ที่ได้รับมอบหมายให้เสร็จโดยไม่ต้องมีใครเตือน','ส่งงานที่ค้างอยู่ 1 ชิ้น','รับผิดชอบของที่ยืมมา คืนให้เรียบร้อย'],
+ hon:['ยอมรับตรง ๆ 1 เรื่องที่ทำพลาด โดยไม่แก้ตัว','คืนเงินหรือของที่ติดค้างใครไว้','ทำข้อสอบ/งานด้วยตัวเองทั้งชิ้นแม้มีโอกาสลอก'],
+ resp2:['ขออนุญาตก่อนหยิบหรือใช้ของของคนอื่นทุกครั้งในวันนี้','ไม่พูดแทรกใครเลยทั้งวัน','ขอความยินยอมก่อนโพสต์/แชร์รูปที่มีคนอื่น'],
+ common:['เก็บขยะที่ไม่ใช่ของตัวเอง 3 ชิ้น','ปิดน้ำ-ปิดไฟห้องเรียนเมื่อไม่ใช้','อาสาช่วยงานส่วนรวมของห้อง 1 อย่างโดยไม่ต้องมีใครขอ'],
+ disc:['เข้าแถว-ต่อคิวอย่างเป็นระเบียบทุกครั้งในวันนี้','ปฏิบัติตามกติกาห้อง 1 ข้อที่เราเคยละเลย','ไม่เล่นมือถือในคาบเรียนทั้งวัน'],
+ divers:['ชวนเพื่อนที่ไม่ค่อยได้คุยด้วยกินข้าวหรือทำงานด้วยกัน','รับฟังความเห็นที่ต่างจากเราจนจบ 1 เรื่องโดยไม่เถียงกลับทันที','เรียนรู้ 1 อย่างเกี่ยวกับวัฒนธรรม/ความเชื่อที่ต่างจากเรา'],
+};
+
+/* พฤหัส · โจทย์บันทึกการเคารพผู้อื่น (เสา 3) หมุนเวียนตามสัปดาห์ */
+const DAILY_THU=[
+ {p:'วันนี้เราได้ "ฟังใครสักคนจนจบ" โดยไม่ขัด ไม่แทรก เรื่องอะไร',h:'ใคร · เรื่องอะไร · เรารู้สึกอย่างไรที่ได้ฟังจนจบ'},
+ {p:'วันนี้เราเจอความคิดเห็นที่ไม่ตรงกับเราตรงไหนบ้าง แล้วเราตอบสนองอย่างไร',h:'เห็นต่างเรื่องอะไร · เราทำอะไร · ถ้าย้อนได้จะทำเหมือนเดิมไหม'},
+ {p:'วันนี้เราช่วยเหลือหรือให้เกียรติใครสักคนอย่างไร',h:'ใคร · ทำอะไร · เขาตอบสนองอย่างไร'},
+ {p:'วันนี้เราสังเกตเห็นใครถูกปฏิบัติอย่างไม่เป็นธรรมไหม เราทำอะไรได้บ้าง',h:'เหตุการณ์ · เราทำหรือไม่ได้ทำอะไร · เพราะอะไร'},
+ {p:'วันนี้เราขออนุญาตหรือขอความยินยอมใครก่อนทำอะไรบ้าง',h:'เรื่องอะไร · ทำไมการขอก่อนจึงสำคัญ'},
+ {p:'วันนี้เราได้เรียนรู้อะไรจากคนที่แตกต่างจากเรา (วัย เพศ ความเชื่อ ความถนัด)',h:'ใคร · ต่างจากเราอย่างไร · ได้เรียนรู้อะไร'},
+];
+
+/* remote=true เฉพาะตอนเปิดของนักเรียนรายคน (คีย์เดียว)
+   เส้นทางแบบกลุ่ม (หน้าครู/รายงาน/หลักฐาน) ต้อง pullAll ก่อนแล้วอ่านจากเครื่องเท่านั้น
+   ไม่งั้นคีย์ที่ไม่มีข้อมูลจะยิงเครือข่ายทีละคีย์เป็นร้อยครั้งจนหน้าค้าง */
+async function dailyRec(wk,i,remote){
+  const raw=await S.get(dailyKey(wk,i),!!remote);
+  if(!raw) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+function dailyBlank(wk,i){ return {v:1,idx:i,name:ROSTER[i],week:wk,dims:dailyDims(wk),days:{},at:Date.now()}; }
+/* วันของสัปดาห์แบบภารกิจ: 1=จันทร์ … 5=ศุกร์ · 0=เสาร์-อาทิตย์ */
+function dailyToday(){ const d=new Date().getDay(); return (d>=1&&d<=5)?d:0; }
+const dailyDoneCount=r=>r?[1,2,3,4,5].filter(d=>r.days[d]&&r.days[d].done).length:0;
+
+/* ---------- ฝั่งนักเรียน ---------- */
+let DS=null;
+function openDaily(){ go('daily'); renderDailyPick(); }
+function renderDailyPick(){
+  const wk=isoWeekKey(), td=dailyToday();
+  const [d1,d2]=dailyDims(wk);
+  if(!td){
+    $('v-daily').innerHTML=`<div class="card"><div class="eyebrow">ภารกิจรายวัน</div>
+      <h2>วันนี้เป็นวันพัก</h2>
+      <p class="muted">ภารกิจรายวันมีวันจันทร์ถึงศุกร์ วันละประมาณ 5 นาที แล้วพบกันวันจันทร์</p>
+      <div class="row"><button onclick="go('home')">กลับหน้าแรก</button></div></div>`;
+    return;
+  }
+  const dd=DAILY_DAYS[td-1];
+  $('v-daily').innerHTML=`<div class="card">
+    <div class="eyebrow">ภารกิจรายวัน · สัปดาห์ ${esc(wk)}</div>
+    <h2>${dd[3]} วัน${['','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'][td]} · ${dd[2]}</h2>
+    <p class="small muted">วันละ 5 นาที ครบสัปดาห์ = วงจรพลเมืองครบ 1 รอบ · ด้านเป้าหมายสัปดาห์นี้: <b>${DIMS[d1].n}</b> และ <b>${DIMS[d2].n}</b></p>
+    <h3 style="margin-top:10px">แตะชื่อของตัวเอง</h3>
+    <div class="roster">${ROSTER.map((n,i)=>
+      `<div class="rcard" id="drc${i}" onclick="dailyOpen(${i})"><div class="no">${i+1}</div>
+        <div><div class="nm">${esc(n)}</div><div class="st" id="dstat${i}"></div></div></div>`).join('')}</div>
+    <div class="row" style="margin-top:16px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
+  /* ดึงของสัปดาห์นี้ครั้งเดียว แล้วอ่านสถานะจากเครื่อง */
+  pullAll('lc:daily:'+wk).then(()=>ROSTER.forEach(async(n,i)=>{
+    const r=await dailyRec(wk,i); const el=$('dstat'+i);
+    if(el&&r){ const k=dailyDoneCount(r);
+      el.textContent=(r.days[td]&&r.days[td].done?'วันนี้ทำแล้ว · ':'')+k+'/5 วัน';
+      if(r.days[td]&&r.days[td].done){const c=$('drc'+i); if(c)c.classList.add('done');} }
+  }));
+}
+async function dailyOpen(i){
+  const wk=isoWeekKey();
+  DS=(await dailyRec(wk,i,true))||dailyBlank(wk,i);
+  DS.idx=i; DS.name=ROSTER[i]; DS.dims=DS.dims||dailyDims(wk);
+  const td=dailyToday();
+  if(DS.days[td]&&DS.days[td].done){ renderDailyDone(); return; }
+  DS.days[td]=DS.days[td]||{};
+  renderDailyForm();
+}
+/* จุดร่วมของทุกฟอร์ม: หัวการ์ด + จุดความคืบหน้า 5 วัน */
+function dailyHead(){
+  const td=dailyToday(), dd=DAILY_DAYS[td-1];
+  const dots=DAILY_DAYS.map(([d,ab])=>{
+    const on=DS.days[d]&&DS.days[d].done;
+    return `<span style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;margin-right:10px">
+      <span style="width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+        font-size:12px;font-weight:600;${on?'background:var(--teal);color:#fff':'background:var(--bg2);color:var(--muted);border:1px solid var(--line)'}">${on?'✓':ab}</span>
+      <span class="small muted" style="font-size:10px">${ab}</span></span>`;
+  }).join('');
+  return `<div class="eyebrow">ภารกิจรายวัน · ${esc(DS.name)} · สัปดาห์ ${esc(DS.week)}</div>
+    <div style="margin:6px 0 2px">${dots}</div>
+    <h2 style="margin-top:8px">${dd[3]} ${dd[2]}</h2>`;
+}
+function renderDailyForm(){
+  const td=dailyToday(), wk=DS.week, [d1,d2]=DS.dims, day=DS.days[td];
+  let body='';
+  if(td===1){
+    const it=DAILY_MON[dailyPickIdx(DAILY_MON.length,wk,1)];
+    const goals=[d1,d2].map(k=>DAILY_ACTS[k][dailyPickIdx(3,wk,17)]);
+    body=`<div class="notice good"><b>รู้ไว้วันนี้</b><br><span class="small">${esc(it.f)}</span></div>
+    <h3>${esc(it.q)}</h3>
+    ${it.o.map((t,j)=>`<div class="opt ${day.ans===j?'sel':''}" onclick="dSetAns(${j})">${esc(t)}</div>`).join('')}
+    <div id="dFb"></div>
+    <h3 style="margin-top:16px">ตั้งเป้าของสัปดาห์นี้ · เลือกเอง 1 อย่าง</h3>
+    <p class="small muted">เป้าเล็ก ๆ ที่ตั้งใจทำจริงภายในสัปดาห์นี้ (จะกลับมาถามวันพุธและวันศุกร์)</p>
+    ${goals.map((g,j)=>`<div class="opt ${day.goalPick===j?'sel':''}" onclick="dSetGoal(${j},'${[d1,d2][j]}')">${esc(g)}</div>`).join('')}
+    <div class="opt ${day.goalPick===2?'sel':''}" onclick="dSetGoal(2,'${d1}')">ตั้งเองแบบอื่น (พิมพ์ด้านล่าง)</div>
+    <label for="dGoalTxt" class="small">เป้าที่ตั้ง (แก้ข้อความได้)</label>
+    <textarea id="dGoalTxt" style="min-height:52px">${esc(day.goalText||'')}</textarea>`;
+  }else if(td===2){
+    const it=DAILY_TUE[dailyPickIdx(DAILY_TUE.length,wk,2)];
+    body=`<div class="notice"><b>สถานการณ์วันนี้</b><br><span class="small">${esc(it.s)}</span></div>
+    <h3>ถ้าเป็นเรา จะทำแบบไหน</h3>
+    ${it.o.map((op,j)=>`<div class="opt ${day.pick===j?'sel':''}" onclick="dSetPick(${j},${op.l})">${esc(op.t)}</div>`).join('')}
+    <label for="dWhy">เพราะอะไรจึงเลือกแบบนั้น <span class="muted" style="font-weight:400">(1-2 ประโยค)</span></label>
+    <textarea id="dWhy" style="min-height:56px">${esc(day.why||'')}</textarea>`;
+  }else if(td===3){
+    const goal=dailyGoalOf(DS);
+    const menu=[...DAILY_ACTS[d1],...DAILY_ACTS[d2]];
+    const sug=menu[dailyPickIdx(menu.length,wk,29)];
+    body=`${goal?`<div class="notice good"><b>เป้าที่ตั้งไว้วันจันทร์</b><br><span class="small">${esc(goal)}</span></div>`:''}
+    <h3>วันนี้ลงมือทำอะไรเพื่อคนอื่นหรือส่วนรวมไปแล้วบ้าง</h3>
+    <p class="small muted">เรื่องเล็กก็นับ ถ้ายังไม่ได้ทำ เลือกจากเมนูแล้วไปทำก่อนก็ได้ เช่น "${esc(sug)}"</p>
+    <label for="dAct">สิ่งที่ทำ</label><textarea id="dAct" style="min-height:56px">${esc(day.act||'')}</textarea>
+    <label for="dActWho">ใครได้ประโยชน์ / เกิดผลอะไร</label><textarea id="dActWho" style="min-height:44px">${esc(day.who||'')}</textarea>`;
+  }else if(td===4){
+    const it=DAILY_THU[dailyPickIdx(DAILY_THU.length,wk,4)];
+    body=`<div class="notice"><b>โจทย์วันนี้</b><br><span class="small">${esc(it.p)}</span></div>
+    <label for="dResp">บันทึกของเรา <span class="muted" style="font-weight:400">(${esc(it.h)})</span></label>
+    <textarea id="dResp" style="min-height:72px">${esc(day.what||'')}</textarea>`;
+  }else{
+    const goal=dailyGoalOf(DS);
+    body=`${goal?`<div class="notice good"><b>เป้าที่ตั้งไว้วันจันทร์</b><br><span class="small">${esc(goal)}</span></div>`:''}
+    <h3>สัปดาห์นี้เราทำสองด้านนี้ได้แค่ไหน · ให้คะแนนตัวเอง</h3>
+    ${[d1,d2].map(k=>`<div style="margin:8px 0"><div class="small">${DIMS[k].n}</div>
+      ${[1,2,3,4].map(v=>`<button type="button" class="bbtn ${(day.self&&day.self[k])===v?'on':''}" onclick="dSetSelf('${k}',${v})">${v}</button>`).join('')}
+      <span class="small muted" style="margin-left:6px">1 เริ่มต้น · 4 เชี่ยวชาญ</span></div>`).join('')}
+    <label for="dLearn">สิ่งที่ได้เรียนรู้มากที่สุดในสัปดาห์นี้</label>
+    <textarea id="dLearn" style="min-height:56px">${esc(day.learn||'')}</textarea>
+    <h3 style="margin-top:14px">บอกต่อที่บ้าน</h3>
+    <p class="small muted">งานวิจัยพบว่านักเรียนที่เล่าสิ่งที่เรียนให้คนที่บ้านฟัง ได้ผลลัพธ์ที่ยั่งยืนกว่าอย่างชัดเจน</p>
+    <div class="row">
+      <button type="button" class="${day.told===true?'primary':''}" onclick="dSetTold(true)">เล่าแล้ว / จะเล่าคืนนี้</button>
+      <button type="button" class="${day.told===false?'primary':''}" onclick="dSetTold(false)">ยังไม่พร้อมเล่า</button>
+    </div>
+    <label for="dTold" class="small" style="margin-top:8px">เล่าเรื่องอะไร ให้ใครฟัง <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
+    <input id="dTold" value="${esc(day.toldWho||'')}">`;
+  }
+  $('v-daily').innerHTML=`<div class="card">${dailyHead()}${body}
+    <div class="row navrow" style="margin-top:14px">
+      <button onclick="renderDailyPick()">ย้อนกลับ</button>
+      <button class="primary" onclick="dailySave()">บันทึกภารกิจวันนี้</button>
+    </div></div>`;
+}
+function dailyGoalOf(r){ const m=r.days[1]; return m&&m.goalText?m.goalText:null; }
+function dSetAns(j){
+  const td=dailyToday(), it=DAILY_MON[dailyPickIdx(DAILY_MON.length,DS.week,1)];
+  DS.days[td].ans=j; DS.days[td].correct=(j===it.a);
+  document.querySelectorAll('#v-daily .opt').forEach((el,k)=>{ if(k<4) el.classList.toggle('sel',k===j); });
+  $('dFb').innerHTML=j===it.a?'<div class="notice good"><span class="small">ถูกต้อง เยี่ยมมาก</span></div>'
+    :`<div class="notice"><span class="small">ยังไม่ตรงทีเดียว ลองอ่านข้อเท็จจริงด้านบนอีกครั้ง · คำตอบที่ดีที่สุดคือ "${esc(it.o[it.a])}"</span></div>`;
+}
+function dSetGoal(j,dim){
+  const td=dailyToday(), wk=DS.week, [d1,d2]=DS.dims;
+  DS.days[td].goalPick=j; DS.days[td].goalDim=dim;
+  const goals=[d1,d2].map(k=>DAILY_ACTS[k][dailyPickIdx(3,wk,17)]);
+  if(j<2){ $('dGoalTxt').value=goals[j]; }
+  DS.days[td].goalText=$('dGoalTxt').value;
+  document.querySelectorAll('#v-daily .opt').forEach((el,k)=>{ if(k>=4) el.classList.toggle('sel',k-4===j); });
+}
+function dSetPick(j,l){ const td=dailyToday(); DS.days[td].pick=j; DS.days[td].level=l;
+  document.querySelectorAll('#v-daily .opt').forEach((el,k)=>el.classList.toggle('sel',k===j)); }
+function dSetSelf(k,v){ const td=dailyToday(); DS.days[td].self=DS.days[td].self||{}; DS.days[td].self[k]=v; renderDailyForm(); }
+function dSetTold(v){ const td=dailyToday(); DS.days[td].told=v; renderDailyForm(); }
+async function dailySave(){
+  const td=dailyToday(); if(!td||!DS) return;
+  const day=DS.days[td];
+  /* เก็บค่าจากช่องพิมพ์ตามวัน */
+  if(td===1){ if($('dGoalTxt')) day.goalText=$('dGoalTxt').value.trim();
+    if(day.ans===undefined){ toast('เลือกคำตอบก่อน'); return; }
+    if(!day.goalText){ toast('ตั้งเป้าของสัปดาห์ก่อน เลือกจากเมนูหรือพิมพ์เองก็ได้'); return; } }
+  if(td===2){ if($('dWhy')) day.why=$('dWhy').value.trim();
+    if(day.pick===undefined){ toast('เลือกก่อนว่าถ้าเป็นเราจะทำแบบไหน'); return; }
+    if(!day.why){ toast('บอกเหตุผลสั้น ๆ ที่เลือกแบบนั้น'); return; } }
+  if(td===3){ if($('dAct')) day.act=$('dAct').value.trim(); if($('dActWho')) day.who=$('dActWho').value.trim();
+    if(!day.act){ toast('เล่าสั้น ๆ ว่าวันนี้ลงมือทำอะไร เรื่องเล็กก็นับ'); return; } }
+  if(td===4){ if($('dResp')) day.what=$('dResp').value.trim();
+    if(!day.what){ toast('บันทึกสั้น ๆ ตามโจทย์ก่อน'); return; } }
+  if(td===5){ if($('dLearn')) day.learn=$('dLearn').value.trim(); if($('dTold')) day.toldWho=$('dTold').value.trim();
+    const [d1,d2]=DS.dims;
+    if(!day.self||!day.self[d1]||!day.self[d2]){ toast('ให้คะแนนตัวเองทั้งสองด้านก่อน'); return; }
+    if(day.told===undefined){ toast('เลือกก่อนว่าจะเล่าให้คนที่บ้านฟังไหม'); return; } }
+  day.done=true; day.at=Date.now();
+  const j=JSON.stringify(DS), key=dailyKey(DS.week,DS.idx);
+  LS.set(key,j); queueRemote(key,DS.name,j);
+  const ok=await flushRemote(true);
+  toast(ok?'บันทึกแล้ว เก่งมาก':'บันทึกในเครื่องแล้ว จะส่งขึ้นระบบเมื่อมีเน็ต',1);
+  renderDailyDone();
+}
+function renderDailyDone(){
+  const k=dailyDoneCount(DS);
+  /* นับวันสะสมทั้งหมดจากข้อมูลในเครื่อง เพื่อให้เห็นความต่อเนื่อง (สร้างความเชื่อว่าตัวเองทำได้) */
+  let all=0;
+  try{ for(let x=0;x<localStorage.length;x++){ const key=localStorage.key(x);
+    if(key&&key.startsWith('lc:daily:')&&key.endsWith(':'+DS.idx)){
+      try{ all+=dailyDoneCount(JSON.parse(localStorage.getItem(key))); }catch(e){} } } }catch(e){}
+  $('v-daily').innerHTML=`<div class="card">${dailyHead()}
+    <div class="notice good"><b>วันนี้เสร็จแล้ว</b><br>
+      <span class="small">สัปดาห์นี้ทำแล้ว ${k}/5 วัน · สะสมทั้งหมด ${all} วัน ${k>=5?'· ครบวงจรพลเมือง 1 รอบเต็ม!':''}</span></div>
+    ${k>=5?'<p class="small muted">ครบทั้ง 5 วัน: รู้ → คิด → ลงมือ → เคารพผู้อื่น → สะท้อน คือวงจรของพลเมืองที่ตื่นรู้หนึ่งรอบเต็ม</p>':''}
+    <div class="row" style="margin-top:12px">
+      <button onclick="renderDailyForm()">ดู/แก้ไขของวันนี้</button>
+      <button onclick="renderDailyPick()">เพื่อนคนอื่นทำต่อ</button>
+      <button class="primary" onclick="go('home')">กลับหน้าแรก</button></div></div>`;
+}
+
+/* ---------- ฝั่งครู: ติดตามรายวัน ---------- */
+let DT_SHIFT=0;
+async function openDailyTeach(shift){
+  if(shift!==undefined) DT_SHIFT=shift;
+  go('dailyteach');
+  $('v-dailyteach').innerHTML='<div class="card"><h2>กำลังรวบรวมข้อมูลภารกิจรายวัน…</h2></div>';
+  try{ await renderDailyTeach(); }
+  catch(e){ $('v-dailyteach').innerHTML=`<div class="card"><h1>แสดงผลไม่สำเร็จ</h1>
+    <div class="notice"><span class="small">${esc(e.message||e)}</span></div>
+    <div class="row"><button class="primary" onclick="openDailyTeach()">ลองใหม่</button><button onclick="go('home')">หน้าแรก</button></div></div>`; }
+}
+async function renderDailyTeach(){
+  const wk=weekKeyShift(DT_SHIFT);
+  await pullAll('lc:daily:'+wk);
+  const recs=[]; for(let i=0;i<ROSTER.length;i++) recs.push(await dailyRec(wk,i));
+  const td=(DT_SHIFT===0)?dailyToday():0;
+  const [d1,d2]=dailyDims(wk);
+  const n=ROSTER.length;
+  const doneToday=td?recs.filter(r=>r&&r.days[td]&&r.days[td].done).length:0;
+  const cells=[1,2,3,4,5].map(d=>recs.filter(r=>r&&r.days[d]&&r.days[d].done).length);
+  const totalDone=cells.reduce((a,b)=>a+b,0);
+  const pctWk=Math.round(totalDone/(5*n)*100);
+  const told=recs.filter(r=>r&&r.days[5]&&r.days[5].done&&r.days[5].told===true).length;
+  const monOk=recs.filter(r=>r&&r.days[1]&&r.days[1].done&&r.days[1].correct).length;
+  const monAll=recs.filter(r=>r&&r.days[1]&&r.days[1].done).length;
+  /* นักเรียนที่หายไป 2 วันติดล่าสุด (เฉพาะสัปดาห์ปัจจุบันและวันที่ผ่านมาแล้ว) */
+  const missing=[];
+  if(td>=2){ ROSTER.forEach((nm,i)=>{ const r=recs[i];
+    const miss=[td-1,td].filter(d=>!(r&&r.days[d]&&r.days[d].done)).length;
+    if(miss>=2) missing.push(nm); }); }
+  /* หลักฐานที่นักเรียนพิมพ์วันนี้ */
+  const feed=[];
+  if(td){ recs.forEach((r,i)=>{ if(!r||!r.days[td]||!r.days[td].done) return; const D=r.days[td];
+    const t=td===1?('เป้า: '+(D.goalText||'-')):td===2?((D.level?('เลือกระดับ '+D.level+' · '):'')+(D.why||'-'))
+      :td===3?((D.act||'-')+(D.who?(' → '+D.who):'')):td===4?(D.what||'-')
+      :((D.learn||'-')+(D.told?' · เล่าที่บ้าน':''));
+    if(!D.byTeacher) feed.push({i,name:ROSTER[i],t}); }); }
+  $('v-dailyteach').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · ติดตามภารกิจรายวัน สัปดาห์ ${esc(wk)}</div>
+  <div class="card">
+    <div class="eyebrow">ติดตามภารกิจรายวัน · ${esc(ROOM)}</div>
+    <h1>สัปดาห์ ${esc(wk)} ${DT_SHIFT===0?'(สัปดาห์นี้)':''}</h1>
+    <p class="small muted">ด้านเป้าหมายของสัปดาห์: <b>${DIMS[d1].n}</b> + <b>${DIMS[d2].n}</b> · หมุนเวียนอัตโนมัติครบ 9 ด้านทุก 5 สัปดาห์
+      · จันทร์ รู้ · อังคาร คิด · พุธ ลงมือ · พฤหัส เคารพผู้อื่น · ศุกร์ สะท้อน+บอกต่อที่บ้าน</p>
+    <div class="grid3" style="margin-top:10px">
+      <div class="card tight"><div class="eyebrow">ทำครบทั้งสัปดาห์</div><div class="bignum ${pctWk>=60?'ok':''}">${pctWk}%</div><div class="small muted">${totalDone}/${5*n} ช่อง</div></div>
+      <div class="card tight"><div class="eyebrow">${td?'วันนี้ทำแล้ว':'วันนี้ไม่มีภารกิจ'}</div><div class="bignum">${td?doneToday+'/'+n:'—'}</div><div class="small muted">${td?'คน':'เสาร์-อาทิตย์ หรือดูย้อนหลัง'}</div></div>
+      <div class="card tight"><div class="eyebrow">เล่าให้ที่บ้านฟัง (ศ.)</div><div class="bignum ${told>=Math.ceil(n/2)?'ok':''}">${told}</div><div class="small muted">จากที่ทำวันศุกร์ ${cells[4]} คน</div></div>
+    </div>
+    <div class="row noprint" style="margin-top:10px">
+      <button onclick="openDailyTeach(${DT_SHIFT-1})">← สัปดาห์ก่อน</button>
+      ${DT_SHIFT<0?`<button onclick="openDailyTeach(${DT_SHIFT+1})">สัปดาห์ถัดไป →</button>`:''}
+      ${DT_SHIFT!==0?`<button onclick="openDailyTeach(0)">สัปดาห์นี้</button>`:''}
+      <button class="primary" onclick="openDailyRep('week')">รายงานผล</button>
+      <button onclick="dailyCSV()">ส่งออก CSV</button>
+      <button onclick="window.print()">พิมพ์</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>
+  ${missing.length?`<div class="card"><div class="notice"><b>ควรตามต่อ</b> · ขาด 2 วันติดล่าสุด: ${missing.map(esc).join(' · ')}</div></div>`:''}
+  <div class="card"><h2>ตารางสัปดาห์ · แตะช่องเพื่อบันทึกแทน (นักเรียนไม่มีมือถือ)</h2>
+    <p class="small muted noprint">✓ เขียว = นักเรียนทำเอง · ✓ เหลือง = ครูบันทึกแทน · แตะช่องว่างเพื่อบันทึกว่าทำในกระดาษ แตะซ้ำเพื่อยกเลิก (เฉพาะช่องที่ครูบันทึก)</p>
+    <div style="overflow-x:auto"><table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th>
+      ${DAILY_DAYS.map(([d,ab,nm])=>`<th title="${nm}">${ab}</th>`).join('')}<th>รวม</th></tr></thead><tbody>
+    ${ROSTER.map((nm,i)=>{ const r=recs[i];
+      return `<tr><td class="mono">${i+1}</td><td>${esc(nm)}</td>
+        ${[1,2,3,4,5].map(d=>{ const D=r&&r.days[d];
+          const on=D&&D.done, byT=on&&D.byTeacher;
+          return `<td class="mono noprint-click" style="text-align:center;cursor:pointer;${on?(byT?'color:var(--gold)':'color:var(--teal-d)'):'color:var(--muted)'}"
+            onclick="dailyTMark(${i},${d})">${on?'✓':'·'}</td>`; }).join('')}
+        <td class="mono">${dailyDoneCount(r)}/5</td></tr>`; }).join('')}
+    </tbody></table></div>
+    <p class="small muted">ความรู้วันจันทร์ตอบถูก ${monAll?monOk+'/'+monAll+' คน':'—'} · แถบวัน: ${cells.map((c,x)=>DAILY_DAYS[x][1]+' '+c).join(' · ')}</p>
+  </div>
+  ${feed.length?`<div class="card"><h2>สิ่งที่นักเรียนบันทึกวันนี้</h2>
+    ${feed.map(f=>`<p class="small" style="margin:6px 0"><b>${esc(f.name.replace('นาย',''))}:</b> ${esc(f.t)}</p>`).join('')}</div>`:''}
+  <div class="card noprint"><h2>ทำไมต้องรายวัน</h2>
+    <p class="small muted" style="max-width:70ch">หลักฐานวิจัยชี้ตรงกันว่า "ปริมาณและความต่อเนื่อง" ของการฝึกความเป็นพลเมืองส่งผลต่อผลลัพธ์มากกว่ากิจกรรมครั้งเดียว (Keating et al., 2010; See et al., 2017) การกลับมาฝึกซ้ำให้ผลเพิ่มทุกรอบ (Blevins et al., 2021) และนักเรียนที่นำสิ่งที่เรียนไปคุยต่อที่บ้านได้ผลที่ยั่งยืนกว่าอย่างมีนัยสำคัญ (Vercelloti &amp; Matto, 2016) · ภารกิจรายวันจึงออกแบบเป็นวงจรเล็ก 5 วันที่หมุนครบ: รู้ → คิด → ลงมือ → เคารพผู้อื่น → สะท้อน+บอกต่อ สอดคล้องกับวงจร Active Citizenship ของ ACT และแนวทาง สกศ. ที่เน้น คิด วิเคราะห์ ฝึกฝน</p></div>`;
+}
+/* ครูบันทึกแทน (กระดาษ) — เพิ่มได้เฉพาะช่องว่าง และยกเลิกได้เฉพาะช่องที่ครูบันทึกเอง */
+async function dailyTMark(i,d){
+  const wk=weekKeyShift(DT_SHIFT);
+  const r=(await dailyRec(wk,i))||dailyBlank(wk,i);
+  const D=r.days[d];
+  if(D&&D.done&&!D.byTeacher){ toast('ช่องนี้นักเรียนทำเองในระบบ แก้ไขไม่ได้'); return; }
+  if(D&&D.done&&D.byTeacher){ delete r.days[d]; }
+  else r.days[d]={done:true,byTeacher:true,at:Date.now()};
+  const j=JSON.stringify(r), key=dailyKey(wk,i);
+  LS.set(key,j); queueRemote(key,r.name,j); flushRemote(true);
+  renderDailyTeach();
+}
+function dailyCSV(){
+  const wk=weekKeyShift(DT_SHIFT);
+  (async()=>{
+    const rows=[['ที่','ชื่อ-สกุล','จ','อ','พ','พฤ','ศ','รวม','เป้าที่ตั้ง','ลงมือทำ (พ.)','บันทึกเคารพผู้อื่น (พฤ.)','สิ่งที่เรียนรู้ (ศ.)','เล่าที่บ้าน']];
+    for(let i=0;i<ROSTER.length;i++){ const r=await dailyRec(wk,i);
+      const g=d=>r&&r.days[d]&&r.days[d].done?'1':'0';
+      rows.push([i+1,ROSTER[i],g(1),g(2),g(3),g(4),g(5),dailyDoneCount(r),
+        r&&r.days[1]?(r.days[1].goalText||''):'', r&&r.days[3]?(r.days[3].act||''):'',
+        r&&r.days[4]?(r.days[4].what||''):'', r&&r.days[5]?(r.days[5].learn||''):'',
+        r&&r.days[5]&&r.days[5].told?'ใช่':'']); }
+    const csv='﻿'+rows.map(rw=>rw.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download='uptogrow_daily_'+wk+'.csv'; a.click();
+  })();
+}
+
+/* ---------- รายงานผลหลายช่วงเวลา: สัปดาห์ / เดือน / ภาคเรียน(เทอม) ---------- */
+function dailyWeeksFor(period){
+  const out=[];
+  if(period==='week'){ out.push(isoWeekKey()); return out; }
+  if(period==='month'){
+    const m=new Date().getMonth();
+    for(let k=5;k>=0;k--){ const d=new Date(); d.setDate(d.getDate()-7*k);
+      /* ใช้เดือนของวันจันทร์ในสัปดาห์นั้น */
+      const day=d.getDay()||7; const mon=new Date(d); mon.setDate(d.getDate()-day+1);
+      if(mon.getMonth()===m) out.push(isoWeekKey(d)); }
+    return [...new Set(out)];
+  }
+  /* ภาคเรียน: เทอม 1 ≈ 16 พ.ค. · เทอม 2 ≈ 1 พ.ย. (แก้วันเริ่มได้ในหน้ารายงาน) */
+  let start=LS.get('lc:cfg:termstart');
+  if(!start){ const now=new Date(), y=now.getFullYear(), mth=now.getMonth();
+    start=(mth>=4&&mth<=9)?(y+'-05-16'):(mth>=10?(y+'-11-01'):((y-1)+'-11-01')); }
+  const s=new Date(start+'T00:00:00'); const today=new Date();
+  for(let d=new Date(s); d<=today; d.setDate(d.getDate()+7)) out.push(isoWeekKey(d));
+  const cur=isoWeekKey(); if(!out.includes(cur)) out.push(cur);
+  return [...new Set(out)];
+}
+/* รวมสถิติจากหลายสัปดาห์ ใช้ทั้งหน้ารายงานและหน้าหลักฐาน 5 ด้าน */
+async function dailyStats(weeks){
+  const n=ROSTER.length;
+  const st={weeks:weeks.length,n,slots:0,done:0,byStu:Array(n).fill(0),
+    monOk:0,monAll:0,tueHi:0,tueAll:0,acts:[],resp:[],told:0,friAll:0,goals:[],
+    dimsCovered:new Set(),selfFirst:{},selfLast:{},anyone:false};
+  for(const wk of weeks){
+    const [d1,d2]=dailyDims(wk);
+    for(let i=0;i<n;i++){
+      const r=await dailyRec(wk,i); st.slots+=5;
+      if(!r) continue;
+      const k=dailyDoneCount(r); if(k>0){ st.anyone=true; st.dimsCovered.add(d1); st.dimsCovered.add(d2); }
+      st.done+=k; st.byStu[i]+=k;
+      const D=r.days;
+      if(D[1]&&D[1].done){ st.monAll++; if(D[1].correct) st.monOk++; if(D[1].goalText) st.goals.push({i,t:D[1].goalText}); }
+      if(D[2]&&D[2].done){ st.tueAll++; if((D[2].level||0)>=3) st.tueHi++; }
+      if(D[3]&&D[3].done&&D[3].act) st.acts.push({i,wk,t:D[3].act,who:D[3].who||''});
+      if(D[4]&&D[4].done&&D[4].what) st.resp.push({i,wk,t:D[4].what});
+      if(D[5]&&D[5].done){ st.friAll++; if(D[5].told===true) st.told++;
+        if(D[5].self){ for(const dm of [d1,d2]){ if(D[5].self[dm]){
+          if(st.selfFirst[dm]===undefined) st.selfFirst[dm]=[]; st.selfFirst[dm].push({wk,v:D[5].self[dm]}); } } } }
+    }
+  }
+  return st;
+}
+async function openDailyRep(period){
+  period=period||'week';
+  go('dailyrep');
+  $('v-dailyrep').innerHTML='<div class="card"><h2>กำลังคำนวณรายงาน…</h2></div>';
+  try{
+    await pullAll('lc:daily:');
+    const weeks=dailyWeeksFor(period);
+    const st=await dailyStats(weeks);
+    renderDailyRep(period,weeks,st);
+  }catch(e){ $('v-dailyrep').innerHTML=`<div class="card"><h1>คำนวณไม่สำเร็จ</h1>
+    <div class="notice"><span class="small">${esc(e.message||e)}</span></div>
+    <div class="row"><button class="primary" onclick="openDailyRep()">ลองใหม่</button><button onclick="go('home')">หน้าแรก</button></div></div>`; }
+}
+function renderDailyRep(period,weeks,st){
+  const n=st.n, pct=(a,b)=>b?Math.round(a/b*100):0;
+  const pAll=pct(st.done,st.slots);
+  const names={week:'รายสัปดาห์',month:'รายเดือน',term:'รายภาคเรียน (เทอม)'};
+  const stPill=(v,c)=>v===null?'<span class="pill" style="color:var(--gold);border-color:var(--gold)">รอข้อมูล</span>'
+      :(v>=c?'<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ผ่านเกณฑ์</span>'
+        :'<span class="pill" style="color:var(--red);border-color:var(--red)">ยังไม่ถึง</span>');
+  /* ตารางแบบรายงานโครงการฯ: เป้าหมาย | ผลที่วัดได้ | เกณฑ์ | สถานะ | ร่องรอยหลักฐาน */
+  const goalRows=[
+    ['นักเรียนฝึกภารกิจรายวันอย่างต่อเนื่อง', pAll+'% ของช่องทั้งหมด ('+st.done+'/'+st.slots+')', st.anyone?pAll:null, 60, 'ตารางสัปดาห์ + CSV ในหน้าติดตามรายวัน'],
+    ['เข้าใจหน้าที่และสิทธิ (ตอบความรู้วันจันทร์ถูก)', st.monAll?pct(st.monOk,st.monAll)+'% ('+st.monOk+'/'+st.monAll+')':'—', st.monAll?pct(st.monOk,st.monAll):null, 70, 'คำตอบวันจันทร์ในระบบ'],
+    ['เลือกการกระทำระดับ 3-4 ในสถานการณ์ฝึกคิด (อังคาร)', st.tueAll?pct(st.tueHi,st.tueAll)+'% ('+st.tueHi+'/'+st.tueAll+')':'—', st.tueAll?pct(st.tueHi,st.tueAll):null, 60, 'ตัวเลือก+เหตุผลวันอังคาร'],
+    ['ลงมือทำเพื่อส่วนรวมและบันทึกหลักฐาน (พุธ)', st.acts.length+' ครั้ง จาก '+n+' คน', st.anyone?pct(st.acts.length,st.weeks*n):null, 50, 'บันทึกการลงมือทำ + ผู้ได้ประโยชน์'],
+    ['บันทึกการเคารพ/รับฟังผู้อื่น (พฤหัสบดี)', st.resp.length+' ครั้ง', st.anyone?pct(st.resp.length,st.weeks*n):null, 50, 'บันทึกวันพฤหัสบดีในระบบ'],
+    ['นำไปเล่าต่อที่บ้าน (ศุกร์) — ตัวคูณความยั่งยืน', st.friAll?pct(st.told,st.friAll)+'% ('+st.told+'/'+st.friAll+')':'—', st.friAll?pct(st.told,st.friAll):null, 50, 'คำตอบ "บอกต่อที่บ้าน" วันศุกร์'],
+  ];
+  /* ครอบคลุมพระบรมราโชบาย 4 ด้าน จากด้านที่ฝึกในช่วงเวลา */
+  const royalRows=Object.entries(ROYAL).map(([rk,r])=>{
+    const hit=r.dims.filter(d=>st.dimsCovered.has(d));
+    return `<tr><td>${esc(r.n)}</td><td class="small">${r.dims.map(d=>st.dimsCovered.has(d)?'<b>'+esc(DIMS[d].n)+'</b>':'<span class="muted">'+esc(DIMS[d].n)+'</span>').join(' · ')}</td>
+      <td class="mono">${hit.length}/${r.dims.length}</td></tr>`; }).join('');
+  const topStu=st.byStu.map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).slice(0,3).filter(x=>x.v>0);
+  const lowStu=st.byStu.map((v,i)=>({i,v})).sort((a,b)=>a.v-b.v).slice(0,3).filter(x=>x.v<st.weeks*5*0.4);
+  $('v-dailyrep').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานภารกิจรายวัน ${names[period]}</div>
+  <div class="card">
+    <div class="eyebrow">รายงานผลภารกิจรายวัน · ${esc(ROOM)} ${esc(GRADE)}</div>
+    <h1>${names[period]}</h1>
+    <p class="small muted">ช่วงข้อมูล: ${weeks.map(esc).join(' · ')} (${st.weeks} สัปดาห์ × ${n} คน)</p>
+    <div class="row noprint" style="margin:8px 0">
+      <button class="${period==='week'?'primary':''}" onclick="openDailyRep('week')">รายสัปดาห์</button>
+      <button class="${period==='month'?'primary':''}" onclick="openDailyRep('month')">รายเดือน</button>
+      <button class="${period==='term'?'primary':''}" onclick="openDailyRep('term')">รายภาคเรียน / เทอม</button>
+    </div>
+    ${period==='term'?`<div class="row noprint" style="align-items:center;gap:8px">
+      <label class="small" style="margin:0">วันเริ่มภาคเรียน</label>
+      <input type="date" id="dTermStart" style="width:auto" value="${esc(LS.get('lc:cfg:termstart')||'')}">
+      <button class="small" onclick="LS.set('lc:cfg:termstart',$('dTermStart').value);openDailyRep('term')">ใช้วันนี้เป็นจุดเริ่ม</button>
+    </div>`:''}
+    <div class="grid3" style="margin-top:10px">
+      <div class="card tight"><div class="eyebrow">การทำต่อเนื่อง</div><div class="bignum ${pAll>=60?'ok':''}">${pAll}%</div><div class="small muted">${st.done}/${st.slots} ช่อง</div></div>
+      <div class="card tight"><div class="eyebrow">ลงมือทำจริง</div><div class="bignum">${st.acts.length}</div><div class="small muted">ครั้ง (มีบันทึกหลักฐาน)</div></div>
+      <div class="card tight"><div class="eyebrow">เล่าต่อที่บ้าน</div><div class="bignum ${st.friAll&&st.told/st.friAll>=0.5?'ok':''}">${st.friAll?pct(st.told,st.friAll)+'%':'—'}</div><div class="small muted">ตัวคูณความยั่งยืน</div></div>
+    </div>
+  </div>
+  <div class="card"><h2>ตารางเป้าหมาย ผล และร่องรอยหลักฐาน</h2>
+    <p class="small muted">รูปแบบเดียวกับตารางองค์ประกอบที่ ๔ ของรายงานโครงการสร้างและส่งเสริมความเป็นพลเมืองดีฯ นำไปแนบรายงานได้ทันที</p>
+    <table style="margin-top:6px"><thead><tr><th>เป้าหมาย</th><th>ผลที่วัดได้</th><th>เกณฑ์</th><th>สถานะ</th><th>ร่องรอยหลักฐาน</th></tr></thead><tbody>
+    ${goalRows.map(g=>`<tr><td>${esc(g[0])}</td><td class="mono">${esc(g[1])}</td><td class="mono">≥ ${g[3]}%</td>
+      <td>${stPill(g[2],g[3])}</td><td class="small">${esc(g[4])}</td></tr>`).join('')}
+    </tbody></table></div>
+  <div class="card"><h2>ความครอบคลุมพระบรมราโชบายด้านการศึกษา 4 ด้าน</h2>
+    <p class="small muted">จากด้านสมรรถนะที่ฝึกในช่วงเวลานี้ (ตัวหนา = ได้ฝึกแล้ว) · ครบ 9 ด้านอัตโนมัติทุก 5 สัปดาห์</p>
+    <table><thead><tr><th>พระบรมราโชบาย</th><th>สมรรถนะที่รองรับ</th><th>ฝึกแล้ว</th></tr></thead><tbody>${royalRows}</tbody></table></div>
+  ${(st.acts.length||st.resp.length)?`<div class="card"><h2>ตัวอย่างหลักฐานพฤติกรรม (คัดล่าสุด)</h2>
+    ${st.acts.slice(-6).map(a=>`<p class="small" style="margin:5px 0">🌱 <b>${esc((ROSTER[a.i]||'').replace('นาย',''))}:</b> ${esc(a.t)}${a.who?' → '+esc(a.who):''}</p>`).join('')}
+    ${st.resp.slice(-4).map(a=>`<p class="small" style="margin:5px 0">🤝 <b>${esc((ROSTER[a.i]||'').replace('นาย',''))}:</b> ${esc(a.t)}</p>`).join('')}</div>`:''}
+  <div class="card"><h2>รายคน</h2>
+    ${topStu.length?`<p class="small">ต่อเนื่องเด่น: ${topStu.map(x=>esc(ROSTER[x.i].replace('นาย',''))+' ('+x.v+' วัน)').join(' · ')}</p>`:''}
+    ${lowStu.length?`<p class="small" style="color:var(--red)">ควรตามต่อ: ${lowStu.map(x=>esc(ROSTER[x.i].replace('นาย',''))+' ('+x.v+' วัน)').join(' · ')}</p>`:''}
+    <div class="row noprint" style="margin-top:10px">
+      <button class="primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+      <button onclick="openDailyTeach()">หน้าติดตามรายวัน</button>
+      <button onclick="openEvid()">หลักฐานความสำเร็จ 5 ด้าน</button>
+      <button onclick="go('home')">หน้าแรก</button></div></div>`;
+}
+
 /* ================= หลักฐานความสำเร็จ 5 ด้าน (Evidence of Success) =================
    กรอบ: ความสำเร็จของงานพลเมืองดีต้องมีหลักฐานอย่างน้อย 5 ด้าน ไม่ใช่แค่คะแนนหลังเรียนสูงขึ้น
    1 ความรู้ความเข้าใจ  2 คิดวิเคราะห์ตัดสินใจด้วยเหตุผล  3 เคารพความแตกต่างและสิทธิผู้อื่น
@@ -4152,6 +4682,8 @@ async function openEvid(){
   /* ดึงบันทึกติดตามการลงมือทำของภารกิจนี้ */
   const acts=[]; for(const d of done){ acts.push(await loadAct(d.idx,curMission)); }
   const actOf=i=>acts[done.findIndex(d=>d.idx===i)]||null;
+  /* หลักฐานจากภารกิจรายวัน 4 สัปดาห์ล่าสุด */
+  const dst=await dailyStats([-3,-2,-1,0].map(weekKeyShift));
 
   const pct=(k,tot)=>tot?Math.round(k/tot*100):0;
   const fil=t=>String(t||'').trim().length>=5;
@@ -4216,6 +4748,24 @@ async function openEvid(){
       pctRow('ครูยืนยันหลักฐานว่าเกิดขึ้นจริง',acts.filter(a=>a&&a.teacher&&a.teacher.ok==='yes').length,n,50),
     ]},
   ];
+  /* เติมหลักฐานภารกิจรายวันเข้าเสาที่เกี่ยวข้อง เฉพาะเมื่อห้องเริ่มใช้ฟีเจอร์นี้แล้ว
+     เพื่อไม่ให้เสาเดิมถูกดึงเป็น "รอข้อมูล" ก่อนเปิดใช้ */
+  if(dst.anyone){
+    const dp=(a,b)=>b?Math.round(a/b*100):0;
+    pillars[0].rows.push(row('ตอบความรู้หน้าที่-สิทธิรายวัน (จันทร์) ถูกต้อง',
+      dst.monAll?`${dst.monOk}/${dst.monAll} (${dp(dst.monOk,dst.monAll)}%)`:'ยังไม่มีข้อมูล',
+      dst.monAll?dp(dst.monOk,dst.monAll)>=70:null,'≥ 70% · 4 สัปดาห์ล่าสุด'));
+    pillars[1].rows.push(row('เลือกการกระทำระดับ 3-4 ในสถานการณ์ฝึกคิดรายวัน (อังคาร)',
+      dst.tueAll?`${dst.tueHi}/${dst.tueAll} (${dp(dst.tueHi,dst.tueAll)}%)`:'ยังไม่มีข้อมูล',
+      dst.tueAll?dp(dst.tueHi,dst.tueAll)>=60:null,'≥ 60% · 4 สัปดาห์ล่าสุด'));
+    pillars[2].rows.push(row('บันทึกการเคารพ/รับฟังผู้อื่นรายวัน (พฤหัสบดี)',
+      dst.resp.length+' ครั้ง',dst.resp.length?dst.resp.length>=Math.ceil(n*0.5):null,'≥ ครึ่งห้อง · 4 สัปดาห์ล่าสุด'));
+    pillars[3].rows.push(row('ลงมือทำเพื่อส่วนรวมรายวัน (พุธ) พร้อมหลักฐาน',
+      dst.acts.length+' ครั้ง',dst.acts.length?dst.acts.length>=Math.ceil(n*0.5):null,'≥ ครึ่งห้อง · 4 สัปดาห์ล่าสุด'));
+    pillars[4].rows.push(row('นำสิ่งที่เรียนไปเล่าต่อที่บ้าน (ศุกร์)',
+      dst.friAll?`${dst.told}/${dst.friAll} (${dp(dst.told,dst.friAll)}%)`:'ยังไม่มีข้อมูล',
+      dst.friAll?dp(dst.told,dst.friAll)>=50:null,'≥ 50% · 4 สัปดาห์ล่าสุด'));
+  }
   const st=p=>p===null?'<span class="pill" style="color:var(--gold);border-color:var(--gold)">รอข้อมูล</span>'
             :p?'<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ผ่านเกณฑ์</span>'
             :'<span class="pill" style="color:var(--red);border-color:var(--red)">ยังไม่ถึงเกณฑ์</span>';

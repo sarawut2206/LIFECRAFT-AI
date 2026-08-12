@@ -14,7 +14,8 @@
 
 /* v5 (12 ส.ค. 2569) เพิ่มแบบสังเกตพฤติกรรมของครู 9 ด้าน และตารางความเที่ยงตรงเชิงสภาพ
    v6 (12 ส.ค. 2569) เพิ่มหลักฐานความสำเร็จ 5 ด้าน และโมดูลติดตามการลงมือทำ */
-const VERSION    = 'v6';
+/* v7 (12 ส.ค. 2569) เพิ่มภารกิจรายวัน จ-ศ + รายงานรายสัปดาห์/เดือน/ภาคเรียน */
+const VERSION    = 'v7';
 const SHELL      = `uptogrow-shell-${VERSION}`;
 const RUNTIME    = `uptogrow-runtime-${VERSION}`;
 const FONTS      = `uptogrow-fonts-${VERSION}`;
