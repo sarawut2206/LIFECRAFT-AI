@@ -12,7 +12,8 @@
  * Service Worker จึงไม่แตะข้อมูลผู้เรียน ทำหน้าที่แคชเฉพาะตัวโปรแกรม
  */
 
-const VERSION    = 'v4';
+/* v5 (12 ส.ค. 2569) เพิ่มแบบสังเกตพฤติกรรมของครู 9 ด้าน และตารางความเที่ยงตรงเชิงสภาพ */
+const VERSION    = 'v5';
 const SHELL      = `uptogrow-shell-${VERSION}`;
 const RUNTIME    = `uptogrow-runtime-${VERSION}`;
 const FONTS      = `uptogrow-fonts-${VERSION}`;

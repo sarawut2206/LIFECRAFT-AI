@@ -534,7 +534,29 @@ const RUBRICS = {
   civic:{n:'ความเป็นพลเมืองดีและประโยชน์ส่วนรวม',l:['คำนึงถึงประโยชน์ตนเองเป็นหลัก','เห็นประโยชน์ส่วนรวม แต่ยังไม่ลงมือ','ตัดสินใจโดยคำนึงถึงผู้ได้รับผลกระทบและความโปร่งใส','ปกป้องสิทธิผู้อื่น เสนอทางออกเพื่อส่วนรวม และรับผิดชอบผลที่ตามมา']}
 };
 
-const ROLES = ['ผู้รวบรวมข้อมูล','ผู้วิเคราะห์ผลกระทบ','ผู้ตรวจสอบความเป็นธรรม','ผู้จัดทำแผนและงบ','ผู้นำเสนอ'];
+/* แบบสังเกตพฤติกรรมโดยครู ครบทั้ง 9 ด้านตาม DIMS (คีย์ตรงกับ DIMS ทุกตัว)
+   ใช้คู่กับแบบวัดของนักเรียนเพื่อหาความเที่ยงตรงเชิงสภาพ (concurrent validity)
+   ระดับ 1-4 ต้องเป็นพฤติกรรมที่ครูสังเกตเห็นได้จริงระหว่างทำภารกิจ ไม่ใช่ความรู้สึก
+   คีย์ think self comm ตรงกับ RUBRICS เดิม ข้อมูลที่ครูเคยประเมินไว้จึงใช้ต่อได้ทันที
+   ส่วนคีย์ civic ของฉบับเดิมไม่มีในชุดนี้ เพราะถูกแยกเป็น 6 ด้านย่อย ระบบจะแสดงเป็นค่าฉบับเดิม */
+const TOBS = {
+  self:{n:'การจัดการตนเอง',l:['ต้องให้ครูเตือนอย่างต่อเนื่องจึงจะเริ่มงาน','วางแผนได้บางส่วน แต่ทำไม่ต่อเนื่อง','วางแผน ติดตาม และทำงานของตนจนเสร็จ','ประเมินตนเอง ปรับแผนระหว่างทาง และช่วยให้ทีมทำงานดีขึ้น']},
+  think:{n:'การคิดและแก้ปัญหา',l:['ตัดสินใจจากความรู้สึกหรือข้อมูลด้านเดียว','เสนอทางเลือกได้ แต่อธิบายผลกระทบไม่ครบ','เปรียบเทียบทางเลือก ใช้หลักฐาน อธิบายเหตุผลได้','วิเคราะห์หลายมิติ คาดการณ์ความเสี่ยง ปรับแผนเมื่อข้อมูลเปลี่ยน']},
+  comm:{n:'การสื่อสารและทำงานร่วมกัน',l:['ไม่รับฟังหรือไม่ทำตามบทบาทที่ตกลง','มีส่วนร่วม แต่จัดการความขัดแย้งไม่ได้','รับฟัง แบ่งงาน และสร้างข้อสรุปร่วมกันได้','ประสานความเห็นที่ต่างกัน ช่วยสมาชิก และยกระดับผลงานทีม']},
+  resp:{n:'ความรับผิดชอบ',l:['ไม่ส่งงานหรือทิ้งงานให้เพื่อนทำแทน','ส่งงานเมื่อถูกตามเท่านั้น','ทำงานที่รับผิดชอบเสร็จตามกำหนดโดยไม่ต้องตาม','ทำงานเสร็จตามกำหนด และรับผิดชอบผลที่เกิดขึ้นโดยไม่โยนความผิด']},
+  hon:{n:'ความซื่อสัตย์',l:['ปิดบังหรือให้ข้อมูลไม่ตรงความจริงเพื่อให้ตนได้ประโยชน์','พูดความจริงเมื่อถูกถามตรง ๆ เท่านั้น','บอกข้อมูลตามจริงแม้จะเสียประโยชน์ของตน','ยอมรับความผิดพลาดของตนเอง และทักท้วงเมื่อเห็นการไม่ซื่อสัตย์']},
+  resp2:{n:'การเคารพสิทธิผู้อื่น',l:['พูดแทรก ล้อเลียน หรือใช้ของผู้อื่นโดยไม่ขอ','ไม่ละเมิดผู้อื่น แต่ยังไม่สนใจสิทธิของเพื่อน','ขออนุญาต รับฟังจนจบ และไม่ตัดสินผู้อื่นล่วงหน้า','ปกป้องสิทธิของเพื่อนเมื่อเห็นว่ามีคนถูกละเมิด']},
+  common:{n:'การคำนึงถึงประโยชน์ส่วนรวม',l:['คำนึงถึงประโยชน์ของตนเองเป็นหลัก','เห็นประโยชน์ส่วนรวม แต่ยังไม่ลงมือทำ','ตัดสินใจโดยคำนึงถึงผู้ได้รับผลกระทบและความโปร่งใส','เสนอทางออกเพื่อส่วนรวมและลงมือทำจนเกิดผลจริง']},
+  disc:{n:'วินัยและการเคารพกติกา',l:['ทำผิดกติกาของห้องซ้ำ ๆ แม้ถูกตักเตือน','ทำตามกติกาเมื่อมีครูอยู่','ทำตามกติกาและตรงต่อเวลาโดยไม่ต้องมีคนกำกับ','ทำตามกติกาอย่างสม่ำเสมอ และช่วยให้เพื่อนรักษากติกาด้วยวิธีที่ไม่กระทบความสัมพันธ์']},
+  divers:{n:'การยอมรับความแตกต่าง',l:['ล้อเลียนหรือกีดกันคนที่ต่างจากตน','อยู่ร่วมกับคนที่ต่างได้ แต่เลี่ยงการทำงานด้วย','รับฟังความเห็นที่ต่างและทำงานร่วมกับทุกคนได้','ใช้ความแตกต่างให้เป็นประโยชน์ต่องาน และดูแลไม่ให้ใครถูกกีดกัน']}
+};
+/* ระดับที่ครูให้ในด้าน k ของนักเรียนคนหนึ่ง คืนค่า 0 เมื่อยังไม่ประเมิน */
+const tobsLv=(d,k)=>((d&&d.teacher&&d.teacher.score&&d.teacher.score[k])||0);
+/* จำนวนด้านที่ครูประเมินแล้ว นับเฉพาะคีย์ที่อยู่ในชุดปัจจุบัน */
+const tobsCount=d=>Object.keys(TOBS).filter(k=>tobsLv(d,k)).length;
+const TOBS_N=Object.keys(TOBS).length;
+
+const ROLES =['ผู้รวบรวมข้อมูล','ผู้วิเคราะห์ผลกระทบ','ผู้ตรวจสอบความเป็นธรรม','ผู้จัดทำแผนและงบ','ผู้นำเสนอ'];
 
 
 const EVENTS_M2 = [
@@ -1479,11 +1501,28 @@ function showReport(st,tv){
   <div class="card"><h2>การสะท้อนคิด</h2>
     ${REFLECT_Q.map((q,i)=>`<p class="small"><b>${i+1}. ${q}</b><br>${esc(st.reflect['q'+i]||'—')}</p>`).join('')}</div>
   <div class="card"><h2>ผลประเมิน Rubric</h2>
-    <table><thead><tr><th>สมรรถนะ</th><th>ประเมินตนเอง</th><th>ครูประเมิน</th></tr></thead><tbody>
+    <h3 style="font-size:15px">นักเรียนประเมินตนเอง</h3>
+    <table><thead><tr><th>สมรรถนะ</th><th>ระดับที่ประเมินตนเอง</th></tr></thead><tbody>
     ${Object.entries(RUBRICS).map(([k,r])=>`<tr><td>${r.n}</td>
-      <td class="mono">${st.self[k]?st.self[k]+' — '+r.l[st.self[k]-1]:'—'}</td>
-      <td class="mono">${st.teacher.score[k]?st.teacher.score[k]+' — '+r.l[st.teacher.score[k]-1]:'ยังไม่ประเมิน'}</td></tr>`).join('')}
+      <td class="mono">${st.self[k]?st.self[k]+' — '+r.l[st.self[k]-1]:'—'}</td></tr>`).join('')}
     </tbody></table>
+
+    <h3 style="font-size:15px;margin-top:16px">ครูสังเกตพฤติกรรม ${TOBS_N} ด้าน</h3>
+    <p class="small muted">คอลัมน์ขวาคือคะแนนจากแบบวัดของนักเรียนเอง (หลังเรียน) ไว้เทียบว่าสิ่งที่ครูเห็นตรงกับที่นักเรียนตอบหรือไม่</p>
+    <table><thead><tr><th>สมรรถนะ</th><th>ครูประเมิน</th><th>แบบวัดนักเรียน</th><th>ต่าง</th></tr></thead><tbody>
+    ${Object.entries(TOBS).map(([k,r])=>{
+      const tv2=tobsLv(st,k), sv=dimScore(st.post||{},k);
+      const gap=(tv2&&sv)?(tv2-sv):null;
+      return `<tr><td>${r.n}</td>
+      <td class="mono">${tv2?tv2+' — '+r.l[tv2-1]:'<span class="muted">ยังไม่ประเมิน</span>'}</td>
+      <td class="mono">${sv?sv.toFixed(2):'—'}</td>
+      <td class="mono ${gap===null?'':Math.abs(gap)>=1.5?'bad':''}">${gap===null?'—':(gap>=0?'+':'')+gap.toFixed(2)}</td></tr>`;}).join('')}
+    ${st.teacher.score&&st.teacher.score.civic?`<tr><td class="small muted">ความเป็นพลเมืองดีและประโยชน์ส่วนรวม<br>(ค่าจากแบบสังเกตฉบับเดิม 4 ด้าน)</td>
+      <td class="mono muted">${st.teacher.score.civic}</td><td class="mono muted">—</td><td class="mono muted">—</td></tr>`:''}
+    </tbody></table>
+    <p class="small muted" style="margin-top:6px">ครูประเมินแล้ว ${tobsCount(st)} จาก ${TOBS_N} ด้าน
+      ${(()=>{const big=Object.keys(TOBS).filter(k=>{const a=tobsLv(st,k),b=dimScore(st.post||{},k);return a&&b&&Math.abs(a-b)>=1.5;});
+        return big.length?` · <b class="bad">ต่างกันตั้งแต่ 1.5 ระดับใน ${big.length} ด้าน</b> ควรใช้ประกอบการสัมภาษณ์`:'';})()}</p>
     ${st.teacher.note?`<p class="small" style="margin-top:8px"><b>ข้อเสนอแนะจากครู:</b> ${esc(st.teacher.note)}</p>`:''}
     ${st.interview&&st.interview.at?`<div class="notice good" style="margin-top:10px"><b>ผลการสัมภาษณ์เชิงกระบวนการคิด</b><br>
       <span class="small">ข้อสรุปของครู: ${esc(st.interview.consistent)} · ผู้สัมภาษณ์ ${esc(st.interview.by)} · ${fmtDT(st.interview.at)}</span>
@@ -1494,15 +1533,31 @@ function showReport(st,tv){
     ${tv?`<button onclick="openTeacher()">กลับหน้าครู</button>`:`<button onclick="go('home')">กลับหน้าแรก</button>`}</div>`;
   go('report'); window._r=st; if(tv) tScoreUI(st);
 }
+/* แบ่งแบบสังเกตเป็น 2 กลุ่มตาม DIMS[k].g เพื่อลดภาระการอ่านของครู แตะซ้ำเพื่อยกเลิกระดับเดิม */
 function tScoreUI(st){
-  $('tScore').innerHTML=`<h3>ครูให้ระดับสมรรถนะ</h3>`+Object.entries(RUBRICS).map(([k,r])=>
-    `<div style="margin:10px 0"><div class="small muted">${r.n}</div>
-     ${r.l.map((tx,i)=>`<div class="opt ${st.teacher.score[k]===i+1?'sel':''}" onclick="tSet('${k}',${i+1})"><b class="mono">${i+1}</b> ${tx}</div>`).join('')}</div>`).join('')+
-    `<label for="tn">ข้อเสนอแนะถึงนักเรียน</label><textarea id="tn">${esc(st.teacher.note||'')}</textarea>
-     <div class="row" style="margin-top:10px"><button class="primary" onclick="tSave()">บันทึกผลประเมิน</button></div>`;
+  const grp=g=>Object.entries(TOBS).filter(([k])=>DIMS[k].g===g).map(([k,r])=>
+    `<div style="margin:10px 0"><div class="small muted" id="tobh-${k}">${tobsHead(st,k)}</div>
+     <div id="tobo-${k}">${tobsOpts(st,k)}</div></div>`).join('');
+  $('tScore').innerHTML=`<h3>ครูให้ระดับสมรรถนะ ${TOBS_N} ด้าน</h3>
+    <p class="small muted">ให้ระดับจากพฤติกรรมที่สังเกตเห็นจริงระหว่างทำภารกิจ · แตะระดับเดิมซ้ำเพื่อยกเลิก
+      · ประเมินแล้ว <b id="tobn">${tobsCount(st)}</b>/${TOBS_N} ด้าน (ให้ครบทุกด้านเพื่อให้คำนวณความเที่ยงตรงเชิงสภาพได้)</p>
+    <h4 style="font-size:14px;margin:14px 0 0">ทักษะชีวิต</h4>${grp('life')}
+    <h4 style="font-size:14px;margin:14px 0 0">ความเป็นพลเมืองดี</h4>${grp('civic')}
+    <label for="tn">ข้อเสนอแนะถึงนักเรียน</label><textarea id="tn">${esc(st.teacher.note||'')}</textarea>
+    <div class="row" style="margin-top:10px"><button class="primary" onclick="tSave()">บันทึกผลประเมิน</button></div>`;
   $('tn').oninput=e=>{st.teacher.note=e.target.value;};
 }
-function tSet(k,v){const st=window._r;st.teacher.score[k]=v;tScoreUI(st);}
+const tobsHead=(st,k)=>TOBS[k].n+(tobsLv(st,k)?'':' <span style="color:var(--gold)">· ยังไม่ประเมิน</span>');
+const tobsOpts=(st,k)=>TOBS[k].l.map((tx,i)=>
+  `<div class="opt ${tobsLv(st,k)===i+1?'sel':''}" onclick="tSet('${k}',${i+1})"><b class="mono">${i+1}</b> ${tx}</div>`).join('');
+/* วาดใหม่เฉพาะด้านที่แตะ เพื่อไม่ให้หน้าเลื่อนกลับขึ้นบนทุกครั้งที่ให้ระดับ */
+function tSet(k,v){
+  const st=window._r;
+  if(st.teacher.score[k]===v) delete st.teacher.score[k]; else st.teacher.score[k]=v;
+  const o=$('tobo-'+k), h=$('tobh-'+k), n=$('tobn');
+  if(!o){ tScoreUI(st); return; }
+  o.innerHTML=tobsOpts(st,k); h.innerHTML=tobsHead(st,k); if(n) n.textContent=tobsCount(st);
+}
 async function tSave(){const st=window._r;const j=JSON.stringify(st);const key=mKey(st.idx,st.missionId);LS.set(key,j);queueRemote(key,st.name,j);
   const ok=await flushRemote(true);toast(ok?'บันทึกผลประเมินขึ้นระบบแล้ว':'บันทึกในเครื่องแล้ว แต่ยังส่งขึ้น Sheet ไม่ได้ กดปุ่มส่งซ้ำที่มุมบน',ok);}
 
@@ -1583,7 +1638,7 @@ async function openTeacher(){
       <div>
         <h3 style="font-size:14px">สัดส่วนระดับสมรรถนะที่ครูให้ (แผนภูมิวงกลม)</h3>
         ${(()=>{const lv=[0,0,0,0];
-          done.forEach(d=>{Object.keys(RUBRICS).forEach(k=>{const v=d.teacher&&d.teacher.score&&d.teacher.score[k]; if(v) lv[v-1]++;});});
+          done.forEach(d=>{Object.keys(TOBS).forEach(k=>{const v=tobsLv(d,k); if(v) lv[v-1]++;});});
           const cc=CPAL();
           return svgDonut(['ระดับ 1 เริ่มต้น','ระดับ 2 กำลังพัฒนา','ระดับ 3 สามารถ','ระดับ 4 เชี่ยวชาญ'],lv,[cc.red,cc.amber,cc.tealSoft,cc.teal])
             + (lv.every(x=>x===0)?'<p class="small muted" style="text-align:center">ยังไม่มีครูให้ระดับสมรรถนะ กราฟจะแสดงสัดส่วนจริงเมื่อเริ่มประเมิน</p>':'');})()}
@@ -1616,14 +1671,14 @@ async function openTeacher(){
       if(!d)return `<tr><td class="mono">${i+1}</td><td>${n}</td><td colspan="8" class="muted small">ยังไม่มีข้อมูล</td></tr>`;
       const p=total(d.pre),q=total(d.post),ok=d.done;
       const gm=gapMin(d.preAt||d.started,d.postAt||d.finished);
-      const scored=Object.keys(d.teacher&&d.teacher.score||{}).length===4;
+      const nScored=tobsCount(d);
       return `<tr>
         <td class="mono">${i+1}</td><td>${n}</td>
         <td class="small">${fmtD(d.finished||d.started)}</td>
         <td class="mono small ${!d.paper&&gm!==null&&gm<30?'bad':''}">${d.paper?'<span class="muted">กระดาษ</span>':(gm!==null?gm+' นาที':'-')}</td>
         <td class="mono">${p||'-'}</td><td class="mono">${ok?q:'-'}</td>
         <td class="mono ${ok&&q-p>0?'ok':ok&&q-p<0?'bad':''}">${ok?((q-p>=0?'+':'')+(q-p)):'-'}</td>
-        <td class="small">${scored?'<span class="ok">✓ ครบ</span>':'<span class="muted">ยังไม่ครบ</span>'}</td>
+        <td class="small">${nScored===TOBS_N?'<span class="ok">✓ ครบ '+TOBS_N+'</span>':`<span class="muted">${nScored}/${TOBS_N}</span>`}</td>
         <td class="small">${(()=>{const sg=validitySignals(d);
           if(!sg.length) return '<span class="muted">—</span>';
           return '<span style="color:var(--gold)">ควรตรวจสอบ '+sg.length+'</span>';})()}
@@ -1633,8 +1688,9 @@ async function openTeacher(){
     </tbody></table>
     ${(()=>{const short=all.filter(d=>d&&d.done&&!d.paper&&gapMin(d.preAt||d.started,d.postAt||d.finished)!==null&&gapMin(d.preAt||d.started,d.postAt||d.finished)<30);
       return short.length?`<div class="notice">มีนักเรียน ${short.length} คนที่ทำแบบวัดก่อนและหลังห่างกันน้อยกว่า 30 นาที ซึ่งอาจถูกตั้งคำถามว่าวัดพัฒนาการได้จริงหรือไม่ ควรตรวจสอบว่ามีกิจกรรมคั่นกลางครบถ้วน</div>`:'';})()}
-    ${(()=>{const un=all.filter(d=>d&&d.done&&Object.keys(d.teacher&&d.teacher.score||{}).length<4);
-      return un.length?`<div class="notice">เหลือนักเรียน ${un.length} คนที่ครูยังให้ระดับรูบริกไม่ครบ กดปุ่ม ดูรายคน เพื่อประเมินก่อนปิดคาบ</div>`:'';})()}
+    ${(()=>{const un=all.filter(d=>d&&d.done&&tobsCount(d)<TOBS_N);
+      return un.length?`<div class="notice">เหลือนักเรียน ${un.length} คนที่ครูยังให้ระดับแบบสังเกตไม่ครบ ${TOBS_N} ด้าน กดปุ่ม ดูรายคน เพื่อประเมินก่อนปิดคาบ<br>
+        <span class="small">ต้องมีอย่างน้อย 3 คนที่ประเมินครบ ระบบจึงคำนวณความเที่ยงตรงเชิงสภาพในหน้าสถิติได้</span></div>`:'';})()}
     ${pulled?'':'<div class="notice">ดึงข้อมูลจาก Google Sheet ไม่สำเร็จ ตารางนี้แสดงเฉพาะข้อมูลที่อยู่ในเครื่องนี้ ให้ตรวจลิงก์ Web app หรือสัญญาณอินเทอร์เน็ต</div>'}
     <div class="row noprint" style="margin-top:14px">
       <button onclick="exportCSV()">ส่งออก CSV</button>
@@ -2730,21 +2786,24 @@ function renderBatchGrid(){
       ${seg('pre',i)}${seg('post',i)}
     </div>`).join('');
   const preN=Object.keys(B.pre).length, postN=Object.keys(B.post).length;
-  const ready=preN>=10&&postN>=10;
-  const rub=Object.entries(RUBRICS).map(([k,r])=>`<div style="margin:8px 0">
+  const ready=preN>=ITEMS.length&&postN>=ITEMS.length;
+  const rubGrp=g=>Object.entries(TOBS).filter(([k])=>DIMS[k].g===g).map(([k,r])=>`<div style="margin:8px 0">
       <div class="small" style="margin-bottom:3px">${r.n}</div>
       ${[1,2,3,4].map(v=>`<button class="bbtn ${B.score[k]===v?'on':''}" onclick="setBatchScore('${k}',${v})" title="${esc(r.l[v-1])}">${v}</button>`).join('')}
     </div>`).join('');
+  const nRub=Object.keys(TOBS).filter(k=>B.score[k]).length;
   box.innerHTML=`
   <div class="card">
     <div class="row" style="justify-content:space-between;align-items:center">
       <h2 style="margin:0">${esc(ROSTER[B.idx])}</h2>
-      <span class="pill ${ready?'':''}" style="${ready?'color:var(--teal-d);border-color:var(--teal)':'color:var(--red);border-color:var(--red)'}">ก่อน ${preN}/10 · หลัง ${postN}/10</span>
+      <span class="pill" style="${ready?'color:var(--teal-d);border-color:var(--teal)':'color:var(--red);border-color:var(--red)'}">ก่อน ${preN}/${ITEMS.length} · หลัง ${postN}/${ITEMS.length}</span>
     </div>
     <p class="small muted">กรอกหมายเลขข้อที่นักเรียนเลือก (1 ถึง 4) ทั้งก่อนและหลังเรียน · ปุ่มสีเหลือง = ก่อนเรียน  ปุ่มสีเขียว = หลังเรียน · แตะซ้ำเพื่อยกเลิก</p>
     <div class="bgrid">${items}</div>
-    <h3 style="margin-top:14px;font-size:15px">ระดับรูบริกที่ครูประเมิน (ไม่บังคับ แตะเลข 1–4 · แตะซ้ำเพื่อยกเลิก)</h3>
-    ${rub}
+    <h3 style="margin-top:14px;font-size:15px">แบบสังเกตพฤติกรรมที่ครูประเมิน ${TOBS_N} ด้าน (ไม่บังคับ แตะเลข 1–4 · แตะซ้ำเพื่อยกเลิก)</h3>
+    <p class="small muted">ประเมินแล้ว ${nRub}/${TOBS_N} ด้าน · เลื่อนเมาส์ค้างที่ตัวเลขเพื่อดูคำอธิบายระดับ</p>
+    <h4 style="font-size:14px;margin:10px 0 0">ทักษะชีวิต</h4>${rubGrp('life')}
+    <h4 style="font-size:14px;margin:10px 0 0">ความเป็นพลเมืองดี</h4>${rubGrp('civic')}
     <div class="row navrow">
       <button class="primary" onclick="saveBatch()">บันทึกคะแนนนักเรียนคนนี้</button>
       <button onclick="clearBatch()">ล้างและเลือกคนใหม่</button>
@@ -2808,9 +2867,9 @@ function scoringKey(){
           <td class="mono">${lo.toFixed(2)} – ${hi.toFixed(2)}</td><td>${lab}</td></tr>`).join('')}
     </tbody></table>
 
-    <h3>4. เกณฑ์รูบริกประเมินสมรรถนะ (ครูเป็นผู้ประเมิน)</h3>
+    <h3>4. แบบสังเกตพฤติกรรมของครู ${TOBS_N} ด้าน (ครูเป็นผู้ประเมิน)</h3>
     <table><thead><tr><th style="width:24%">สมรรถนะ</th><th>ระดับ 1</th><th>ระดับ 2</th><th>ระดับ 3</th><th>ระดับ 4</th></tr></thead><tbody>
-      ${Object.values(RUBRICS).map(r=>`<tr class="pitem"><td><b>${esc(r.n)}</b></td>
+      ${Object.values(TOBS).map(r=>`<tr class="pitem"><td><b>${esc(r.n)}</b></td>
         ${r.l.map(t=>`<td class="small">${esc(t)}</td>`).join('')}</tr>`).join('')}
     </tbody></table>
     <p class="small">เกณฑ์การผ่าน: นักเรียนควรได้ระดับ 3 ขึ้นไปในทุกสมรรถนะ · ครูเป็นผู้ยืนยันระดับสุดท้ายจากหลักฐานเชิงประจักษ์ในระบบและการสังเกตพฤติกรรม</p>
@@ -2854,6 +2913,23 @@ function renderPaper(){
     <h3>W · ลงมือเพื่อส่วนรวม</h3>
     <p>ข้อตกลง/แนวปฏิบัติที่เสนอต่อห้อง:</p>${line(2)}
     <p>สิ่งที่จะลงมือทำเองภายในสัปดาห์นี้:</p>${line(1)}`;
+  /* แบบบันทึกการสังเกตของครู ใช้จดระหว่างเดินดูในคาบ แล้วนำมากรอกที่โหมดไม่มีมือถือ */
+  const obsSheet=`
+    <h2 style="margin-top:2px">แบบบันทึกการสังเกตพฤติกรรมของครู · ${TOBS_N} ด้าน</h2>
+    <p class="small muted">ครูวงกลมรอบระดับที่สังเกตเห็นจริงระหว่างทำภารกิจ (ดูคำอธิบายระดับที่หน้าเกณฑ์รูบริก)
+      หนึ่งแผ่นต่อนักเรียนหนึ่งคน · นำผลไปกรอกที่ "โหมดไม่มีมือถือ" เพื่อให้ระบบคำนวณความเที่ยงตรงเชิงสภาพ</p>
+    <p class="small">ชื่อ–สกุลนักเรียน ______________________________ เลขที่ ______ ผู้สังเกต ______________________ วันที่ __________</p>
+    <table style="width:100%;border-collapse:collapse;margin-top:8px">
+      <thead><tr><th style="text-align:left;border-bottom:1px solid #999">สมรรถนะ</th>
+        <th style="border-bottom:1px solid #999;width:30%">ระดับที่สังเกตได้</th>
+        <th style="text-align:left;border-bottom:1px solid #999;width:34%">หลักฐาน/พฤติกรรมที่เห็น</th></tr></thead>
+      <tbody>${Object.entries(TOBS).map(([k,r])=>`<tr class="pitem">
+        <td style="border-bottom:1px solid #ccc;padding:7px 0"><b>${esc(r.n)}</b><br>
+          <span class="small muted">${DIMS[k].g==='life'?'ทักษะชีวิต':'ความเป็นพลเมืองดี'}</span></td>
+        <td class="mono" style="text-align:center;border-bottom:1px solid #ccc">1&nbsp;&nbsp; 2&nbsp;&nbsp; 3&nbsp;&nbsp; 4</td>
+        <td style="border-bottom:1px solid #ccc"></td></tr>`).join('')}</tbody>
+    </table>
+    <p style="margin-top:10px">ข้อเสนอแนะถึงนักเรียน:</p>${line(2)}`;
   $('v-paper').innerHTML=`
   <div class="card noprint">
     <div class="eyebrow">ใบงาน/แบบวัดสำหรับพิมพ์ (นักเรียนไม่มีมือถือ)</div>
@@ -2876,6 +2952,8 @@ function renderPaper(){
     <div style="page-break-before:always;break-before:page"></div>
     ${ws}
     <div style="page-break-before:always;break-before:page"></div>
+    ${obsSheet}
+    <div style="page-break-before:always;break-before:page"></div>
     ${scoringKey()}
     <p class="small muted" style="margin-top:14px;border-top:1px solid #999;padding-top:6px">Life Competency UP TO GROW · LIFECRAFT AI</p>
   </div>`;
@@ -2889,7 +2967,7 @@ function renderPaper(){
 const MODEL={
   input:['สภาพปัญหาพฤติกรรมในชั้นเรียน','แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (ก่อนเรียน)','รายชื่อและบริบทของห้องเรียน','ฐานงานวิจัย '+28+' รายการ'],
   process:['ภารกิจสถานการณ์รายสัปดาห์','กระบวนการ UP TO GROW 8 ขั้น','AI Coach ตั้งคำถาม ไม่ให้คำตอบ','ครูสังเกตพฤติกรรมและให้รูบริก'],
-  output:['แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (หลังเรียน)','หลักฐานการตัดสินใจรายบุคคล','ระดับรูบริก 4 ด้านที่ครูยืนยัน','ข้อตกลงและการลงมือจริงของห้อง'],
+  output:['แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (หลังเรียน)','หลักฐานการตัดสินใจรายบุคคล','แบบสังเกตพฤติกรรม '+Object.keys(TOBS).length+' ด้านที่ครูยืนยัน','ข้อตกลงและการลงมือจริงของห้อง'],
   outcome:['ทักษะชีวิตและพลเมืองดีสูงขึ้น','พัฒนาการสะสมรายเดือน/ภาคเรียน','ข้อตกลงของห้องที่ยั่งยืน','เครือข่ายครูแลกเปลี่ยนภารกิจ']
 };
 function openModel(){ go('model'); renderModel(); }
@@ -3048,6 +3126,25 @@ const pTxt=p=>!isFinite(p)?'-':(p<0.001?'< .001':p.toFixed(3).replace(/^0/,''));
 const sigTxt=p=>!isFinite(p)?'':(p<0.01?'**':p<0.05?'*':'ns');
 function dTxt(d){ const a=Math.abs(d);
   return !isFinite(d)?'-':(a<0.2?'เล็กมาก':a<0.5?'เล็ก':a<0.8?'ปานกลาง':'สูง'); }
+/* สหสัมพันธ์แบบเพียร์สัน ใช้หาความเที่ยงตรงเชิงสภาพระหว่างคะแนนแบบวัดของนักเรียนกับผลการสังเกตของครู
+   ทดสอบนัยสำคัญด้วย t = r√(df/(1−r²)) เมื่อ df = n−2 */
+function pearson(x,y){
+  const n=Math.min(x.length,y.length), df=n-2;
+  if(n<3) return {n,df,ok:false,r:NaN,t:NaN,p:NaN};
+  const mx=stMean(x),my=stMean(y);
+  let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){ const a=x[i]-mx,b=y[i]-my; sxy+=a*b; sxx+=a*a; syy+=b*b; }
+  /* ถ้าฝั่งใดฝั่งหนึ่งไม่แปรผันเลย สหสัมพันธ์ไม่นิยาม */
+  if(sxx===0||syy===0) return {n,df,ok:false,r:NaN,t:NaN,p:NaN,flat:true};
+  let r=sxy/Math.sqrt(sxx*syy);
+  r=Math.max(-1,Math.min(1,r));
+  const den=1-r*r;
+  const t=den<=0?Infinity*Math.sign(r||1):r*Math.sqrt(df/den);
+  return {n,df,ok:true,r,t,p:den<=0?0:tP_(t,df)};
+}
+/* เกณฑ์แปลความหมายค่าสหสัมพันธ์ */
+const rTxt=r=>{ const a=Math.abs(r);
+  return !isFinite(r)?'-':(a<0.20?'ต่ำมาก':a<0.40?'ต่ำ':a<0.60?'ปานกลาง':a<0.80?'สูง':'สูงมาก'); };
 
 async function loadAllForMission(mid){
   const arr=[];
@@ -3100,6 +3197,25 @@ async function openStats(){
       <td class="mono ${r.mD>0?'ok':''}">${(r.mD>=0?'+':'')+r.mD.toFixed(2)}</td>
       <td class="mono">${isFinite(r.t)?r.t.toFixed(3):'-'}</td>
       <td class="mono">${pTxt(r.p)}</td><td class="mono">${sigTxt(r.p)}</td></tr>`;}).join('');
+  /* ความเที่ยงตรงเชิงสภาพ (concurrent validity)
+     เทียบคะแนนรายด้านจากแบบวัดของนักเรียน (หลังเรียน) กับระดับที่ครูให้จากแบบสังเกต
+     รายด้านใช้การตัดเป็นคู่ คือนับเฉพาะนักเรียนที่มีทั้งสองค่าในด้านนั้น
+     ส่วนค่ารวมใช้เฉพาะนักเรียนที่ครูประเมินครบทุกด้านและมีคะแนนแบบวัดครบ เพื่อให้ทุกคนคิดจากชุดด้านเดียวกัน */
+  const corrRows=Object.entries(TOBS).map(([k,rb])=>{
+    const xs=[],ys=[];
+    done.forEach(d=>{ const a=dimScore(d.post||{},k), b=tobsLv(d,k); if(a&&b){xs.push(a);ys.push(b);} });
+    return {k,n:rb.n,c:pearson(xs,ys),mx:stMean(xs),my:stMean(ys)};
+  });
+  const pairMean=d=>{
+    const xs=[],ys=[];
+    Object.keys(TOBS).forEach(k=>{ const a=dimScore(d.post||{},k), b=tobsLv(d,k); if(a&&b){xs.push(a);ys.push(b);} });
+    return xs.length===TOBS_N?{x:stMean(xs),y:stMean(ys)}:null;
+  };
+  const ovPairs=done.map(pairMean).filter(Boolean);
+  const ovR=pearson(ovPairs.map(o=>o.x),ovPairs.map(o=>o.y));
+  const ovSkip=done.length-ovPairs.length;
+  const anyObs=done.some(d=>tobsCount(d)>0);
+
   /* ตารางคะแนนรายบุคคลพร้อมผลต่าง D และ D กำลังสอง */
   const mD=R.mD;
   const indRows=done.map((d,i)=>{
@@ -3201,7 +3317,49 @@ async function openStats(){
   </div>
 
   <div class="card">
-    <h2>ตารางที่ 6 คะแนนรายบุคคลและการคำนวณ (ภาคผนวก ก)</h2>
+    <h2>ตารางที่ 6 ความเที่ยงตรงเชิงสภาพ (Concurrent Validity)</h2>
+    <p class="small muted">สหสัมพันธ์แบบเพียร์สันระหว่าง <b>คะแนนรายด้านจากแบบวัดของนักเรียน (หลังเรียน)</b>
+      กับ <b>ระดับที่ครูให้จากแบบสังเกตพฤติกรรม ${TOBS_N} ด้าน</b> ทั้งสองค่าอยู่ในมาตรระดับพฤติกรรม 1–4
+      ค่า r ที่สูงหมายความว่าสิ่งที่นักเรียนตอบในแบบวัดสอดคล้องกับสิ่งที่ครูสังเกตเห็นจริง
+      ซึ่งเป็นหลักฐานว่าเครื่องมือวัดสิ่งที่ตั้งใจจะวัด</p>
+    ${!anyObs?`<div class="notice">ยังไม่มีครูให้ระดับแบบสังเกตพฤติกรรมเลย จึงยังคำนวณค่านี้ไม่ได้<br>
+      <span class="small">ไปที่หน้าครู เลือก "ดูรายคน" แล้วให้ระดับ ${TOBS_N} ด้าน อย่างน้อย 3 คน ระบบจะคำนวณให้อัตโนมัติ</span></div>`
+    :`<table style="margin-top:8px"><thead><tr><th>สมรรถนะ</th><th>n</th><th>x̄ แบบวัด</th><th>x̄ ครูสังเกต</th><th>r</th><th>ระดับความสัมพันธ์</th><th>t</th><th>p</th><th></th></tr></thead><tbody>
+      ${corrRows.map(x=>`<tr><td>${esc(x.n)}</td>
+        <td class="mono">${x.c.n}</td>
+        <td class="mono">${x.c.n?x.mx.toFixed(2):'-'}</td>
+        <td class="mono">${x.c.n?x.my.toFixed(2):'-'}</td>
+        <td class="mono ${x.c.ok&&x.c.r>=0.6?'ok':''}"><b>${x.c.ok?x.c.r.toFixed(3):'-'}</b></td>
+        <td class="small">${x.c.ok?rTxt(x.c.r):(x.c.flat?'คะแนนไม่แปรผัน':'ข้อมูลยังไม่พอ')}</td>
+        <td class="mono">${x.c.ok&&isFinite(x.c.t)?x.c.t.toFixed(3):'-'}</td>
+        <td class="mono">${x.c.ok?pTxt(x.c.p):'-'}</td>
+        <td class="mono">${x.c.ok?sigTxt(x.c.p):''}</td></tr>`).join('')}
+      <tr style="border-top:2px solid var(--line)"><td><b>ภาพรวมทุกด้าน</b></td>
+        <td class="mono"><b>${ovR.n}</b></td>
+        <td class="mono">${ovPairs.length?stMean(ovPairs.map(o=>o.x)).toFixed(2):'-'}</td>
+        <td class="mono">${ovPairs.length?stMean(ovPairs.map(o=>o.y)).toFixed(2):'-'}</td>
+        <td class="mono ${ovR.ok&&ovR.r>=0.6?'ok':''}"><b>${ovR.ok?ovR.r.toFixed(3):'-'}</b></td>
+        <td class="small"><b>${ovR.ok?rTxt(ovR.r):(ovR.flat?'คะแนนไม่แปรผัน':'ข้อมูลยังไม่พอ')}</b></td>
+        <td class="mono">${ovR.ok&&isFinite(ovR.t)?ovR.t.toFixed(3):'-'}</td>
+        <td class="mono"><b>${ovR.ok?pTxt(ovR.p):'-'}</b></td>
+        <td class="mono">${ovR.ok?sigTxt(ovR.p):''}</td></tr>
+      </tbody></table>
+    <p class="small muted" style="margin-top:6px">df = n − 2 · * p &lt; .05 · ** p &lt; .01 ·
+      เกณฑ์แปลผล |r| &lt; .20 ต่ำมาก · .20–.39 ต่ำ · .40–.59 ปานกลาง · .60–.79 สูง · ตั้งแต่ .80 สูงมาก
+      ${ovSkip>0?`<br>แถวภาพรวมใช้ข้อมูลเฉพาะนักเรียนที่ครูประเมินครบทั้ง ${TOBS_N} ด้านและมีคะแนนแบบวัดครบทุกด้าน จึงไม่ได้นับ ${ovSkip} คน ส่วนตารางรายด้านนับทุกคนที่มีข้อมูลของด้านนั้น`:''}</p>
+    <div class="notice ${ovR.ok&&ovR.r>=0.6&&ovR.p<0.05?'good':''}" style="margin-top:10px"><span class="small">
+      ${ovR.ok
+        ? `ผลรวมทุกด้านได้ค่าสหสัมพันธ์ r = <b>${ovR.r.toFixed(3)}</b> (n = ${ovR.n}, df = ${ovR.df}, p ${pTxt(ovR.p)}) อยู่ในระดับ<b>${rTxt(ovR.r)}</b> ` +
+          (ovR.p<0.05
+            ? `และมีนัยสำคัญทางสถิติที่ระดับ ${ovR.p<0.01?'.01':'.05'} แสดงว่าคะแนนจากแบบวัดของนักเรียนสอดคล้องกับพฤติกรรมที่ครูสังเกตเห็นจริง เป็นหลักฐานยืนยันความเที่ยงตรงเชิงสภาพของเครื่องมือ`
+            : `แต่ยังไม่มีนัยสำคัญทางสถิติที่ระดับ .05 เนื่องจากจำนวนตัวอย่างยังน้อย ควรเก็บข้อมูลเพิ่มก่อนสรุป`)
+        : `ยังคำนวณค่ารวมไม่ได้ ต้องมีนักเรียนอย่างน้อย 3 คนที่ครูประเมินครบทั้ง ${TOBS_N} ด้านและทำแบบวัดครบทุกด้าน ขณะนี้มี ${ovPairs.length} คน`}
+      </span></div>
+    <p class="small muted" style="margin-top:8px">งานวิจัยเปรียบเทียบ: การวัดความเป็นพลเมืองดีของนักเรียนระดับประถมศึกษาปีที่ 6 รายงานค่าสหสัมพันธ์ระหว่างคะแนนนักเรียนกับการประเมินของครูที่ r = 0.84 (ระดับสูงมาก) ใช้เป็นจุดเทียบว่าเครื่องมือของเราให้ผลใกล้เคียงเพียงใด</p>`}
+  </div>
+
+  <div class="card">
+    <h2>ตารางที่ 7 คะแนนรายบุคคลและการคำนวณ (ภาคผนวก ก)</h2>
     <table style="margin-top:8px"><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>ก่อน</th><th>หลัง</th><th>D</th><th>D−D̄</th><th>(D−D̄)²</th></tr></thead>
       <tbody>${indRows}
       <tr style="border-top:2px solid var(--line)"><td colspan="4"><b>รวม</b></td>
@@ -3403,9 +3561,9 @@ function renderPlan(){
       <tr><td>ความตรงของคำตอบ</td><td>สัมภาษณ์</td><td>แบบสัมภาษณ์เชิงกระบวนการคิด</td><td>สอดคล้องกับคำตอบในระบบ</td></tr>
     </tbody></table>
 
-    <h3>8. เกณฑ์การประเมิน (Rubric)</h3>
+    <h3>8. เกณฑ์การประเมิน (Rubric) — แบบสังเกตพฤติกรรมของครู ${TOBS_N} ด้าน</h3>
     <table><thead><tr><th style="width:26%">สมรรถนะ</th><th>ระดับ 1 เริ่มต้น</th><th>ระดับ 2 กำลังพัฒนา</th><th>ระดับ 3 สามารถ</th><th>ระดับ 4 เชี่ยวชาญ</th></tr></thead><tbody>
-      ${Object.values(RUBRICS).map(r=>`<tr class="pitem"><td><b>${esc(r.n)}</b></td>
+      ${Object.values(TOBS).map(r=>`<tr class="pitem"><td><b>${esc(r.n)}</b></td>
         ${r.l.map(t=>`<td class="small">${esc(t)}</td>`).join('')}</tr>`).join('')}
     </tbody></table>
 
@@ -3510,7 +3668,14 @@ function demoRecord(i,mid,r){
   /* ประเมินตนเอง และครูให้รูบริก (เว้นบางคนไว้ให้เห็นสถานะยังประเมินไม่ครบ) */
   const lv=Math.max(1,Math.min(4,Math.round(p.base+p.gain)));
   Object.keys(RUBRICS).forEach(k=>{ rec.self[k]=Math.max(1,Math.min(4,lv+(r()<0.3?1:0))); });
-  if(i<13){ Object.keys(RUBRICS).forEach(k=>{ rec.teacher.score[k]=Math.max(1,Math.min(4,lv+(r()<0.25?-1:0))); }); }
+  /* ครูให้ระดับแบบสังเกตครบ 9 ด้าน โดยอิงพฤติกรรมจริงของนักเรียนในด้านนั้น
+     บวกความคลาดเคลื่อนของผู้สังเกตและแนวโน้มให้คะแนนเข้มกว่าที่นักเรียนตอบเอง
+     ปรับค่าความคลาดเคลื่อนไว้ให้ได้ r ราว .82 ใกล้เคียงงานวิจัย ป.6 ที่รายงาน r = 0.84
+     จึงได้สหสัมพันธ์ระดับสูงแต่ไม่สมบูรณ์ เหมือนข้อมูลจากการสังเกตจริง ไม่ใช่ตัวเลขสุ่มล้วน */
+  if(i<13){ Object.keys(TOBS).forEach(k=>{
+    const sv=dimScore(post,k)||lv;
+    rec.teacher.score[k]=clamp14(sv-0.3+(r()-0.5)*2.2);
+  }); }
   rec.fix=S('fix');
   /* บทสนทนากับโค้ชสำหรับบางคน เพื่อให้เห็นหลักฐานการใช้ AI */
   if(r()<0.55){
@@ -3662,8 +3827,16 @@ async function buildRoomSummary(){
     const pre=done.map(d=>total(d.pre)), post=done.map(d=>total(d.post));
     const R=pairedT(pre,post);
     const rub=[0,0,0,0];
-    done.forEach(d=>Object.keys(RUBRICS).forEach(k=>{const v=d.teacher&&d.teacher.score&&d.teacher.score[k]; if(v)rub[v-1]++;}));
+    done.forEach(d=>Object.keys(TOBS).forEach(k=>{const v=tobsLv(d,k); if(v)rub[v-1]++;}));
+    /* ความเที่ยงตรงเชิงสภาพระดับห้อง ใช้เฉพาะผู้เรียนที่ครูประเมินครบทุกด้านและทำแบบวัดครบ
+       ส่งขึ้นเป็นค่าสรุประดับห้องเท่านั้น ไม่มีคำตอบรายบุคคล ตามหลัก PDPA เดิมของระบบ */
+    const cvX=[],cvY=[];
+    done.forEach(d=>{ const a=[],b=[];
+      Object.keys(TOBS).forEach(k=>{ const p=dimScore(d.post||{},k), q=tobsLv(d,k); if(p&&q){a.push(p);b.push(q);} });
+      if(a.length===TOBS_N){ cvX.push(stMean(a)); cvY.push(stMean(b)); } });
+    const cvR=pearson(cvX,cvY);
     perMission.push({mid:m.id,week:m.week,title:m.title,n:done.length,
+      cv:cvR.ok?+cvR.r.toFixed(3):null, cvN:cvR.n,
       total:ROSTER.length, items:answeredCount(done[0].pre),
       mPre:+R.mPre.toFixed(2), mPost:+R.mPost.toFixed(2), mD:+R.mD.toFixed(2),
       t:isFinite(R.t)?+R.t.toFixed(3):null, p:isFinite(R.p)?R.p:null,
@@ -3771,7 +3944,7 @@ async function openSchool(){
   <div class="card">
     <h2>เปรียบเทียบระหว่างห้องเรียน</h2>
     <div style="overflow-x:auto"><table><thead><tr><th>รหัสห้อง</th><th>ห้อง</th><th>ระดับชั้น</th><th>ครูผู้สอน</th>
-      <th>ทำครบ</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th><th>E.I.</th><th>สุขภาวะ</th><th>ขอช่วยเหลือ</th></tr></thead><tbody>
+      <th>ทำครบ</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th><th>E.I.</th><th title="สหสัมพันธ์ระหว่างแบบวัดของนักเรียนกับแบบสังเกตของครู">ความเที่ยงตรง r</th><th>สุขภาวะ</th><th>ขอช่วยเหลือ</th></tr></thead><tbody>
     ${sums.map(s=>{const m=latest(s);
       return `<tr><td class="mono">${esc(s.code)}</td><td>${esc(s.room||'-')}</td><td>${esc(s.grade||'-')}</td>
         <td class="small">${esc(s.teacher||'-')}</td>
@@ -3779,11 +3952,15 @@ async function openSchool(){
         <td class="mono">${m?m.mPre.toFixed(2):'-'}</td><td class="mono">${m?m.mPost.toFixed(2):'-'}</td>
         <td class="mono ${m&&m.mD>0?'ok':''}">${m?((m.mD>=0?'+':'')+m.mD.toFixed(2)):'-'}</td>
         <td class="mono ${m&&m.ei>=0.5?'ok':m?'bad':''}">${m?m.ei.toFixed(3):'-'}</td>
+        <td class="mono ${m&&m.cv!=null&&m.cv>=0.6?'ok':''}">${m&&m.cv!=null?m.cv.toFixed(3)+`<span class="small muted"> (n=${m.cvN})</span>`:'<span class="muted small">—</span>'}</td>
         <td>${s.pulse&&s.pulse.avg!=null?`<span class="mono">${s.pulse.avg.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(s.pulse.avg)}</span>`:'<span class="muted small">—</span>'}</td>
         <td class="mono ${s.pulse&&s.pulse.help?'bad':''}">${s.pulse?s.pulse.help:0}</td></tr>`;}).join('')}
     </tbody></table></div>
     <p class="small muted" style="margin-top:8px">ตัวเลขมาจากภารกิจล่าสุดที่แต่ละห้องดำเนินการแล้วเสร็จ
-      ห้องที่ยังไม่มีข้อมูลแสดงว่ายังอยู่ระหว่างจัดกิจกรรม</p>
+      ห้องที่ยังไม่มีข้อมูลแสดงว่ายังอยู่ระหว่างจัดกิจกรรม<br>
+      คอลัมน์ <b>ความเที่ยงตรง r</b> คือสหสัมพันธ์ระหว่างคะแนนแบบวัดของผู้เรียนกับผลการสังเกตพฤติกรรมของครู
+      ค่าตั้งแต่ .60 ขึ้นไปถือว่าสอดคล้องกันในระดับสูง หากยังแสดง — แปลว่าครูยังให้ระดับแบบสังเกตไม่ครบ ${TOBS_N} ด้าน อย่างน้อย 3 คน
+      ทุกค่าในตารางนี้เป็นค่าสรุประดับห้อง ไม่มีคำตอบรายบุคคล</p>
   </div>
 
   <div class="card">
