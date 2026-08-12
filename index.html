@@ -118,6 +118,17 @@ tr.click:hover{background:var(--panel2);cursor:pointer}
 #body .card>.row:last-of-type,#v-test .card>.row:nth-last-of-type(1){position:sticky;bottom:0;z-index:5;
   padding:12px 0 4px;background:linear-gradient(180deg,#ffffff00,var(--panel) 35%)}
 .bad-field{border-color:var(--red)!important;box-shadow:0 0 0 3px #e4572e33}
+/* หน้าเลือกบทบาท: หน้าแรกสุดของโปรแกรม */
+body.rolev .navbar{display:none}
+.rolegrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.rolebtn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 10px;
+  min-height:120px;border:2px solid var(--line);border-radius:14px;background:var(--panel);
+  cursor:pointer;font-size:16px;justify-content:center}
+.rolebtn:hover{border-color:var(--teal)}
+.rolebtn.on{border-color:var(--teal);background:var(--bg2);box-shadow:0 0 0 3px #17a58933}
+.rolebtn .ri{font-size:30px;line-height:1}
+@media(max-width:560px){.rolegrid{grid-template-columns:1fr}.rolebtn{min-height:72px;flex-direction:row;justify-content:flex-start;padding:12px 16px}
+  .rolebtn .ri{font-size:24px}}
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
 .rcard{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;
   padding:12px;background:var(--soft);cursor:pointer;transition:.15s}
@@ -401,7 +412,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
     <p class="small muted" style="margin:4px 0 0">แตะปุ่มที่ครูบอก ระบบจะจำที่ค้างไว้ให้เสมอ</p>
     <div class="hgrid">
       <button class="htile acc" onclick="openDaily()"><span class="ic">📅</span>
-        <b>ภารกิจวันนี้</b><small>ใช้เวลา 5 นาที · จันทร์ถึงศุกร์</small></button>
+        <b>ภารกิจวันนี้</b><small>ครบ 8 ขั้น 10 นาที · จันทร์ถึงศุกร์</small></button>
       <button class="htile" onclick="openWeekMissions()"><span class="ic">🎯</span>
         <b>ภารกิจสัปดาห์นี้</b><small>สถานการณ์เต็มรูปแบบ 8 ขั้น</small></button>
       <button class="htile" onclick="openPulse()"><span class="ic">💚</span>
@@ -474,6 +485,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <section id="v-setup2" class="hide"></section>
 <section id="v-interview" class="hide"></section>
 <section id="v-lock" class="hide"></section>
+<section id="v-role" class="hide"></section>
 <section id="v-share" class="hide"></section>
 <section id="v-batch" class="hide"></section>
 <section id="v-paper" class="hide"></section>
@@ -827,9 +839,10 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar(); navClose();
+  document.body.classList.toggle('rolev',v==='role');
   if(v==='home') renderMissionList();}
 
 /* ===== แถบเมนูบนสุด =====
@@ -838,7 +851,7 @@ function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window
 const NAV_MENUS={
   mission:[
     {h:'ภารกิจ 4 ระดับ · ระดับล่างไหลขึ้นเป็นระดับบน'},
-    {i:'📅',t:'ภารกิจรายวัน',d:'จันทร์–ศุกร์ ตามปฏิทิน วันละ 5 นาที',fn:"needTeacher(openDayPlan)"},
+    {i:'📅',t:'ภารกิจรายวัน',d:'จันทร์–ศุกร์ ตามปฏิทิน ครบ 8 ขั้น วันละ 10 นาที',fn:"needTeacher(openDayPlan)"},
     {i:'🗓️',t:'ภารกิจรายสัปดาห์',d:'สรุปจากภารกิจรายวัน 5 วัน',fn:"needTeacher(()=>openLevel('week'))"},
     {i:'📆',t:'ภารกิจรายเดือน',d:'สรุปจากภารกิจรายสัปดาห์ 4 สัปดาห์',fn:"needTeacher(()=>openLevel('month'))"},
     {i:'🎓',t:'ภารกิจรายเทอม',d:'สรุปจากภารกิจรายเดือน 4–5 เดือน',fn:"needTeacher(()=>openLevel('term'))"},
@@ -1316,7 +1329,9 @@ function filterRoster(q){
   q=(q||'').trim();
   ROSTER.forEach((n,i)=>{const c=$('rc'+i); if(c) c.style.display=(!q||n.includes(q))?'':'none';});
 }
-async function startStudent(i){
+/* ทุกจุดเข้าภารกิจของนักเรียนต้องผ่านประตูเช็คอินใจก่อน (needPulse ดูโมดูลเช็คอินใจ) */
+function startStudent(i){ needPulse(i,()=>startStudent_(i)); }
+async function startStudent_(i){
   const raw=await S.get(mKey(i),true);
   if(raw){try{s=JSON.parse(raw);curMission=(s.missionId!==undefined)?s.missionId:curMission;}catch(e){s=blank(i);}}else s=blank(i);
   $('whoami').textContent=s.name+' · '+MIS().title; $('whoami').classList.remove('empty');
@@ -2186,7 +2201,9 @@ function renderQPick(){
       `<div class="rcard" onclick="qOpen(${i})"><div class="no">${i+1}</div><div><div class="nm">${n}</div></div></div>`).join('')}</div>
     <div class="row" style="margin-top:16px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
 }
-async function qOpen(i){
+function qOpen(i){ needPulse(i,()=>qOpen_(i)); }
+async function qOpen_(i){
+  go('qstudent'); /* กลับจากประตูเช็คอินใจต้องสลับ view กลับมาเอง */
   const raw=await S.get(qKey(QCODE,i),true);
   QS=raw?JSON.parse(raw):{idx:i,name:ROSTER[i],code:QCODE,topic:QDEF.topic,at:Date.now(),pick:null,reason:'',r0:'',r1:'',teacher:{level:0,note:''}};
   renderQForm();
@@ -2865,8 +2882,53 @@ function checkPin(){
 }
 function lockTeacher(){
   teacherUnlocked=false;
-  try{ sessionStorage.removeItem('lc:tok'); }catch(e){}
-  toast('ออกจากหน้าครูแล้ว',1); go('home'); renderMissionList();
+  try{ sessionStorage.removeItem('lc:tok'); sessionStorage.removeItem('lc:role'); }catch(e){}
+  toast('ออกจากหน้าครูแล้ว',1); go('role'); renderRole();
+}
+
+/* ================= หน้าเลือกบทบาท: ประตูแรกของโปรแกรม =================
+   เข้าจาก URL หลักต้องเลือกก่อนว่าเข้าในฐานะอะไร
+   - นักเรียน เข้าได้ทันที
+   - ครูและผู้บริหาร ใส่รหัสเดียวกัน (TEACHER_PIN) แล้วแยกปลายทางตามบทบาท
+   จำบทบาทไว้ใน sessionStorage ปิดแท็บแล้วเปิดใหม่จึงถามใหม่
+   ยกเว้นเข้าจากลิงก์ภารกิจที่ครูส่งให้ (?m=...) จะข้ามหน้านี้เข้าภารกิจทันที
+   ==================================================================== */
+function getRole(){ try{ return sessionStorage.getItem('lc:role'); }catch(e){ return null; } }
+function renderRole(sel){
+  $('v-role').innerHTML=`
+  <div class="card" style="max-width:560px;margin:34px auto">
+    <div class="eyebrow">Life Competency UP TO GROW · ${esc(LS.get('lc:cfg:school')||ROOM)}</div>
+    <h1 style="margin-top:4px">วันนี้เข้าใช้งานในฐานะอะไร</h1>
+    <p class="muted small">นักเรียนเข้าได้ทันที · ครูและผู้บริหารต้องใส่รหัสผ่านก่อน</p>
+    <div class="rolegrid">
+      <button type="button" class="rolebtn" onclick="roleStudent()">
+        <span class="ri">🎒</span><b>นักเรียน</b><span class="small muted">ทำภารกิจ · เช็คอินใจ</span></button>
+      <button type="button" class="rolebtn ${sel==='teacher'?'on':''}" onclick="renderRole('teacher')">
+        <span class="ri">🧑‍🏫</span><b>ครู</b><span class="small muted">ติดตาม · ประเมิน · รายงาน</span></button>
+      <button type="button" class="rolebtn ${sel==='admin'?'on':''}" onclick="renderRole('admin')">
+        <span class="ri">🏫</span><b>ผู้บริหาร</b><span class="small muted">ภาพรวมระดับโรงเรียน</span></button>
+    </div>
+    ${(sel==='teacher'||sel==='admin')?`
+    <label for="rolePin" style="margin-top:16px">รหัสผ่านสำหรับ${sel==='teacher'?'ครู':'ผู้บริหาร'}</label>
+    <input type="password" id="rolePin" placeholder="กรอกรหัสผ่าน" onkeydown="if(event.key==='Enter')rolePinOK('${sel}')">
+    <div class="row" style="margin-top:12px">
+      <button class="primary" onclick="rolePinOK('${sel}')">เข้าใช้งาน</button>
+    </div>
+    <p class="small muted" style="margin-top:10px">การป้องกันนี้เป็นระดับการใช้งานในชั้นเรียน เพื่อกันการกดเข้าโดยไม่ตั้งใจ ไม่ใช่ระบบความปลอดภัยระดับสูง</p>`:''}
+  </div>`;
+  if(sel){ setTimeout(()=>{ const e=$('rolePin'); if(e) e.focus(); },80); }
+}
+function roleStudent(){
+  try{ sessionStorage.setItem('lc:role','student'); }catch(e){}
+  go('home'); checkResume();
+}
+function rolePinOK(r){
+  const v=($('rolePin')||{}).value||'';
+  if(v.trim()!==TEACHER_PIN){ bad('rolePin','รหัสไม่ถูกต้อง กรุณาลองใหม่'); return; }
+  teacherUnlocked=true;
+  try{ sessionStorage.setItem('lc:tok','1'); sessionStorage.setItem('lc:role',r); }catch(e){}
+  if(r==='admin'){ toast('เข้าสู่โหมดผู้บริหารแล้ว',1); openSchool(); }
+  else{ toast('เข้าสู่โหมดครูแล้ว',1); go('home'); }
 }
 
 /* ---------- สร้างลิงก์ภารกิจสำหรับนักเรียน ---------- */
@@ -4588,7 +4650,7 @@ function renderDailyPick(){
   if(!td){
     $('v-daily').innerHTML=`<div class="card"><div class="eyebrow">ภารกิจรายวัน</div>
       <h2>วันนี้เป็นวันพัก</h2>
-      <p class="muted">ภารกิจรายวันมีวันจันทร์ถึงศุกร์ วันละประมาณ 5 นาที แล้วพบกันวันจันทร์</p>
+      <p class="muted">ภารกิจรายวันมีวันจันทร์ถึงศุกร์ วันละประมาณ 10 นาที แล้วพบกันวันจันทร์</p>
       <div class="row"><button onclick="go('home')">กลับหน้าแรก</button></div></div>`;
     return;
   }
@@ -4596,7 +4658,7 @@ function renderDailyPick(){
   $('v-daily').innerHTML=`<div class="card">
     <div class="eyebrow">ภารกิจรายวัน · สัปดาห์ ${esc(wk)}</div>
     <h2>${dd[3]} วัน${['','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'][td]} · ${dd[2]}</h2>
-    <p class="small muted">วันละ 5 นาที ครบสัปดาห์ = วงจรพลเมืองครบ 1 รอบ · ด้านเป้าหมายสัปดาห์นี้: <b>${DIMS[d1].n}</b> และ <b>${DIMS[d2].n}</b></p>
+    <p class="small muted">วันละ 10 นาที ครบกระบวนการ UP TO GROW ทั้ง 8 ขั้น · ครบสัปดาห์ = วงจรพลเมืองครบ 1 รอบ · ด้านเป้าหมายสัปดาห์นี้: <b>${DIMS[d1].n}</b> และ <b>${DIMS[d2].n}</b></p>
     <h3 style="margin-top:10px">แตะชื่อของตัวเอง</h3>
     <div class="roster">${ROSTER.map((n,i)=>
       `<div class="rcard" id="drc${i}" onclick="dailyOpen(${i})"><div class="no">${i+1}</div>
@@ -4611,7 +4673,9 @@ function renderDailyPick(){
       if(r.days[td]&&r.days[td].done){const c=$('drc'+i); if(c)c.classList.add('done');} }
   }));
 }
-async function dailyOpen(i){
+function dailyOpen(i){ needPulse(i,()=>dailyOpen_(i)); }
+async function dailyOpen_(i){
+  go('daily'); /* กลับจากประตูเช็คอินใจต้องสลับ view กลับมาเอง */
   const wk=dailyWeek();
   DS=(await dailyRec(wk,i,true))||dailyBlank(wk,i);
   DS.idx=i; DS.name=ROSTER[i]; DS.dims=DS.dims||dailyDims(wk);
@@ -4621,6 +4685,14 @@ async function dailyOpen(i){
   renderDailyForm();
 }
 /* จุดร่วมของทุกฟอร์ม: หัวการ์ด + จุดความคืบหน้า 5 วัน */
+/* ระหว่างทำ 8 ขั้น ใช้หัวแบบย่อบรรทัดเดียว เพื่อให้คำถามอยู่ในจอแรกโดยไม่ต้องเลื่อน
+   แถบ 8 ขั้นด้านล่างบอกความคืบหน้าอยู่แล้ว จึงไม่ต้องมีจุด 5 วันและหัวใหญ่ซ้ำ */
+function dailyHeadMini(){
+  const td=dailyToday(), dd=DAILY_DAYS[td-1];
+  const k=dailyDoneCount(DS);
+  return `<div class="eyebrow" style="margin-bottom:10px">${dd[3]} วัน${['','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'][td]} ${dd[2]}
+    · ${esc(DS.name)} · สัปดาห์นี้ทำแล้ว ${k}/5 วัน</div>`;
+}
 function dailyHead(){
   const td=dailyToday(), dd=DAILY_DAYS[td-1];
   const dots=DAILY_DAYS.map(([d,ab])=>{
@@ -4634,40 +4706,143 @@ function dailyHead(){
     <div style="margin:6px 0 2px">${dots}</div>
     <h2 style="margin-top:8px">${dd[3]} ${dd[2]}</h2>`;
 }
-/* ทุกวันใช้โครงเดียวกัน: สถานการณ์ + ตัวเลือกระดับ 1-4 + เหตุผล
-   แล้วเติมส่วนเฉพาะของวันต่อท้าย (จ ตั้งเป้า · พ หลักฐานการลงมือทำ · ศ สะท้อนและบอกต่อ)
-   ทำให้ทุกวันให้คะแนนระดับได้เหมือนกัน จึงรวมขึ้นเป็นภารกิจรายสัปดาห์ได้จริง */
+/* ===== ภารกิจรายวันเดินครบกระบวนการ UP TO GROW ทั้ง 8 ขั้น ภายใน 10 นาที =====
+   เหตุผลที่ออกแบบแบบนี้
+   1 ขั้นที่ 4 ตัดสินใจ คือ "ข้อวัดผลจริง" ใช้ระดับ 1-4 จาก DAILY_SIT เหมือนเดิมทุกประการ
+     การรวมขึ้นเป็นภารกิจรายสัปดาห์ เดือน และเทอม จึงไม่เปลี่ยนวิธีคิดเลย
+   2 อีก 7 ขั้นเป็นคำถาม "กระบวนการคิด" ไม่ใช่คำถามเนื้อเรื่อง จึงใช้กับทั้ง 30 สถานการณ์ในคลังได้
+     โดยไม่ต้องเขียนคำถามใหม่ 30 ชุด และไม่ทำให้เครื่องมือวัดปนเปื้อน
+   3 งบเวลารวม 10 นาที (DMIN) จึงให้ "แตะตอบ" เป็นหลัก
+     พิมพ์เฉพาะขั้น O ตัดสินใจ 1 ประโยค และขั้น W ของวันจันทร์ พุธ ศุกร์
+   4 ขั้น U วัดความเข้าใจว่าเรื่องนี้เป็นเรื่องหน้าที่ สิทธิ หรือกติกา = หลักฐานความสำเร็จด้านที่ 1
+     ขั้น R ถามว่าเคยเจอจริงไหมและตอนนั้นทำเหมือนที่เลือกไหม = กลไกตรวจสอบความตรง
+   5 ทุกขั้นแสดงให้เห็นว่ากำลังฝึกคุณลักษณะพลเมืองดีข้อใด และตรงกับพระบรมราโชบายด้านใด */
+const DMIN=[1.5,1,1,2.5,1,.5,1,1.5];
+const dRoyalOf=d=>Object.keys(ROYAL).filter(k=>ROYAL[k].dims.indexOf(d)>=0);
+/* กรอบความรู้ประจำสมรรถนะ ใช้เป็นตัวเลือกในขั้น U เพื่อวัดความเข้าใจเรื่องหน้าที่และสิทธิ */
+const DFRAME={
+  resp:'หน้าที่ที่เรารับผิดชอบ และผลที่ตามมาถ้าไม่ทำ',
+  hon:'ความซื่อสัตย์ และการแยกแยะว่าอะไรถูกอะไรผิด',
+  resp2:'สิทธิของคนอื่นที่เราต้องขออนุญาตและเคารพ',
+  common:'ประโยชน์ของส่วนรวมที่ต้องมาก่อนความสะดวกของตัวเอง',
+  disc:'กติกาและข้อตกลงที่ทุกคนร่วมกันตั้งไว้',
+  divers:'การยอมรับว่าคนอื่นคิดหรือเป็นต่างจากเราได้',
+  think:'การหาข้อเท็จจริงให้ชัดก่อนจะเชื่อหรือตัดสินใจ',
+  self:'การจัดการตัวเองให้ทำสิ่งที่ควรทำได้จริง',
+  comm:'การพูดคุยและทำงานร่วมกับคนอื่นให้เข้าใจตรงกัน',
+};
+/* ตัวเลือกขั้น U: กรอบที่ถูกของสถานการณ์นั้น + ตัวลวงอีก 3 ข้อ สลับตำแหน่งแบบคงที่ทั้งห้อง */
+function dUOpts(wk,td,dim){
+  const r=rng_(dailyWeekNum(wk)*31337+td*997);
+  const pool=Object.keys(DFRAME).filter(k=>k!==dim), pick=[];
+  while(pick.length<3&&pool.length) pick.push(pool.splice(Math.floor(r()*pool.length),1)[0]);
+  const all=[{t:DFRAME[dim],ok:1}].concat(pick.map(k=>({t:DFRAME[k],ok:0})));
+  for(let x=all.length-1;x>0;x--){ const y=Math.floor(r()*(x+1)), t=all[x]; all[x]=all[y]; all[y]=t; }
+  return all;
+}
+/* คำถามกระบวนการคิดของขั้นที่ 2 3 5 7 · ระดับ 1-4 ไล่จากมองแคบไปมองถึงส่วนรวมและระบบ */
+function dStepDef(n){
+  if(n===1) return {q:'ถ้าไม่มีใครทำอะไรเลย เรื่องนี้จะกระทบใครบ้าง',h:'ลองมองให้ไกลกว่าตัวเราเอง',f:'p',
+    o:[{t:'ไม่กระทบใคร เดี๋ยวก็ผ่านไปเอง',l:1},
+       {t:'กระทบแค่ตัวเราคนเดียว',l:2},
+       {t:'กระทบเพื่อนบางคนที่เกี่ยวข้องโดยตรง',l:3},
+       {t:'กระทบทั้งห้องหรือส่วนรวม แม้แต่คนที่ยังไม่รู้เรื่องด้วย',l:4}]};
+  if(n===2) return {q:'ก่อนจะตัดสินใจ เราควรรู้อะไรเพิ่มอีก',h:'ตัดสินใจจากอะไร จึงจะเรียกว่ามีหลักฐาน',f:'t',
+    o:[{t:'ไม่ต้องรู้อะไรเพิ่ม ตัดสินจากความรู้สึกได้เลย',l:1},
+       {t:'รู้ว่าเพื่อนส่วนใหญ่จะทำแบบไหน แล้วทำตามนั้น',l:2},
+       {t:'รู้ข้อเท็จจริงว่าเกิดอะไรขึ้นจริง จากคนที่อยู่ในเหตุการณ์',l:3},
+       {t:'รู้ทั้งข้อเท็จจริง และกติกาหรือข้อตกลงที่ตกลงกันไว้เรื่องนี้',l:4}]};
+  if(n===4) return {q:'ถ้าอยากให้เกิดผลจริง ควรทำร่วมกับใคร',h:'เรื่องส่วนรวมมักแก้คนเดียวไม่สำเร็จ',f:'g',
+    o:[{t:'ไม่ต้องยุ่งกับใคร ต่างคนต่างอยู่',l:1},
+       {t:'ทำคนเดียวเงียบ ๆ ไม่ต้องบอกใคร',l:2},
+       {t:'ชวนเพื่อนที่เกี่ยวข้องมาคุยกันก่อน แล้วช่วยกันทำ',l:3},
+       {t:'ชวนเพื่อนคุย และเสนอให้ห้องหรือครูรับรู้ เพื่อให้เป็นข้อตกลงร่วมกัน',l:4}]};
+  return {q:'ถ้าเจอเรื่องแบบนี้อีกครั้ง จะทำให้ดีขึ้นตรงไหน',h:'ไม่ต้องสมบูรณ์แบบ ขอแค่ดีขึ้นกว่าเดิมหนึ่งก้าว',f:'o2',
+    o:[{t:'ไม่มีอะไรต้องปรับ ทำแบบเดิมก็ได้',l:1},
+       {t:'จะกล้าพูดหรือกล้าลงมือให้เร็วกว่าเดิม',l:2},
+       {t:'จะหาข้อมูลและฟังคนอื่นให้ครบก่อนตัดสินใจ',l:3},
+       {t:'จะชวนคนอื่นร่วมด้วย เพื่อแก้ที่ต้นเหตุ ไม่ใช่แก้เฉพาะครั้งนี้',l:4}]};
+}
+/* แถบความคืบหน้า 8 ขั้น พร้อมเวลาที่เหลือโดยประมาณ */
+function dailyBar(n){
+  const left=DMIN.slice(n).reduce((a,b)=>a+b,0);
+  return `<div class="card tight" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between">
+      <span class="stepnum">ขั้นที่ ${n+1} / 8 · ${STEPS[n][0]} ${STEPS[n][1]}</span>
+      <span class="stepnum">เหลืออีกประมาณ ${left<1?'ไม่ถึง 1':Math.round(left)} นาที</span></div>
+    <div class="prog"><i style="width:${(n/8)*100}%"></i></div>
+    <div class="steps" style="margin:10px 0 0">${STEPS.map((x,i)=>
+      `<div class="st ${i<n?'done':i===n?'now':''}"><div class="l">${x[0]}</div><div class="n">${x[1]}</div></div>`).join('')}</div>
+  </div>`;
+}
 function renderDailyForm(){
   const td=dailyToday(), wk=DS.week, [d1,d2]=DS.dims, day=DS.days[td];
+  const n=Math.max(0,Math.min(7,day.st||0));
   const it=dailySit(wk,td);
-  const core=`<div class="notice"><b>สถานการณ์วันนี้</b><br><span class="small">${esc(it.s)}</span></div>
-    <h3>ถ้าเป็นเรา จะทำแบบไหน</h3>
-    <p class="small muted">ไม่มีคำตอบถูกหรือผิด และไม่มีผลต่อคะแนนเก็บ เลือกสิ่งที่จะทำจริง ๆ
-      · ข้อนี้ฝึกด้าน <b>${DIMS[it.dim].n}</b></p>
-    ${it.o.map((op,j)=>`<div class="opt ${day.pick===j?'sel':''}" onclick="dSetPick(${j},${op.l})">${esc(op.t)}</div>`).join('')}
-    <label for="dWhy">เพราะอะไรจึงเลือกแบบนั้น <span class="muted" style="font-weight:400">(1-2 ประโยค)</span></label>
-    <textarea id="dWhy" style="min-height:56px">${esc(day.why||'')}</textarea>`;
-  let extra='';
+  const sit=`<div class="notice"><b>สถานการณ์วันนี้</b><br><span class="small">${esc(it.s)}</span></div>`;
+  let body='';
+  if(n===0){
+    const ro=dRoyalOf(it.dim).map(k=>ROYAL[k].s).join(' · ');
+    const uo=dUOpts(wk,td,it.dim);
+    body=`${sit}
+      <div class="notice good"><span class="small">วันนี้กำลังฝึกคุณลักษณะพลเมืองดีด้าน <b>${DIMS[it.dim].n}</b>
+        ${ro?`<br>ตรงกับพระบรมราโชบายด้าน <b>${esc(ro)}</b>`:''}</span></div>
+      <h3>เรื่องนี้เป็นเรื่องเกี่ยวกับอะไรมากที่สุด</h3>
+      <p class="small muted">อ่านสถานการณ์ให้จบก่อน แล้วเลือกข้อที่ตรงที่สุด 1 ข้อ</p>
+      ${uo.map((o,j)=>`<div class="opt ${day.u===j?'sel':''}" onclick="dSetU(${j},${o.ok})">${esc(o.t)}</div>`).join('')}`;
+  }else if(n===1||n===2||n===4||n===6){
+    const q=dStepDef(n), cur=(day.sl&&day.slPick)?day.slPick[q.f]:undefined;
+    body=`${sit}<h3>${esc(q.q)}</h3><p class="small muted">${esc(q.h)}</p>
+      ${q.o.map((o,j)=>`<div class="opt ${cur===j?'sel':''}" onclick="dSetSL('${q.f}',${j},${o.l})">${esc(o.t)}</div>`).join('')}`;
+  }else if(n===3){
+    body=`${sit}
+      <h3>ถ้าเป็นเรา จะทำแบบไหน</h3>
+      <p class="small muted">ไม่มีคำตอบถูกหรือผิด และไม่มีผลต่อคะแนนเก็บ เลือกสิ่งที่จะทำจริง ๆ
+        · ขั้นนี้คือขั้นที่ระบบใช้วัดผล</p>
+      ${it.o.map((op,j)=>`<div class="opt ${day.pick===j?'sel':''}" onclick="dSetPick(${j},${op.l})">${esc(op.t)}</div>`).join('')}
+      <label for="dWhy">เพราะอะไรจึงเลือกแบบนั้น <span class="muted" style="font-weight:400">(1-2 ประโยค)</span></label>
+      <textarea id="dWhy" style="min-height:56px">${esc(day.why||'')}</textarea>`;
+  }else if(n===5){
+    const R=[['same','เคยเจอ และตอนนั้นทำเหมือนที่เลือกวันนี้'],
+             ['diff','เคยเจอ แต่ตอนนั้นทำต่างจากที่เลือกวันนี้'],
+             ['never','ยังไม่เคยเจอเรื่องแบบนี้']];
+    body=`<h3>ย้อนดูตัวเอง</h3>
+      <p class="small muted">ตอบตามจริงได้เลย ข้อนี้ไม่มีถูกผิด และไม่มีผลต่อคะแนน
+        การตอบว่าเคยทำต่างจากที่เลือก คือความกล้าที่ครูอยากเห็นมากที่สุด</p>
+      ${R.map(([v,t],j)=>`<div class="opt ${day.rSame===v?'sel':''}" onclick="dSetR('${v}',${j})">${esc(t)}</div>`).join('')}`;
+  }else{
+    body=dailyWStep(td,wk,d1,d2,day);
+  }
+  $('v-daily').innerHTML=`<div class="card">${dailyHeadMini()}${dailyBar(n)}${body}
+    <div class="row navrow" style="margin-top:16px">
+      <button onclick="dBack()">${n===0?'ย้อนกลับ':'ขั้นก่อนหน้า'}</button>
+      <button class="primary" onclick="dNext()">${n===7?'บันทึกภารกิจวันนี้':'ถัดไป'}</button>
+    </div></div>`;
+}
+/* ขั้นที่ 8 W เพื่อส่วนรวม · เนื้อหาต่างกันตามวัน แต่ทุกวันจบด้วยการผูกมัดให้ลงมือทำจริง */
+function dailyWStep(td,wk,d1,d2,day){
   if(td===1){
     const goals=[d1,d2].map(k=>DAILY_ACTS[k][dailyPickIdx(3,wk,17)]);
-    extra=`<h3 style="margin-top:18px">ตั้งเป้าของสัปดาห์นี้ · เลือกเอง 1 อย่าง</h3>
+    return `<h3>ตั้งเป้าของสัปดาห์นี้ · เลือกเอง 1 อย่าง</h3>
     <p class="small muted">เป้าเล็ก ๆ ที่ตั้งใจทำจริงภายในสัปดาห์นี้ (จะกลับมาถามวันพุธและวันศุกร์)</p>
     ${goals.map((g,j)=>`<div class="opt gopt ${day.goalPick===j?'sel':''}" onclick="dSetGoal(${j})">${esc(g)}</div>`).join('')}
     <div class="opt gopt ${day.goalPick===2?'sel':''}" onclick="dSetGoal(2)">ตั้งเองแบบอื่น (พิมพ์ด้านล่าง)</div>
     <label for="dGoalTxt" class="small">เป้าที่ตั้ง (แก้ข้อความได้)</label>
     <textarea id="dGoalTxt" style="min-height:52px">${esc(day.goalText||'')}</textarea>`;
-  }else if(td===3){
+  }
+  if(td===3){
     const goal=dailyGoalOf(DS);
-    const menu=[...DAILY_ACTS[d1],...DAILY_ACTS[d2]];
+    const menu=[].concat(DAILY_ACTS[d1],DAILY_ACTS[d2]);
     const sug=menu[dailyPickIdx(menu.length,wk,29)];
-    extra=`<h3 style="margin-top:18px">แล้ววันนี้เราลงมือทำอะไรไปจริง ๆ บ้าง</h3>
+    return `<h3>แล้ววันนี้เราลงมือทำอะไรไปจริง ๆ บ้าง</h3>
     ${goal?`<div class="notice good"><span class="small"><b>เป้าที่ตั้งไว้วันจันทร์:</b> ${esc(goal)}</span></div>`:''}
     <p class="small muted">เรื่องเล็กก็นับ ถ้ายังไม่ได้ทำ ไปทำก่อนแล้วค่อยกลับมาบันทึกก็ได้ เช่น "${esc(sug)}"</p>
     <label for="dAct">สิ่งที่ทำ</label><textarea id="dAct" style="min-height:56px">${esc(day.act||'')}</textarea>
     <label for="dActWho">ใครได้ประโยชน์ / เกิดผลอะไร</label><textarea id="dActWho" style="min-height:44px">${esc(day.who||'')}</textarea>`;
-  }else if(td===5){
+  }
+  if(td===5){
     const goal=dailyGoalOf(DS);
-    extra=`<h3 style="margin-top:18px">สรุปสัปดาห์ของตัวเอง</h3>
+    return `<h3>สรุปสัปดาห์ของตัวเอง</h3>
     ${goal?`<div class="notice good"><span class="small"><b>เป้าที่ตั้งไว้วันจันทร์:</b> ${esc(goal)}</span></div>`:''}
     <p class="small muted">ให้คะแนนตัวเองในสองด้านที่ฝึกมาทั้งสัปดาห์ · 1 เริ่มต้น · 4 เชี่ยวชาญ</p>
     ${[d1,d2].map(k=>`<div style="margin:8px 0"><div class="small">${DIMS[k].n}</div>
@@ -4683,13 +4858,31 @@ function renderDailyForm(){
     <label for="dTold" class="small" style="margin-top:8px">เล่าเรื่องอะไร ให้ใครฟัง <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
     <input id="dTold" value="${esc(day.toldWho||'')}">`;
   }
-  $('v-daily').innerHTML=`<div class="card">${dailyHead()}${core}${extra}
-    <div class="row navrow" style="margin-top:14px">
-      <button onclick="renderDailyPick()">ย้อนกลับ</button>
-      <button class="primary" onclick="dailySave()">บันทึกภารกิจวันนี้</button>
-    </div></div>`;
+  /* วันอังคารและวันพฤหัสบดี ปิดท้ายด้วยการเลือกสิ่งเล็ก ๆ ที่จะทำวันนี้จริง */
+  const a=dailyPickIdx(3,wk,td*23);
+  const menu=[DAILY_ACTS[d1][a],DAILY_ACTS[d2][a],DAILY_ACTS[d1][(a+1)%3]];
+  return `<h3>วันนี้จะทำอะไรเล็ก ๆ ที่เป็นประโยชน์กับส่วนรวมสักอย่าง</h3>
+    <p class="small muted">เลือก 1 อย่างที่ทำได้จริงก่อนกลับบ้านวันนี้ · งานเล็กที่ทำสำเร็จมีค่ากว่างานใหญ่ที่ไม่ได้เริ่ม</p>
+    ${menu.map((g,j)=>`<div class="opt gopt ${day.wPick===j?'sel':''}" onclick="dSetW(${j})">${esc(g)}</div>`).join('')}
+    <div class="opt gopt ${day.wPick===3?'sel':''}" onclick="dSetW(3)">อย่างอื่นที่คิดเอง (พิมพ์ด้านล่าง)</div>
+    <label for="dWTxt" class="small">สิ่งที่จะทำ (แก้ข้อความได้)</label>
+    <textarea id="dWTxt" style="min-height:52px">${esc(day.wTxt||'')}</textarea>`;
 }
 function dailyGoalOf(r){ const m=r.days[1]; return m&&m.goalText?m.goalText:null; }
+/* ---------- ตัวเลือกและการเดินหน้าถอยหลังระหว่างขั้น ---------- */
+const dSel=j=>document.querySelectorAll('#v-daily .opt').forEach((el,k)=>el.classList.toggle('sel',k===j));
+function dSetU(j,ok){ const day=DS.days[dailyToday()]; day.u=j; day.uOk=!!ok; dSel(j); }
+function dSetSL(f,j,l){ const day=DS.days[dailyToday()];
+  day.sl=day.sl||{}; day.slPick=day.slPick||{}; day.sl[f]=l; day.slPick[f]=j; dSel(j); }
+function dSetR(v,j){ DS.days[dailyToday()].rSame=v; dSel(j); }
+function dSetW(j){ const td=dailyToday(), day=DS.days[td], wk=DS.week, [d1,d2]=DS.dims;
+  const a=dailyPickIdx(3,wk,td*23);
+  const menu=[DAILY_ACTS[d1][a],DAILY_ACTS[d2][a],DAILY_ACTS[d1][(a+1)%3]];
+  day.wPick=j;
+  if(j<3&&$('dWTxt')) $('dWTxt').value=menu[j];
+  if($('dWTxt')) day.wTxt=$('dWTxt').value;
+  document.querySelectorAll('#v-daily .opt.gopt').forEach((el,k)=>el.classList.toggle('sel',k===j));
+}
 /* เลือกการกระทำในสถานการณ์ เก็บทั้งลำดับตัวเลือกและระดับพฤติกรรม */
 function dSetPick(j,l){
   const td=dailyToday(); const day=DS.days[td];
@@ -4704,13 +4897,14 @@ function dSetGoal(j){
   if($('dGoalTxt')) DS.days[td].goalText=$('dGoalTxt').value;
   document.querySelectorAll('#v-daily .opt.gopt').forEach((el,k)=>el.classList.toggle('sel',k===j));
 }
-/* เก็บทุกช่องพิมพ์ที่มีอยู่บนหน้าเข้าตัวแปรก่อนวาดฟอร์มใหม่
-   ไม่งั้นการแตะปุ่มให้คะแนนตัวเองจะล้างเหตุผลที่นักเรียนพิมพ์ไว้ทิ้ง */
+/* เก็บทุกช่องพิมพ์ที่มีอยู่บนหน้าเข้าตัวแปรก่อนวาดหน้าใหม่
+   ไม่งั้นการแตะปุ่มหรือการเปลี่ยนขั้นจะล้างข้อความที่นักเรียนพิมพ์ไว้ทิ้ง */
 function dGrab(){
   const td=dailyToday(); if(!DS||!DS.days[td]) return;
   const day=DS.days[td];
   if($('dWhy')) day.why=$('dWhy').value;
   if($('dGoalTxt')) day.goalText=$('dGoalTxt').value;
+  if($('dWTxt')) day.wTxt=$('dWTxt').value;
   if($('dAct')) day.act=$('dAct').value;
   if($('dActWho')) day.who=$('dActWho').value;
   if($('dLearn')) day.learn=$('dLearn').value;
@@ -4718,23 +4912,48 @@ function dGrab(){
 }
 function dSetSelf(k,v){ dGrab(); const td=dailyToday(); DS.days[td].self=DS.days[td].self||{}; DS.days[td].self[k]=v; renderDailyForm(); }
 function dSetTold(v){ dGrab(); const td=dailyToday(); DS.days[td].told=v; renderDailyForm(); }
+/* ตรวจว่าขั้นนี้ตอบครบหรือยัง คืนข้อความเตือน หรือค่าว่างถ้าผ่าน */
+function dStepCheck(n,day,td){
+  const g=f=>day.sl&&day.sl[f];
+  if(n===0&&day.u===undefined) return 'เลือกก่อนว่าเรื่องนี้เกี่ยวกับอะไรมากที่สุด';
+  if(n===1&&!g('p')) return 'เลือกว่าถ้าปล่อยไว้จะกระทบใครบ้าง';
+  if(n===2&&!g('t')) return 'เลือกว่าควรรู้อะไรเพิ่มก่อนตัดสินใจ';
+  if(n===3){ if(day.pick===undefined) return 'เลือกก่อนว่าถ้าเป็นเราจะทำแบบไหน';
+    if(!(day.why||'').trim()) return 'บอกเหตุผลสั้น ๆ ที่เลือกแบบนั้น'; }
+  if(n===4&&!g('g')) return 'เลือกว่าจะทำร่วมกับใคร';
+  if(n===5&&!day.rSame) return 'เลือกว่าเคยเจอเรื่องแบบนี้จริงไหม';
+  if(n===6&&!g('o2')) return 'เลือกว่าครั้งหน้าจะปรับตรงไหน';
+  if(n===7){
+    if(td===1&&!(day.goalText||'').trim()) return 'ตั้งเป้าของสัปดาห์ก่อน เลือกจากเมนูหรือพิมพ์เองก็ได้';
+    if(td===3&&!(day.act||'').trim()) return 'เล่าสั้น ๆ ว่าวันนี้ลงมือทำอะไร เรื่องเล็กก็นับ';
+    if((td===2||td===4)&&!(day.wTxt||'').trim()) return 'เลือกสิ่งเล็ก ๆ ที่จะทำวันนี้ 1 อย่าง';
+    if(td===5){ const [d1,d2]=DS.dims;
+      if(!day.self||!day.self[d1]||!day.self[d2]) return 'ให้คะแนนตัวเองทั้งสองด้านก่อน';
+      if(day.told===undefined) return 'เลือกก่อนว่าจะเล่าให้คนที่บ้านฟังไหม'; } }
+  return '';
+}
+function dNext(){
+  const td=dailyToday(); if(!td||!DS) return;
+  dGrab(); const day=DS.days[td], n=Math.max(0,Math.min(7,day.st||0));
+  const err=dStepCheck(n,day,td); if(err){ toast(err); return; }
+  if(n>=7){ dailySave(); return; }
+  day.st=n+1; renderDailyForm(); try{ window.scrollTo(0,0); }catch(e){}
+}
+function dBack(){
+  const td=dailyToday(); if(!td||!DS) return;
+  dGrab(); const day=DS.days[td], n=Math.max(0,Math.min(7,day.st||0));
+  if(n<=0){ renderDailyPick(); return; }
+  day.st=n-1; renderDailyForm(); try{ window.scrollTo(0,0); }catch(e){}
+}
 async function dailySave(){
   const td=dailyToday(); if(!td||!DS) return;
   dGrab();
   const day=DS.days[td];
-  ['why','goalText','act','who','learn','toldWho'].forEach(f=>{ if(typeof day[f]==='string') day[f]=day[f].trim(); });
-  /* ส่วนที่ทุกวันต้องมีเหมือนกัน */
-  if(day.pick===undefined){ toast('เลือกก่อนว่าถ้าเป็นเราจะทำแบบไหน'); return; }
-  if(!day.why){ toast('บอกเหตุผลสั้น ๆ ที่เลือกแบบนั้น'); return; }
-  /* ส่วนเฉพาะของวัน */
-  if(td===1){
-    if(!day.goalText){ toast('ตั้งเป้าของสัปดาห์ก่อน เลือกจากเมนูหรือพิมพ์เองก็ได้'); return; } }
-  if(td===3){
-    if(!day.act){ toast('เล่าสั้น ๆ ว่าวันนี้ลงมือทำอะไร เรื่องเล็กก็นับ'); return; } }
-  if(td===5){
-    const [d1,d2]=DS.dims;
-    if(!day.self||!day.self[d1]||!day.self[d2]){ toast('ให้คะแนนตัวเองทั้งสองด้านก่อน'); return; }
-    if(day.told===undefined){ toast('เลือกก่อนว่าจะเล่าให้คนที่บ้านฟังไหม'); return; } }
+  ['why','goalText','wTxt','act','who','learn','toldWho'].forEach(f=>{ if(typeof day[f]==='string') day[f]=day[f].trim(); });
+  /* ตรวจซ้ำทั้ง 8 ขั้นก่อนบันทึก ถ้าขั้นไหนยังไม่ครบให้พากลับไปที่ขั้นนั้น */
+  for(let n=0;n<8;n++){ const err=dStepCheck(n,day,td);
+    if(err){ day.st=n; renderDailyForm(); toast(err); return; } }
+  day.st=8;
   day.done=true; day.at=Date.now();
   const j=JSON.stringify(DS), key=dailyKey(DS.week,DS.idx);
   LS.set(key,j); queueRemote(key,DS.name,j);
@@ -4749,15 +4968,25 @@ function renderDailyDone(){
   try{ for(let x=0;x<localStorage.length;x++){ const key=localStorage.key(x);
     if(key&&key.startsWith('lc:daily:')&&key.endsWith(':'+DS.idx)){
       try{ all+=dailyDoneCount(JSON.parse(localStorage.getItem(key))); }catch(e){} } } }catch(e){}
+  const td=dailyToday(), day=(DS.days[td])||{}, it=dailySit(DS.week,td);
+  const ro=dRoyalOf(it.dim).map(x=>ROYAL[x].n);
+  const todo=(td===1?day.goalText:(td===3?day.act:day.wTxt))||'';
   $('v-daily').innerHTML=`<div class="card">${dailyHead()}
-    <div class="notice good"><b>วันนี้เสร็จแล้ว</b><br>
+    <div class="notice good"><b>วันนี้เสร็จแล้ว · ครบทั้ง 8 ขั้น</b><br>
       <span class="small">สัปดาห์นี้ทำแล้ว ${k}/5 วัน · สะสมทั้งหมด ${all} วัน ${k>=5?'· ครบวงจรพลเมือง 1 รอบเต็ม!':''}</span></div>
+    ${todo?`<div class="notice"><span class="small"><b>อย่าลืมสิ่งที่ตั้งใจไว้วันนี้</b><br>${esc(todo)}</span></div>`:''}
+    <h3 style="margin-top:12px">วันนี้เราได้ฝึกอะไรไปบ้าง</h3>
+    <p class="small muted">คุณลักษณะความเป็นพลเมืองดีด้าน <b>${DIMS[it.dim].n}</b>
+      ${ro.length?`<br>ตามพระบรมราโชบายด้านการศึกษา ข้อ <b>${esc(ro.join(' และ '))}</b>`:''}</p>
+    <div class="steps" style="margin:10px 0">${STEPS.map(x=>
+      `<div class="st done"><div class="l">${x[0]}</div><div class="n">${x[1]}</div></div>`).join('')}</div>
     ${k>=5?'<p class="small muted">ครบทั้ง 5 วัน: รู้ → คิด → ลงมือ → เคารพผู้อื่น → สะท้อน คือวงจรของพลเมืองที่ตื่นรู้หนึ่งรอบเต็ม</p>':''}
     <div class="row" style="margin-top:12px">
-      <button onclick="renderDailyForm()">ดู/แก้ไขของวันนี้</button>
+      <button onclick="dReopen()">ดู/แก้ไขของวันนี้</button>
       <button onclick="renderDailyPick()">เพื่อนคนอื่นทำต่อ</button>
       <button class="primary" onclick="go('home')">กลับหน้าแรก</button></div></div>`;
 }
+function dReopen(){ const td=dailyToday(); if(DS&&DS.days[td]) DS.days[td].st=0; renderDailyForm(); }
 
 /* ---------- ฝั่งครู: ติดตามรายวัน ---------- */
 let DT_SHIFT=0;
@@ -4895,6 +5124,10 @@ async function dailyStats(weeks){
   const st={weeks:weeks.length,n,slots:0,done:0,byStu:Array(n).fill(0),
     lvSum:0,lvN:0,lvHi:0,byDay:{1:[],2:[],3:[],4:[],5:[]},byDim:{},
     acts:[],resp:[],told:0,friAll:0,goals:[],
+    /* ตัวชี้วัดจากกระบวนการ 8 ขั้น · uOk = เข้าใจว่าเรื่องนี้เป็นเรื่องหน้าที่ สิทธิ หรือกติกา
+       procSum/procN = ระดับเฉลี่ยของขั้นคิด 4 ขั้น (P T G O ปรับปรุง)
+       rDiff = ตอบตามจริงว่าเคยเจอแต่ตอนนั้นทำต่างจากที่เลือก (กลไกตรวจสอบความตรง) */
+    uOk:0,uN:0,procSum:0,procN:0,rDiff:0,rSame:0,rNever:0,full8:0,
     dimsCovered:new Set(),selfFirst:{},selfLast:{},anyone:false};
   for(const wk of weeks){
     const [d1,d2]=dailyDims(wk);
@@ -4908,7 +5141,12 @@ async function dailyStats(weeks){
       for(const dd of [1,2,3,4,5]){ const X=D[dd];
         if(X&&X.done&&X.level){ st.lvSum+=X.level; st.lvN++; if(X.level>=3) st.lvHi++;
           st.byDay[dd].push(X.level);
-          if(X.dim){ (st.byDim[X.dim]=st.byDim[X.dim]||[]).push(X.level); } } }
+          if(X.dim){ (st.byDim[X.dim]=st.byDim[X.dim]||[]).push(X.level); } }
+        /* ตัวชี้วัดจากกระบวนการ 8 ขั้น เก็บเฉพาะแถวที่ทำด้วยรูปแบบใหม่ */
+        if(X&&X.done&&X.u!==undefined){ st.uN++; if(X.uOk) st.uOk++; }
+        if(X&&X.done&&X.sl){ ['p','t','g','o2'].forEach(f=>{ if(X.sl[f]){ st.procSum+=X.sl[f]; st.procN++; } });
+          if(X.sl.p&&X.sl.t&&X.sl.g&&X.sl.o2&&X.u!==undefined&&X.rSame) st.full8++; }
+        if(X&&X.done&&X.rSame){ if(X.rSame==='diff') st.rDiff++; else if(X.rSame==='same') st.rSame++; else st.rNever++; } }
       if(D[1]&&D[1].done&&D[1].goalText) st.goals.push({i,t:D[1].goalText});
       if(D[3]&&D[3].done&&D[3].act) st.acts.push({i,wk,t:D[3].act,who:D[3].who||''});
       if(D[4]&&D[4].done&&D[4].what) st.resp.push({i,wk,t:D[4].what});
@@ -4944,6 +5182,9 @@ function renderDailyRep(period,weeks,st){
     ['นักเรียนฝึกภารกิจรายวันอย่างต่อเนื่อง', pAll+'% ของช่องทั้งหมด ('+st.done+'/'+st.slots+')', st.anyone?pAll:null, 60, 'ตารางสัปดาห์ + CSV ในหน้าติดตามรายวัน'],
     ['เลือกการกระทำระดับ 3-4 ในสถานการณ์ประจำวัน', st.lvN?pct(st.lvHi,st.lvN)+'% ('+st.lvHi+'/'+st.lvN+' ครั้ง)':'—', st.lvN?pct(st.lvHi,st.lvN):null, 60, 'ตัวเลือก+เหตุผลในสถานการณ์ทั้ง 5 วัน'],
     ['ระดับพฤติกรรมเฉลี่ยจากสถานการณ์ประจำวัน', st.lvN?(st.lvSum/st.lvN).toFixed(2)+' / 4':'—', st.lvN?Math.round((st.lvSum/st.lvN)/4*100):null, 63, 'ระดับ 1-4 ที่นักเรียนเลือกทุกวัน (เกณฑ์ผ่าน 2.51)'],
+    ['ทำครบกระบวนการ UP TO GROW ทั้ง 8 ขั้น', st.done?pct(st.full8,st.done)+'% ('+st.full8+'/'+st.done+' ครั้ง)':'—', st.done?pct(st.full8,st.done):null, 80, 'คำตอบครบทุกขั้นในแถวข้อมูลรายวัน'],
+    ['เข้าใจว่าเรื่องนี้เป็นเรื่องหน้าที่ สิทธิ หรือกติกา (ขั้น U)', st.uN?pct(st.uOk,st.uN)+'% ('+st.uOk+'/'+st.uN+' ครั้ง)':'—', st.uN?pct(st.uOk,st.uN):null, 70, 'ขั้น U เข้าใจ · หลักฐานความสำเร็จด้านที่ 1'],
+    ['ระดับการคิดเฉลี่ยจากขั้น P T G O', st.procN?(st.procSum/st.procN).toFixed(2)+' / 4':'—', st.procN?Math.round((st.procSum/st.procN)/4*100):null, 63, 'ขั้นเห็นปัญหา คิดมีหลักฐาน ทำงานกลุ่ม ปรับปรุง'],
     ['ลงมือทำเพื่อส่วนรวมและบันทึกหลักฐาน (พุธ)', st.acts.length+' ครั้ง จาก '+n+' คน', st.anyone?pct(st.acts.length,st.weeks*n):null, 50, 'บันทึกการลงมือทำ + ผู้ได้ประโยชน์'],
     ['บันทึกการเคารพ/รับฟังผู้อื่น (พฤหัสบดี)', st.resp.length+' ครั้ง', st.anyone?pct(st.resp.length,st.weeks*n):null, 50, 'บันทึกวันพฤหัสบดีในระบบ'],
     ['นำไปเล่าต่อที่บ้าน (ศุกร์) — ตัวคูณความยั่งยืน', st.friAll?pct(st.told,st.friAll)+'% ('+st.told+'/'+st.friAll+')':'—', st.friAll?pct(st.told,st.friAll):null, 50, 'คำตอบ "บอกต่อที่บ้าน" วันศุกร์'],
@@ -4986,6 +5227,17 @@ function renderDailyRep(period,weeks,st){
   <div class="card"><h2>ความครอบคลุมพระบรมราโชบายด้านการศึกษา 4 ด้าน</h2>
     <p class="small muted">จากด้านสมรรถนะที่ฝึกในช่วงเวลานี้ (ตัวหนา = ได้ฝึกแล้ว) · ครบ 9 ด้านอัตโนมัติทุก 5 สัปดาห์</p>
     <table><thead><tr><th>พระบรมราโชบาย</th><th>สมรรถนะที่รองรับ</th><th>ฝึกแล้ว</th></tr></thead><tbody>${royalRows}</tbody></table></div>
+  ${(st.rDiff+st.rSame+st.rNever)?`<div class="card"><h2>กลไกตรวจสอบความตรง (ขั้น R สะท้อนคิด)</h2>
+    <p class="small muted">ทุกวันระบบถามว่า "เคยเจอเรื่องแบบนี้จริงไหม แล้วตอนนั้นทำเหมือนที่เลือกวันนี้หรือเปล่า"
+      คำตอบนี้ไม่ใช่คะแนน แต่บอกครูว่าคำตอบในระบบใกล้พฤติกรรมจริงแค่ไหน</p>
+    <table><thead><tr><th>คำตอบ</th><th>จำนวนครั้ง</th><th>ครูอ่านอย่างไร</th></tr></thead><tbody>
+      <tr><td>เคยเจอ และทำเหมือนที่เลือก</td><td class="mono">${st.rSame}</td><td class="small">คำตอบสอดคล้องกับพฤติกรรมจริง</td></tr>
+      <tr><td><b>เคยเจอ แต่ตอนนั้นทำต่างจากที่เลือก</b></td><td class="mono">${st.rDiff}</td>
+        <td class="small">ช่องว่างระหว่างสิ่งที่รู้กับสิ่งที่ทำ · เป็นประเด็นสนทนาที่มีค่าที่สุดในห้อง</td></tr>
+      <tr><td>ยังไม่เคยเจอ</td><td class="mono">${st.rNever}</td><td class="small">เป็นการฝึกล่วงหน้าก่อนเจอสถานการณ์จริง</td></tr>
+    </tbody></table>
+    ${st.rDiff?`<div class="notice" style="margin-top:8px"><span class="small">มี ${st.rDiff} ครั้งที่นักเรียนยอมรับตรง ๆ ว่าเคยทำต่างจากที่เลือกไว้ ควรหยิบมาคุยในโฮมรูมโดยไม่ระบุชื่อ</span></div>`:''}
+  </div>`:''}
   ${(st.acts.length||st.resp.length)?`<div class="card"><h2>ตัวอย่างหลักฐานพฤติกรรม (คัดล่าสุด)</h2>
     ${st.acts.slice(-6).map(a=>`<p class="small" style="margin:5px 0">🌱 <b>${esc((ROSTER[a.i]||'').replace('นาย',''))}:</b> ${esc(a.t)}${a.who?' → '+esc(a.who):''}</p>`).join('')}
     ${st.resp.slice(-4).map(a=>`<p class="small" style="margin:5px 0">🤝 <b>${esc((ROSTER[a.i]||'').replace('นาย',''))}:</b> ${esc(a.t)}</p>`).join('')}</div>`:''}
@@ -5368,7 +5620,7 @@ function renderDayPlan(wk,recs){
   <div class="card">
     <div class="eyebrow">ระดับ 1 · ภารกิจรายวัน</div>
     <h1>สัปดาห์ ${fmt(mon)} – ${fmt(fri)} ${mon.getFullYear()+543}</h1>
-    <p class="small muted">ภารกิจรายวันมี 5 ภารกิจ จันทร์ถึงศุกร์ วันละประมาณ 5 นาที
+    <p class="small muted">ภารกิจรายวันมี 5 ภารกิจ จันทร์ถึงศุกร์ วันละประมาณ 10 นาที ครบกระบวนการ 8 ขั้น
       ครบทั้ง 5 วันคือวงจรพลเมือง 1 รอบ แล้วสรุปขึ้นเป็นภารกิจรายสัปดาห์
       · ด้านเป้าหมายสัปดาห์นี้ <b>${DIMS[d1].n}</b> + <b>${DIMS[d2].n}</b>
       ${carried?'<span style="color:var(--teal-d)"> (ต่อเนื่องจากผลสัปดาห์ก่อน)</span>':''}</p>
@@ -5797,6 +6049,21 @@ async function pulseRec(wk,i){
 
 /* ---------- ฝั่งนักเรียน ---------- */
 let PS=null;
+/* ================= ประตูเช็คอินใจก่อนเข้าภารกิจ =================
+   ทุกภารกิจ (รายวัน รายสัปดาห์ ภารกิจด่วน) ต้องมีเช็คอินใจของสัปดาห์นี้ก่อนเสมอ
+   - ยังไม่เช็คอิน → พาไปทำเช็คอิน เสร็จแล้วระบบพาเข้าภารกิจที่ตั้งใจไว้ต่อทันที
+   - เช็คอินสัปดาห์นี้แล้ว → ผ่านเข้าภารกิจได้เลย ไม่ถามซ้ำ
+   (เช็คอินใจเป็นข้อมูลรายสัปดาห์ 1 แถว/คน การถามซ้ำทุกวันจะทับข้อมูลเดิม
+    และเพิ่มภาระโดยไม่ได้ข้อมูลใหม่) */
+async function needPulse(i,fn){
+  let done=false;
+  try{ done=!!(await pulseRec(isoWeekKey(),i)); }catch(e){ done=false; }
+  if(done){ fn(); return; }
+  window._afterPulse=fn;
+  PS={idx:i,name:ROSTER[i],week:isoWeekKey(),mood:null,qs:{},
+      help:{need:false,who:HELPERS[0],note:''},thanks:{to:'',msg:''},at:0};
+  go('pulse'); renderPulseForm();
+}
 function openPulse(){ go('pulse'); renderPulsePick(); }
 function renderPulsePick(){
   const wk=isoWeekKey();
@@ -5824,6 +6091,7 @@ function renderPulseForm(){
   const qs=weekQs(PS.week);
   $('v-pulse').innerHTML=`<div class="card">
     <div class="eyebrow">เช็คอินใจ · ${esc(PS.name)}</div>
+    ${window._afterPulse?`<div class="notice good"><span class="small"><b>เช็คอินใจสั้น ๆ ก่อนเริ่มภารกิจ</b> · ใช้เวลาไม่ถึงนาที เสร็จแล้วระบบพาเข้าภารกิจต่อทันที · สัปดาห์ละครั้งเท่านั้น</span></div>`:''}
     <h2>สัปดาห์นี้รู้สึกอย่างไร</h2>
     <div class="moodrow">${MOODS.map(([v,e,t])=>
       `<button type="button" class="moodbtn ${PS.mood===v?'on':''}" onclick="pulseMood(${v})">
@@ -5866,13 +6134,18 @@ function renderPulseForm(){
     </div>
 
     <div class="row navrow">
-      <button onclick="renderPulsePick()">ย้อนกลับ</button>
-      <button class="primary" onclick="pulseSubmit()">ส่งเช็คอิน</button>
+      <button onclick="pulseBack()">ย้อนกลับ</button>
+      <button class="primary" onclick="pulseSubmit()">ส่งเช็คอิน${window._afterPulse?' แล้วเริ่มภารกิจ':''}</button>
     </div></div>`;
   const w=$('phWho'); if(w) w.onchange=e=>{PS.help.who=e.target.value;};
   const nt=$('phNote'); if(nt) nt.oninput=e=>{PS.help.note=e.target.value;};
   const tt=$('ptTo'); if(tt) tt.onchange=e=>{PS.thanks.to=e.target.value;};
   const tm=$('ptMsg'); if(tm) tm.oninput=e=>{PS.thanks.msg=e.target.value;};
+}
+/* ย้อนกลับจากฟอร์มเช็คอิน: ถ้ามาจากประตูก่อนภารกิจ ให้ยกเลิกและกลับหน้าแรก */
+function pulseBack(){
+  if(window._afterPulse){ window._afterPulse=null; go('home'); return; }
+  renderPulsePick();
 }
 function pulseMood(v){ PS.mood=v; renderPulseForm(); }
 function pulseQ(id,v){ PS.qs[id]=v; renderPulseForm(); }
@@ -5887,6 +6160,10 @@ async function pulseSubmit(){
   LS.set(pulseKey(PS.week,PS.idx),j);
   queueRemote(pulseKey(PS.week,PS.idx),PS.name,j);
   const ok=await flushRemote(true);
+  /* ถ้ามาจากประตูก่อนภารกิจ ส่งเสร็จพาเข้าภารกิจต่อทันที ไม่ต้องแวะหน้าสรุป */
+  const after=window._afterPulse;
+  if(after){ window._afterPulse=null;
+    toast('เช็คอินเรียบร้อย เริ่มภารกิจได้เลย',1); after(); return; }
   toast(ok?'ส่งเช็คอินเรียบร้อย ขอบคุณที่บอกความรู้สึกนะ':'บันทึกในเครื่องแล้ว จะส่งขึ้นระบบเมื่อมีอินเทอร์เน็ต',ok);
   await renderPulseDone(false);
 }
@@ -6173,8 +6450,15 @@ async function checkResume(){
 loadImportedMissions();
 applyZoom(); applyHC(); paintDemoBar();
 initSW(); maybeShowIOSHint(); routeShortcut();
-routeFromURL();
 const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent=ROOM+' · '+GRADE;
 renderMissionList(); renderPick(); checkResume();
+/* ประตูแรก: เข้าจากลิงก์ภารกิจที่ครูส่ง → เข้าภารกิจทันที (ถือเป็นนักเรียน)
+   เข้าจาก URL หลักครั้งแรกของแท็บ → หน้าเลือกบทบาท · เคยเลือกแล้วในแท็บนี้ → ผ่านเลย */
+(async()=>{
+  let routed=false;
+  try{ routed=await routeFromURL(); }catch(e){ routed=false; }
+  if(routed){ try{ if(!getRole()) sessionStorage.setItem('lc:role','student'); }catch(e){} return; }
+  if(!getRole()){ go('role'); renderRole(); }
+})();
 </script>
 </html>
