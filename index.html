@@ -329,6 +329,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
       <div class="btncol">
         <button class="mbtn" onclick="needTeacher(openTeacher)"><span class="mi">📊</span><span class="mt">Dashboard และผลก่อน–หลัง<small>กราฟ ตารางคะแนน ส่งออก CSV</small></span></button>
         <button class="mbtn" onclick="needTeacher(openEvid)"><span class="mi">🏅</span><span class="mt">หลักฐานความสำเร็จ 5 ด้าน<small>ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม · ครูยืนยันการลงมือทำจริง</small></span></button>
+        <button class="mbtn" onclick="needTeacher(openCycle)"><span class="mi">🧩</span><span class="mt">ภารกิจต่อเนื่อง 4 ชั้น<small>วัน → สัปดาห์ → เดือน → เทอม · ครูกดปิดรอบเอง</small></span></button>
         <button class="mbtn" onclick="needTeacher(openDailyTeach)"><span class="mi">📅</span><span class="mt">ติดตามภารกิจรายวัน · รายงานผล<small>ใครทำวันนี้ · สรุปรายสัปดาห์ / เดือน / ภาคเรียน</small></span></button>
         <button class="mbtn" onclick="needTeacher(openPulseDash)"><span class="mi">💚</span><span class="mt">แดชบอร์ดสุขภาวะ · เช็คอินใจ<small>ใครขอความช่วยเหลือ · แนวโน้มรายสัปดาห์</small></span></button>
         <button class="mbtn" onclick="needTeacher(openSchool)"><span class="mi">🏫</span><span class="mt">แดชบอร์ดผู้บริหาร · ทั้งโรงเรียน<small>เทียบทุกห้อง · ผลตามพระบรมราโชบาย 4 ด้าน</small></span></button>
@@ -394,6 +395,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <section id="v-daily" class="hide"></section>
 <section id="v-dailyteach" class="hide"></section>
 <section id="v-dailyrep" class="hide"></section>
+<section id="v-cycle" class="hide"></section>
 <section id="v-school" class="hide"></section>
 <section id="v-evid" class="hide"></section>
 <section id="v-act" class="hide"></section>
@@ -730,7 +732,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar();
   if(v==='home') renderMissionList();}
@@ -4153,7 +4155,13 @@ const DAILY_DAYS=[[1,'จ','รู้และเข้าใจ','📘'],[2,'�
 /* ด้านเป้าหมายหมุนเวียน 5 สัปดาห์ครบทั้ง 9 ด้าน (common ซ้ำเพราะเป็นแก่นของโครงการพลเมืองดี) */
 const DAILY_ROT=[['resp','common'],['think','hon'],['comm','divers'],['self','disc'],['resp2','common']];
 const dailyWeekNum=wk=>parseInt(String(wk).slice(-2),10)||1;
-const dailyDims=wk=>DAILY_ROT[dailyWeekNum(wk)%5];
+/* ด้านเป้าหมายของสัปดาห์: ถ้าครูปิดสัปดาห์ก่อนหน้าแล้ว ระบบจะกำหนดด้านต่อเนื่องไว้ให้
+   (ดูระบบภารกิจต่อเนื่อง 4 ชั้นด้านล่าง) ถ้ายังไม่มี ใช้การหมุนเวียนตามลำดับ */
+function dailyDims(wk){
+  const f=CYCLE&&CYCLE.focus&&CYCLE.focus[wk];
+  if(Array.isArray(f)&&f.length===2&&DIMS[f[0]]&&DIMS[f[1]]) return f;
+  return DAILY_ROT[dailyWeekNum(wk)%5];
+}
 const dailyPickIdx=(len,wk,salt)=>{const r=rng_(dailyWeekNum(wk)*104729+salt*7919);return Math.floor(r()*len);};
 
 /* จันทร์ · ความรู้และความเข้าใจหน้าที่-สิทธิ (เสา 1) — ข้อเท็จจริงสั้น + คำถาม 1 ข้อ */
@@ -4658,6 +4666,328 @@ function renderDailyRep(period,weeks,st){
       <button onclick="openDailyTeach()">หน้าติดตามรายวัน</button>
       <button onclick="openEvid()">หลักฐานความสำเร็จ 5 ด้าน</button>
       <button onclick="go('home')">หน้าแรก</button></div></div>`;
+}
+
+/* ================= ระบบภารกิจต่อเนื่อง 4 ชั้น =================
+   วัน → สัปดาห์ → เดือน → เทอม โดย "ครูเป็นผู้กดปิดรอบ" ไม่ใช่ระบบเดาเอง
+     ภารกิจรายวัน 5 วัน   ครูกด "วันสุดท้ายของสัปดาห์"  → สรุปเป็นภารกิจรายสัปดาห์ 1 รอบ
+     ภารกิจรายสัปดาห์ 4   ครูกด "สัปดาห์สุดท้ายของเดือน" → สรุปเป็นภารกิจรายเดือน 1 รอบ
+     ภารกิจรายเดือน 4-5   ครูกด "เดือนสุดท้ายของเทอม"   → สรุปเป็นภารกิจรายเทอม
+   ทุกครั้งที่ปิดรอบ ระบบจะหา "ด้านที่อ่อนที่สุดจากข้อมูลจริง" แล้วตั้งเป็นด้านเป้าหมาย
+   ของรอบถัดไปให้อัตโนมัติ นี่คือกลไก "ภารกิจต่อเนื่อง" ที่ทำให้แต่ละรอบไม่ใช่ของแยกชิ้น
+   สอดคล้องหลักฐาน ACT 2022 ที่ว่าการฝึกซ้ำต่อเนื่องให้ผลสะสมเพิ่มขึ้นทุกรอบ
+   และการฝึกเจาะจงด้านใดได้ผลเฉพาะด้านนั้น จึงต้องวนให้ครบและเน้นด้านที่ยังอ่อน
+   เก็บที่คีย์เดียว lc:cycle ซิงก์ผ่านกลไกเดิม ไม่ต้องแก้ backend */
+
+const CYCLE_KEY='lc:cycle';
+let CYCLE=null;
+function loadCycle(){
+  try{ const r=LS.get(CYCLE_KEY); CYCLE=r?JSON.parse(r):null; }catch(e){ CYCLE=null; }
+  if(!CYCLE||typeof CYCLE!=='object') CYCLE={v:1,w:{},m:{},t:{},focus:{}};
+  CYCLE.w=CYCLE.w||{}; CYCLE.m=CYCLE.m||{}; CYCLE.t=CYCLE.t||{}; CYCLE.focus=CYCLE.focus||{};
+  return CYCLE;
+}
+async function saveCycle(){
+  const j=JSON.stringify(CYCLE);
+  LS.set(CYCLE_KEY,j); queueRemote(CYCLE_KEY,ROOM||'cycle',j);
+  return await flushRemote(true);
+}
+loadCycle();
+
+const TH_MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const monthKeyOf=d=>{d=d?new Date(d):new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');};
+const monthLabel=mk=>{const[y,m]=mk.split('-').map(Number);return TH_MON[m-1]+' '+(y+543);};
+/* วันจันทร์ของสัปดาห์ ISO ใช้ตัดสินว่าสัปดาห์นั้นอยู่เดือนไหน */
+function mondayOfWeek(wk){
+  const [y,w]=wk.split('-W').map(Number);
+  const jan4=new Date(y,0,4); const day=jan4.getDay()||7;
+  const mon1=new Date(jan4); mon1.setDate(jan4.getDate()-day+1);
+  const d=new Date(mon1); d.setDate(mon1.getDate()+(w-1)*7); return d;
+}
+const weekLabel=wk=>{const d=mondayOfWeek(wk);return 'สัปดาห์ '+wk.split('-W')[1]+' ('+d.getDate()+' '+TH_MON[d.getMonth()]+')';};
+function weeksInMonth(mk){
+  const [y,m]=mk.split('-').map(Number); const out=[];
+  const d=new Date(y,m-1,1);
+  while(d.getMonth()===m-1){ if((d.getDay()||7)===1) out.push(isoWeekKey(d)); d.setDate(d.getDate()+1); }
+  return out;
+}
+function termStartDate(){
+  let s=LS.get('lc:cfg:termstart');
+  if(!s){ const now=new Date(), y=now.getFullYear(), mth=now.getMonth();
+    s=(mth>=4&&mth<=9)?(y+'-05-16'):(mth>=10?(y+'-11-01'):((y-1)+'-11-01')); }
+  return new Date(s+'T00:00:00');
+}
+function termKeyOf(){ const s=termStartDate(); const m=s.getMonth();
+  return (s.getFullYear()+543)+'/'+((m>=4&&m<=9)?1:2); }
+function monthsInTerm(){
+  const s=termStartDate(), now=new Date(), out=[];
+  const d=new Date(s.getFullYear(),s.getMonth(),1);
+  while(d<=now && out.length<8){ out.push(monthKeyOf(d)); d.setMonth(d.getMonth()+1); }
+  return out;
+}
+
+/* ---------- คำนวณสรุปแต่ละชั้น (ไม่เขียนข้อมูล) ---------- */
+/* ชั้น 1→2: รวม 5 วันของสัปดาห์เป็นสรุปสัปดาห์ 1 รอบ */
+async function rollupWeek(wk){
+  const st=await dailyStats([wk]);
+  const [d1,d2]=dailyDims(wk);
+  /* ค่าเฉลี่ยที่นักเรียนประเมินตนเองวันศุกร์ ใช้หา "ด้านที่ยังอ่อนที่สุด" */
+  const selfAvg={};
+  for(const dm of [d1,d2]){
+    const vals=[];
+    for(let i=0;i<ROSTER.length;i++){ const r=await dailyRec(wk,i);
+      const F=r&&r.days[5]; if(F&&F.done&&F.self&&F.self[dm]) vals.push(F.self[dm]); }
+    if(vals.length) selfAvg[dm]=stMean(vals);
+  }
+  const rated=Object.keys(selfAvg);
+  const weakest=rated.length?rated.reduce((a,b)=>selfAvg[a]<=selfAvg[b]?a:b):d1;
+  return {wk,dims:[d1,d2],n:st.n,slots:st.slots,done:st.done,
+    pct:st.slots?Math.round(st.done/st.slots*100):0,
+    monOk:st.monOk,monAll:st.monAll,tueHi:st.tueHi,tueAll:st.tueAll,
+    acts:st.acts.length,resp:st.resp.length,told:st.told,friAll:st.friAll,
+    selfAvg,weakest,any:st.anyone};
+}
+/* ชั้น 2→3: รวมสัปดาห์ที่ปิดแล้วในเดือนนั้นเป็นสรุปเดือน */
+function rollupMonth(mk){
+  const wks=weeksInMonth(mk).filter(w=>CYCLE.w[w]);
+  if(!wks.length) return {mk,weeks:[],closed:0,any:false};
+  const S=wks.map(w=>CYCLE.w[w]);
+  const sum=(f)=>S.reduce((a,x)=>a+(x[f]||0),0);
+  const dimsHit=new Set(); S.forEach(x=>(x.dims||[]).forEach(d=>dimsHit.add(d)));
+  const first=S[0], last=S[S.length-1];
+  return {mk,weeks:wks,closed:wks.length,any:true,
+    pct:Math.round(sum('done')/Math.max(1,sum('slots'))*100),
+    done:sum('done'),slots:sum('slots'),
+    monOk:sum('monOk'),monAll:sum('monAll'),tueHi:sum('tueHi'),tueAll:sum('tueAll'),
+    acts:sum('acts'),resp:sum('resp'),told:sum('told'),friAll:sum('friAll'),
+    dims:[...dimsHit],trend:(last.pct||0)-(first.pct||0),
+    weakest:last.weakest||null};
+}
+/* ชั้น 3→4: รวมเดือนที่ปิดแล้วเป็นสรุปเทอม */
+function rollupTerm(tk){
+  const mks=monthsInTerm().filter(m=>CYCLE.m[m]);
+  if(!mks.length) return {tk,months:[],closed:0,any:false};
+  const S=mks.map(m=>CYCLE.m[m]);
+  const sum=f=>S.reduce((a,x)=>a+(x[f]||0),0);
+  const dimsHit=new Set(); S.forEach(x=>(x.dims||[]).forEach(d=>dimsHit.add(d)));
+  return {tk,months:mks,closed:mks.length,any:true,
+    pct:Math.round(sum('done')/Math.max(1,sum('slots'))*100),
+    done:sum('done'),slots:sum('slots'),
+    monOk:sum('monOk'),monAll:sum('monAll'),tueHi:sum('tueHi'),tueAll:sum('tueAll'),
+    acts:sum('acts'),resp:sum('resp'),told:sum('told'),friAll:sum('friAll'),
+    dims:[...dimsHit],trend:(S[S.length-1].pct||0)-(S[0].pct||0)};
+}
+
+/* ---------- ครูกดปิดรอบ ---------- */
+async function closeWeek(wk){
+  const r=await rollupWeek(wk);
+  if(!r.any){ toast('สัปดาห์นี้ยังไม่มีนักเรียนทำภารกิจรายวันเลย ยังปิดรอบไม่ได้'); return; }
+  if(!confirm(`ปิดรอบสัปดาห์ ${wk}?\n\nทำแล้ว ${r.done}/${r.slots} ช่อง (${r.pct}%)\nระบบจะสรุปเป็นภารกิจรายสัปดาห์ 1 รอบ\nและตั้งด้าน "${DIMS[r.weakest].n}" เป็นเป้าต่อเนื่องของสัปดาห์ถัดไป`)) return;
+  CYCLE.w[wk]={...r,at:Date.now()};
+  /* สร้างภารกิจต่อเนื่อง: สัปดาห์ถัดไปเน้นด้านที่อ่อนที่สุด + ด้านใหม่จากการหมุนเวียน */
+  const nx=isoWeekKey(new Date(mondayOfWeek(wk).getTime()+7*86400000));
+  const rot=DAILY_ROT[dailyWeekNum(nx)%5];
+  const partner=rot.find(d=>d!==r.weakest)||rot[0];
+  CYCLE.focus[nx]=[r.weakest,partner];
+  await saveCycle();
+  toast('ปิดรอบสัปดาห์แล้ว · สัปดาห์ถัดไปจะเน้น '+DIMS[r.weakest].n,1);
+  openCycle();
+}
+async function closeMonth(mk){
+  const r=rollupMonth(mk);
+  if(!r.any){ toast('เดือนนี้ยังไม่มีสัปดาห์ที่ปิดรอบแล้ว ต้องปิดรอบสัปดาห์ก่อน'); return; }
+  if(!confirm(`ปิดรอบเดือน ${monthLabel(mk)}?\n\nรวม ${r.closed} สัปดาห์ที่ปิดแล้ว (${r.pct}%)\nระบบจะสรุปเป็นภารกิจรายเดือน 1 รอบ`)) return;
+  CYCLE.m[mk]={...r,at:Date.now()};
+  await saveCycle();
+  toast('ปิดรอบเดือนแล้ว',1); openCycle();
+}
+async function closeTerm(tk){
+  const r=rollupTerm(tk);
+  if(!r.any){ toast('เทอมนี้ยังไม่มีเดือนที่ปิดรอบแล้ว ต้องปิดรอบเดือนก่อน'); return; }
+  if(!confirm(`ปิดรอบเทอม ${tk}?\n\nรวม ${r.closed} เดือนที่ปิดแล้ว\nระบบจะสรุปเป็นภารกิจรายเทอม (ปิดแล้วยังเปิดใหม่ได้)`)) return;
+  CYCLE.t[tk]={...r,at:Date.now()};
+  await saveCycle();
+  toast('ปิดรอบเทอมแล้ว',1); openCycle();
+}
+async function reopenCycle(level,key){
+  const nm={w:'สัปดาห์',m:'เดือน',t:'เทอม'}[level];
+  if(!confirm(`เปิดรอบ${nm} ${key} ใหม่?\n\nสรุปที่บันทึกไว้จะถูกลบ และคำนวณใหม่เมื่อปิดรอบอีกครั้ง\nข้อมูลของนักเรียนไม่หาย`)) return;
+  delete CYCLE[level][key];
+  await saveCycle(); openCycle();
+}
+
+/* ---------- แดชบอร์ด 4 ชั้น ---------- */
+async function openCycle(){
+  go('cycle');
+  $('v-cycle').innerHTML='<div class="card"><h2>กำลังประมวลผลภารกิจทุกชั้น…</h2></div>';
+  try{
+    await pullAll('lc:daily:'); await pullAll('lc:cycle');
+    loadCycle();
+    const wk=isoWeekKey(), mk=monthKeyOf(), tk=termKeyOf();
+    const wNow=await rollupWeek(wk);
+    const mWeeks=weeksInMonth(mk);
+    const mNow=rollupMonth(mk);
+    const tMonths=monthsInTerm();
+    const tNow=rollupTerm(tk);
+    renderCycle({wk,mk,tk,wNow,mWeeks,mNow,tMonths,tNow});
+  }catch(e){
+    $('v-cycle').innerHTML=`<div class="card"><h1>ประมวลผลไม่สำเร็จ</h1>
+      <div class="notice"><span class="small">${esc(e.message||e)}</span></div>
+      <div class="row"><button class="primary" onclick="openCycle()">ลองใหม่</button>
+        <button onclick="go('home')">หน้าแรก</button></div></div>`;
+  }
+}
+function renderCycle(D){
+  const {wk,mk,tk,wNow,mWeeks,mNow,tMonths,tNow}=D;
+  const td=dailyToday();
+  const pill=(txt,col)=>`<span class="pill" style="color:var(--${col});border-color:var(--${col})">${txt}</span>`;
+  const arrow=t=>`<div style="text-align:center;margin:2px 0 6px"><span class="small muted">↓ ${t}</span></div>`;
+  const closed=(lv,k)=>CYCLE[lv][k];
+
+  /* ชั้น 1 · ภารกิจรายวัน */
+  const dayCells=DAILY_DAYS.map(([d,ab,nm,ic])=>{
+    const past=td&&d<td, isToday=d===td;
+    return `<span style="display:inline-flex;flex-direction:column;align-items:center;gap:3px;margin-right:12px">
+      <span style="width:34px;height:34px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;
+        ${isToday?'background:var(--teal);color:#fff':past?'background:var(--bg2);border:1px solid var(--line)':'background:transparent;border:1px dashed var(--line);opacity:.6'}">${ic}</span>
+      <span class="small muted" style="font-size:10px">${ab}</span></span>`;}).join('');
+  const [wd1,wd2]=wNow.dims;
+  const carried=CYCLE.focus[wk];
+
+  /* ชั้น 2 · ภารกิจรายสัปดาห์ในเดือนนี้ */
+  const wkChips=mWeeks.map(w=>{
+    const c=closed('w',w);
+    return `<span class="pill" style="margin:2px 4px 2px 0;${c?'color:var(--teal-d);border-color:var(--teal)':(w===wk?'color:var(--gold);border-color:var(--gold)':'')}">
+      ${c?'✓':(w===wk?'●':'○')} ${w.split('-W')[1]}${c?' · '+c.pct+'%':''}</span>`;}).join('');
+
+  /* ชั้น 3 · ภารกิจรายเดือนในเทอมนี้ */
+  const mChips=tMonths.map(m=>{
+    const c=closed('m',m);
+    return `<span class="pill" style="margin:2px 4px 2px 0;${c?'color:var(--teal-d);border-color:var(--teal)':(m===mk?'color:var(--gold);border-color:var(--gold)':'')}">
+      ${c?'✓':(m===mk?'●':'○')} ${monthLabel(m)}${c?' · '+c.pct+'%':''}</span>`;}).join('');
+
+  const tClosed=closed('t',tk);
+  const kpi=(lab,val,sub,ok)=>`<div class="card tight"><div class="eyebrow">${lab}</div>
+    <div class="bignum ${ok?'ok':''}">${val}</div><div class="small muted">${sub}</div></div>`;
+
+  $('v-cycle').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · ภารกิจต่อเนื่อง 4 ชั้น</div>
+  <div class="card">
+    <div class="eyebrow">โครงสร้างภารกิจต่อเนื่อง · ${esc(ROOM)} ${esc(GRADE)}</div>
+    <h1>ภารกิจทั้ง 4 ชั้น</h1>
+    <p class="muted small" style="max-width:72ch">แต่ละชั้นไม่ใช่กิจกรรมแยกชิ้น แต่เป็นวัตถุดิบของชั้นถัดไป
+      <b>5 วัน รวมเป็น 1 สัปดาห์ · 4 สัปดาห์ รวมเป็น 1 เดือน · 4-5 เดือน รวมเป็น 1 เทอม</b>
+      ครูเป็นผู้กดปิดรอบเอง ระบบจะสรุปผลขึ้นชั้นถัดไป และตั้งด้านที่ยังอ่อนที่สุดเป็นเป้าของรอบต่อไปให้อัตโนมัติ</p>
+    <div class="row noprint" style="margin-top:10px">
+      <button onclick="openDailyTeach()">ติดตามรายวัน</button>
+      <button onclick="openDailyRep('week')">รายงานผล</button>
+      <button onclick="window.print()">พิมพ์</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><div class="eyebrow">ชั้นที่ 1</div><h2 style="margin:2px 0">📅 ภารกิจรายวัน · ${esc(wk)}</h2></div>
+      ${closed('w',wk)?pill('ปิดรอบแล้ว','teal'):pill(wNow.done+'/'+wNow.slots+' ช่อง','gold')}
+    </div>
+    <p class="small muted" style="margin:4px 0 8px">ด้านเป้าหมายสัปดาห์นี้: <b>${DIMS[wd1].n}</b> + <b>${DIMS[wd2].n}</b>
+      ${carried?' · <span style="color:var(--teal-d)">มาจากผลสัปดาห์ก่อน (ภารกิจต่อเนื่อง)</span>':' · จากการหมุนเวียนตามลำดับ'}</p>
+    <div style="margin:8px 0">${dayCells}</div>
+    <div class="grid3" style="margin-top:8px">
+      ${kpi('ทำต่อเนื่อง',wNow.pct+'%',wNow.done+'/'+wNow.slots+' ช่อง',wNow.pct>=60)}
+      ${kpi('ลงมือทำจริง',wNow.acts,'ครั้ง (พุธ)',wNow.acts>0)}
+      ${kpi('เล่าที่บ้าน',wNow.friAll?Math.round(wNow.told/wNow.friAll*100)+'%':'—','ศุกร์',wNow.friAll&&wNow.told/wNow.friAll>=0.5)}
+    </div>
+    <div class="row noprint" style="margin-top:10px">
+      ${closed('w',wk)
+        ?`<button onclick="reopenCycle('w','${wk}')">เปิดรอบสัปดาห์นี้ใหม่</button>`
+        :`<button class="primary" onclick="closeWeek('${wk}')">วันนี้คือวันสุดท้าย · ปิดรอบสัปดาห์</button>`}
+      <button onclick="openDailyTeach()">ดูตารางรายวัน</button>
+    </div>
+    ${closed('w',wk)?`<p class="small muted" style="margin-top:6px">ปิดรอบเมื่อ ${fmtDT(CYCLE.w[wk].at)} · ด้านที่อ่อนที่สุด: <b>${DIMS[CYCLE.w[wk].weakest].n}</b> ถูกตั้งเป็นเป้าของสัปดาห์ถัดไปแล้ว</p>`:''}
+  </div>
+  ${arrow('5 วันที่ปิดรอบแล้ว รวมเป็นภารกิจรายสัปดาห์ 1 รอบ')}
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><div class="eyebrow">ชั้นที่ 2</div><h2 style="margin:2px 0">🗓️ ภารกิจรายสัปดาห์ · ${monthLabel(mk)}</h2></div>
+      ${closed('m',mk)?pill('ปิดรอบแล้ว','teal'):pill(mNow.closed+'/'+mWeeks.length+' สัปดาห์','gold')}
+    </div>
+    <p class="small muted" style="margin:4px 0 8px">สัปดาห์ในเดือนนี้ (✓ = ปิดรอบแล้ว · ● = สัปดาห์ปัจจุบัน)</p>
+    <div>${wkChips||'<span class="small muted">ยังไม่มีสัปดาห์ในเดือนนี้</span>'}</div>
+    ${mNow.any?`<div class="grid3" style="margin-top:10px">
+      ${kpi('รวมทั้งเดือน',mNow.pct+'%',mNow.done+'/'+mNow.slots+' ช่อง',mNow.pct>=60)}
+      ${kpi('ความรู้ตอบถูก',mNow.monAll?Math.round(mNow.monOk/mNow.monAll*100)+'%':'—','จันทร์',mNow.monAll&&mNow.monOk/mNow.monAll>=0.7)}
+      ${kpi('แนวโน้ม',(mNow.trend>=0?'+':'')+mNow.trend+'%','สัปดาห์แรก → ล่าสุด',mNow.trend>=0)}
+    </div>`:'<div class="notice" style="margin-top:8px"><span class="small">ยังไม่มีสัปดาห์ที่ปิดรอบในเดือนนี้ · ปิดรอบสัปดาห์ที่ชั้นที่ 1 ก่อน</span></div>'}
+    <div class="row noprint" style="margin-top:10px">
+      ${closed('m',mk)
+        ?`<button onclick="reopenCycle('m','${mk}')">เปิดรอบเดือนนี้ใหม่</button>`
+        :`<button class="primary" onclick="closeMonth('${mk}')" ${mNow.any?'':'disabled'}>สัปดาห์นี้คือสัปดาห์สุดท้าย · ปิดรอบเดือน</button>`}
+      <button onclick="openDailyRep('month')">รายงานรายเดือน</button>
+    </div>
+    ${closed('m',mk)?`<p class="small muted" style="margin-top:6px">ปิดรอบเมื่อ ${fmtDT(CYCLE.m[mk].at)} · รวม ${CYCLE.m[mk].closed} สัปดาห์</p>`:''}
+  </div>
+  ${arrow('4 สัปดาห์ที่ปิดรอบแล้ว รวมเป็นภารกิจรายเดือน 1 รอบ')}
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><div class="eyebrow">ชั้นที่ 3</div><h2 style="margin:2px 0">📆 ภารกิจรายเดือน · เทอม ${esc(tk)}</h2></div>
+      ${tClosed?pill('ปิดรอบแล้ว','teal'):pill(tNow.closed+'/'+tMonths.length+' เดือน','gold')}
+    </div>
+    <p class="small muted" style="margin:4px 0 8px">เดือนในเทอมนี้ (นับจากวันเปิดภาคเรียน ${termStartDate().toLocaleDateString('th-TH')})</p>
+    <div>${mChips||'<span class="small muted">ยังไม่มีเดือนในเทอมนี้</span>'}</div>
+    ${tNow.any?`<div class="grid3" style="margin-top:10px">
+      ${kpi('รวมทั้งเทอม',tNow.pct+'%',tNow.done+'/'+tNow.slots+' ช่อง',tNow.pct>=60)}
+      ${kpi('ด้านที่ฝึกแล้ว',tNow.dims.length+'/9','จาก 9 ด้าน',tNow.dims.length>=9)}
+      ${kpi('แนวโน้ม',(tNow.trend>=0?'+':'')+tNow.trend+'%','เดือนแรก → ล่าสุด',tNow.trend>=0)}
+    </div>`:'<div class="notice" style="margin-top:8px"><span class="small">ยังไม่มีเดือนที่ปิดรอบ · ปิดรอบเดือนที่ชั้นที่ 2 ก่อน</span></div>'}
+    <div class="row noprint" style="margin-top:10px">
+      ${tClosed
+        ?`<button onclick="reopenCycle('t','${tk}')">เปิดรอบเทอมนี้ใหม่</button>`
+        :`<button class="primary" onclick="closeTerm('${tk}')" ${tNow.any?'':'disabled'}>เดือนนี้คือเดือนสุดท้าย · ปิดรอบเทอม</button>`}
+      <button onclick="openDailyRep('term')">รายงานรายเทอม</button>
+    </div>
+  </div>
+  ${arrow('4-5 เดือนที่ปิดรอบแล้ว รวมเป็นภารกิจรายเทอม')}
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><div class="eyebrow">ชั้นที่ 4</div><h2 style="margin:2px 0">🎓 ภารกิจรายเทอม · ${esc(tk)}</h2></div>
+      ${tClosed?pill('สรุปแล้ว','teal'):pill('ยังไม่ปิดเทอม','')}
+    </div>
+    ${tNow.any?`
+    <table style="margin-top:8px"><thead><tr><th>ตัวชี้วัดสะสมทั้งเทอม</th><th>ผลที่วัดได้</th><th>เกณฑ์</th><th>สถานะ</th></tr></thead><tbody>
+      ${[['การฝึกอย่างต่อเนื่อง',tNow.pct+'%',60,tNow.pct],
+         ['ความรู้หน้าที่-สิทธิ (จันทร์)',tNow.monAll?Math.round(tNow.monOk/tNow.monAll*100)+'%':'—',70,tNow.monAll?Math.round(tNow.monOk/tNow.monAll*100):null],
+         ['ตัดสินใจระดับ 3-4 (อังคาร)',tNow.tueAll?Math.round(tNow.tueHi/tNow.tueAll*100)+'%':'—',60,tNow.tueAll?Math.round(tNow.tueHi/tNow.tueAll*100):null],
+         ['ลงมือทำเพื่อส่วนรวม (พุธ)',tNow.acts+' ครั้ง',null,null],
+         ['บันทึกการเคารพผู้อื่น (พฤหัส)',tNow.resp+' ครั้ง',null,null],
+         ['เล่าต่อที่บ้าน (ศุกร์)',tNow.friAll?Math.round(tNow.told/tNow.friAll*100)+'%':'—',50,tNow.friAll?Math.round(tNow.told/tNow.friAll*100):null],
+         ['ครอบคลุมสมรรถนะ',tNow.dims.length+'/9 ด้าน',100,Math.round(tNow.dims.length/9*100)],
+        ].map(r=>`<tr><td>${r[0]}</td><td class="mono">${r[1]}</td>
+          <td class="mono">${r[2]?'≥ '+r[2]+'%':'—'}</td>
+          <td>${r[3]===null?'<span class="small muted">รายงานเชิงปริมาณ</span>':(r[3]>=r[2]
+            ?'<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ผ่านเกณฑ์</span>'
+            :'<span class="pill" style="color:var(--red);border-color:var(--red)">ยังไม่ถึง</span>')}</td></tr>`).join('')}
+    </tbody></table>
+    <p class="small muted" style="margin-top:8px">รวมจาก ${tNow.closed} เดือน · ${tNow.months.map(monthLabel).join(' · ')}
+      · ตารางนี้พิมพ์แนบรายงานโครงการฯ ได้ทันที</p>`
+    :'<div class="notice"><span class="small">สรุปเทอมจะปรากฏเมื่อมีเดือนที่ปิดรอบแล้วอย่างน้อย 1 เดือน</span></div>'}
+    <div class="row noprint" style="margin-top:10px">
+      <button class="primary" onclick="openDailyRep('term')">รายงานรายเทอมฉบับเต็ม</button>
+      <button onclick="openEvid()">หลักฐานความสำเร็จ 5 ด้าน</button>
+    </div>
+  </div>
+
+  <div class="card noprint"><h2>กลไกภารกิจต่อเนื่อง</h2>
+    <p class="small muted" style="max-width:72ch">ทุกครั้งที่ปิดรอบสัปดาห์ ระบบจะหาด้านที่นักเรียนประเมินตนเองต่ำที่สุดจากข้อมูลจริงของวันศุกร์
+      แล้วตั้งด้านนั้นเป็นเป้าหมายของสัปดาห์ถัดไปโดยอัตโนมัติ คู่กับด้านใหม่จากการหมุนเวียน
+      ทำให้ด้านที่ยังอ่อนได้ฝึกซ้ำจนแน่น ขณะที่ยังหมุนครบทั้ง 9 ด้าน
+      สอดคล้องกับหลักฐานว่าการฝึกซ้ำต่อเนื่องให้ผลสะสมเพิ่มขึ้นทุกรอบ (Blevins et al., 2021)
+      และการฝึกเจาะจงด้านใดจะได้ผลเฉพาะด้านนั้น จึงต้องวนให้ครบ (ACT Evidence Review, 2022)</p>
+    ${Object.keys(CYCLE.focus).length?`<p class="small">เป้าต่อเนื่องที่ระบบตั้งไว้แล้ว: ${Object.entries(CYCLE.focus).map(([w,f])=>`<b>${esc(w)}</b> → ${f.map(d=>esc(DIMS[d].n)).join(' + ')}`).join(' · ')}</p>`:''}
+  </div>`;
 }
 
 /* ================= หลักฐานความสำเร็จ 5 ด้าน (Evidence of Success) =================
