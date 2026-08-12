@@ -328,6 +328,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
       <div class="btncol">
         <button class="mbtn" onclick="needTeacher(openTeacher)"><span class="mi">📊</span><span class="mt">Dashboard และผลก่อน–หลัง<small>กราฟ ตารางคะแนน ส่งออก CSV</small></span></button>
         <button class="mbtn" onclick="needTeacher(openPulseDash)"><span class="mi">💚</span><span class="mt">แดชบอร์ดสุขภาวะ · เช็คอินใจ<small>ใครขอความช่วยเหลือ · แนวโน้มรายสัปดาห์</small></span></button>
+        <button class="mbtn" onclick="needTeacher(openSchool)"><span class="mi">🏫</span><span class="mt">แดชบอร์ดผู้บริหาร · ทั้งโรงเรียน<small>เทียบทุกห้อง · ผลตามพระบรมราโชบาย 4 ด้าน</small></span></button>
         <button class="mbtn" onclick="needTeacher(openQuick)"><span class="mi">⚡</span><span class="mt">สร้างภารกิจด่วนรายวัน<small>AI ร่างสถานการณ์ ครูอนุมัติ</small></span></button>
         <button class="mbtn" onclick="needTeacher(openBatch)"><span class="mi">📝</span><span class="mt">โหมดไม่มีมือถือ · กรอกแทน<small>ครูกรอกคะแนนจากใบงานกระดาษ</small></span></button>
         <button class="mbtn" onclick="needTeacher(openMoreTeacher)"><span class="mi">⋯</span><span class="mt">เครื่องมือครูเพิ่มเติม<small>ภาพรวมภาคเรียน · พิมพ์ใบงาน · ตั้งค่า</small></span></button>
@@ -356,7 +357,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
     <div class="card tight"><div class="eyebrow">Process</div><h3>UP TO GROW 8 ขั้น</h3>
       <p class="small muted">Understand · Perceive · Think · Own · Group · Reflect · Optimize · Work for the common good · ใช้ซ้ำได้ทุกภารกิจ</p></div>
     <div class="card tight"><div class="eyebrow">Input / Output</div><h3>วัดก่อนและหลังจริง</h3>
-      <p class="small muted">แบบวัดสถานการณ์ 10 ข้อ ชุดเดียวกันทุกภารกิจ ทำให้เทียบพัฒนาการข้ามภารกิจได้</p></div>
+      <p class="small muted">แบบวัดสถานการณ์ 12 ข้อ ชุดเดียวกันทุกภารกิจ ทำให้เทียบพัฒนาการข้ามภารกิจได้</p></div>
     <div class="card tight"><div class="eyebrow">Teacher in the loop</div><h3>AI ถาม ครูตัดสิน</h3>
       <p class="small muted">AI ห้ามให้คำตอบและห้ามให้คะแนนขั้นสุดท้าย ครูเป็นผู้ยืนยันระดับสมรรถนะทุกครั้ง</p></div>
   </div>
@@ -387,6 +388,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <section id="v-plan" class="hide"></section>
 <section id="v-pulse" class="hide"></section>
 <section id="v-pulsedash" class="hide"></section>
+<section id="v-school" class="hide"></section>
 
 <footer>Life Competency UP TO GROW · LIFECRAFT AI · ต้นแบบเพื่อการทดลองใช้ในชั้นเรียน</footer>
 </div>
@@ -413,12 +415,40 @@ function loadClassConfig(){
 }
 loadClassConfig();
 
+/* สมรรถนะ 9 ด้าน สังเคราะห์จากกรอบคุณลักษณะพลเมืองดีของไทย
+   (คุณลักษณะอันพึงประสงค์ 8 ประการ · ค่านิยมหลัก 12 ประการ ·
+    จุดเน้นรายวิชาเพิ่มเติมหน้าที่พลเมือง · กรอบความเป็นพลเมืองของ สกศ.)
+   ด้าน disc และ divers เพิ่มเข้ามาเพื่อให้ครอบคลุมครบตามกรอบ */
 const DIMS = {
   self:{n:'การจัดการตนเอง',g:'life'}, think:{n:'การคิดและแก้ปัญหา',g:'life'},
   comm:{n:'การสื่อสารและทำงานร่วมกัน',g:'life'}, resp:{n:'ความรับผิดชอบ',g:'civic'},
   hon:{n:'ความซื่อสัตย์',g:'civic'}, resp2:{n:'การเคารพสิทธิผู้อื่น',g:'civic'},
-  common:{n:'การคำนึงถึงประโยชน์ส่วนรวม',g:'civic'}
+  common:{n:'การคำนึงถึงประโยชน์ส่วนรวม',g:'civic'},
+  disc:{n:'วินัยและการเคารพกติกา',g:'civic'}, divers:{n:'การยอมรับความแตกต่าง',g:'civic'}
 };
+
+/* พระบรมราโชบายด้านการศึกษา ในหลวงรัชกาลที่ 10 จำนวน 4 ด้าน
+   ใช้เป็นชั้นสังเคราะห์เหนือสมรรถนะ 9 ด้าน เพื่อรายงานผลตามกรอบของโครงการ
+   สมรรถนะหนึ่งด้านส่งผลต่อพระบรมราโชบายได้มากกว่าหนึ่งข้อ ตามลักษณะของพฤติกรรม */
+const ROYAL = {
+  r1:{n:'มีทัศนคติที่ถูกต้องต่อบ้านเมือง',s:'ทัศนคติ ต่อบ้านเมือง',
+      d:'เอื้ออาทรต่อครอบครัวและชุมชน เคารพผู้อื่น และอยู่ร่วมกันได้',
+      dims:['resp2','divers','common']},
+  r2:{n:'มีพื้นฐานชีวิตที่มั่นคง มีคุณธรรม',s:'พื้นฐานชีวิต มีคุณธรรม',
+      d:'แยกแยะถูกผิด ปฏิเสธสิ่งที่ผิด มีวินัยและความซื่อสัตย์',
+      dims:['hon','disc','think']},
+  r3:{n:'มีงานทำ มีอาชีพ',s:'มีงานทำ มีอาชีพ',
+      d:'รักงาน สู้งาน ทำงานจนสำเร็จ และทำงานร่วมกับผู้อื่นได้',
+      dims:['self','resp','comm']},
+  r4:{n:'เป็นพลเมืองดี',s:'เป็นพลเมืองดี',
+      d:'เห็นอะไรที่จะทำเพื่อส่วนรวมได้ก็ลงมือทำ ด้วยความมีน้ำใจ',
+      dims:['common','resp','disc','resp2']}
+};
+/* คะแนนพระบรมราโชบายรายด้าน = ค่าเฉลี่ยของสมรรถนะที่รองรับด้านนั้น */
+function royalScore(a,rk){
+  const ds=ROYAL[rk].dims.map(k=>dimScore(a,k)).filter(v=>v>0);
+  return ds.length?ds.reduce((x,y)=>x+y,0)/ds.length:0;
+}
 
 const ITEMS = [
  {d:'self',q:'ครูมอบหมายงานกลุ่มที่ต้องส่งสัปดาห์หน้า สิ่งแรกที่นักเรียนทำคือ',
@@ -450,8 +480,17 @@ const ITEMS = [
      'บอกเพื่อนให้หยุดล้อ และชวนคนที่ถูกกันเข้ากลุ่ม','บอกให้หยุด ชวนเข้ากลุ่ม พูดคุยกับคนที่ถูกล้อ และเสนอข้อตกลงของห้องเพื่อไม่ให้เกิดซ้ำ']},
  {d:'common',q:'ห้องได้งบ 1,500 บาท มีข้อเสนอให้ซื้อของที่คนเพียง 5 คนได้ใช้ แต่เสียงข้างมากเห็นด้วยเพราะเกรงใจ',
   o:['เห็นด้วยตามเสียงส่วนใหญ่','เห็นด้วยเพราะไม่อยากขัดใจเพื่อน',
-     'ทักท้วงว่ายังมีคนอีกหลายคนที่ไม่ได้ประโยชน์','เสนอข้อมูลว่าใครได้และไม่ได้ประโยชน์ ขอให้ทบทวนทางเลือกอื่น และเสนอวิธีใช้งบที่ทุกคนได้ร่วมใช้']}
+     'ทักท้วงว่ายังมีคนอีกหลายคนที่ไม่ได้ประโยชน์','เสนอข้อมูลว่าใครได้และไม่ได้ประโยชน์ ขอให้ทบทวนทางเลือกอื่น และเสนอวิธีใช้งบที่ทุกคนได้ร่วมใช้']},
+ {d:'disc',q:'โรงเรียนประกาศห้ามนำโทรศัพท์เข้าห้องสอบ วันนั้นนักเรียนลืมฝากไว้ และไม่มีครูตรวจกระเป๋า',
+  o:['เก็บไว้ในกระเป๋าแล้วเข้าสอบเลย เพราะไม่มีใครรู้','พกเข้าไปแต่ปิดเครื่อง คิดว่าไม่ได้ใช้ก็ไม่ผิดกติกา',
+     'แจ้งครูคุมสอบก่อนเข้าห้อง แล้วปฏิบัติตามที่ครูบอก','แจ้งครูก่อนเข้าห้อง และเสนอให้มีจุดฝากโทรศัพท์หน้าห้องสอบ เพื่อไม่ให้เพื่อนคนอื่นเจอปัญหาเดิม']},
+ {d:'divers',q:'มีเพื่อนใหม่ย้ายมาจากต่างจังหวัด พูดสำเนียงต่างจากเพื่อนในห้อง และมักเสนอความคิดที่ไม่เหมือนกลุ่ม',
+  o:['ไม่ค่อยคุยด้วย เพราะรู้สึกเข้ากันยาก','คุยด้วยเมื่อจำเป็น แต่ไม่ชวนเข้ากลุ่มทำงาน',
+     'ชวนเข้ากลุ่มและรับฟังความคิดเห็นของเขา','ชวนเข้ากลุ่ม รับฟัง และช่วยอธิบายให้เพื่อนคนอื่นเข้าใจมุมมองที่ต่างของเขาด้วย']}
 ];
+/* จำนวนข้อของแบบวัดฉบับปัจจุบัน ใช้ตรวจว่าข้อมูลเก่าที่เก็บด้วยฉบับ 10 ข้อปนกันหรือไม่ */
+const FULL_SCORE = ITEMS.length * 4;
+const answeredCount = a => Object.keys(a||{}).length;
 
 const EVENTS_M1 = [
  {t:'งบประมาณถูกตัดเหลือ 1,200 บาท',
@@ -661,7 +700,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar();
   if(v==='home') renderMissionList();}
@@ -859,7 +898,7 @@ function svgDonut(labels,values,colors){
 
 /* กราฟเส้นคะแนนรายบุคคล */
 function svgLine(names,before,after){
-  const c=CPAL(); const W=760,H=300,padL=42,padB=92,padT=16,padR=12,max=40;
+  const c=CPAL(); const W=760,H=300,padL=42,padB=92,padT=16,padR=12,max=FULL_SCORE;
   const iw=W-padL-padR, ih=H-padT-padB, n=names.length;
   if(n===0) return `<p class="small muted">ยังไม่มีนักเรียนที่ทำครบทั้งก่อนและหลัง</p>`;
   const xx=i=>n===1?padL+iw/2:padL+iw*i/(n-1);
@@ -1121,7 +1160,7 @@ function submitTest(){
   const ans=s.phase==='pre'?s.pre:s.post;
   const miss=ITEMS.map((x,i)=>i).filter(i=>!ans['q'+i]);
   if(miss.length){ s.qi=miss[0]; renderTest();
-    toast('ยังเหลือข้อ '+miss.map(i=>i+1).join(', ')+' ระบบต้องใช้คะแนนครบ 10 ข้อเพื่อเทียบก่อนและหลัง'); return; }
+    toast('ยังเหลือข้อ '+miss.map(i=>i+1).join(', ')+' ระบบต้องใช้คะแนนครบ '+ITEMS.length+' ข้อเพื่อเทียบก่อนและหลัง'); return; }
   if(s.phase==='pre'){s.phase='mission';s.step=0;s.qi=0;s.preAt=Date.now();logEv('pre','ทำแบบวัดก่อนเสร็จ คะแนน '+total(s.pre));save(true);renderMission();}
   else{s.done=true;s.finished=Date.now();s.postAt=Date.now();logEv('post','ทำแบบวัดหลังเสร็จ คะแนน '+total(s.post));save(true);showReport(s,false);toast('ส่งครบแล้ว ขอบคุณครับ',1);}
 }
@@ -1413,8 +1452,8 @@ function showReport(st,tv){
           <td>ระยะห่างก่อน–หลัง</td><td class="mono small">${gapMin(st.preAt||st.started,st.postAt||st.finished)!==null?gapMin(st.preAt||st.started,st.postAt||st.finished)+' นาที':'-'}</td></tr>
     </tbody></table>
     <div class="grid3" style="margin-top:12px">
-      <div class="card tight"><div class="eyebrow">ก่อน</div><div class="bignum">${pre}</div><div class="small muted">จาก 40</div></div>
-      <div class="card tight"><div class="eyebrow">หลัง</div><div class="bignum">${post}</div><div class="small muted">จาก 40</div></div>
+      <div class="card tight"><div class="eyebrow">ก่อน</div><div class="bignum">${pre}</div><div class="small muted">จาก ${FULL_SCORE}</div></div>
+      <div class="card tight"><div class="eyebrow">หลัง</div><div class="bignum">${post}</div><div class="small muted">จาก ${FULL_SCORE}</div></div>
       <div class="card tight"><div class="eyebrow">พัฒนาการ</div><div class="bignum ${diff>0?'ok':diff<0?'bad':''}">${diff>=0?'+':''}${diff}</div>
         <div class="small muted">${pre?((diff/pre*100).toFixed(1)+'%'):'-'}</div></div>
     </div>
@@ -1514,6 +1553,13 @@ async function openTeacher(){
       <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยหลัง</div><div class="bignum ok">${mPost.toFixed(2)}</div><div class="small muted">SD ${sd(post).toFixed(2)} · +${growth.toFixed(1)}%</div></div>
     </div>
     ${done.length?'':'<div class="notice">ยังไม่มีนักเรียนทำครบทั้งก่อนและหลัง ตัวเลขจะปรากฏเมื่อมีข้อมูลจริง ระบบไม่สร้างข้อมูลสมมติให้</div>'}
+    ${(()=>{const ns=[...new Set(done.map(d=>answeredCount(d.pre)))];
+      if(!(ns.length>1||(ns.length===1&&ns[0]!==ITEMS.length))) return '';
+      return `<div class="notice"><b>ข้อมูลมาจากแบบวัดคนละฉบับ</b><br><span class="small">
+        พบผู้เรียนที่ทำแบบวัด ${ns.sort((a,b)=>a-b).join(' และ ')} ข้อ ขณะที่ฉบับปัจจุบันมี ${ITEMS.length} ข้อ
+        (คะแนนเต็ม ${FULL_SCORE}) การนำคะแนนรวมมาเทียบกันโดยตรงจะคลาดเคลื่อน
+        แนะนำให้ผู้เรียนที่ทำฉบับเดิมทำแบบวัดหลังเรียนด้วยฉบับปัจจุบัน
+        หรือรายงานผลแยกตามฉบับ ส่วนคะแนนรายด้านยังเทียบกันได้ตามปกติ</span></div>`;})()}
     <div class="noprint" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
       <h3 style="font-size:14px">กรองตามช่วงวันที่ทำกิจกรรม</h3>
       <div class="row">
@@ -1653,7 +1699,7 @@ function toggleAuto(on){ clearInterval(_auto);
 
 function exportCSV(){
   const all=window._all||[];
-  const head=['ที่','ชื่อ-สกุล','ห้อง','ภารกิจ','วันที่ทำ','เวลาเริ่ม','เวลาส่ง','ระยะห่างก่อน-หลัง(นาที)','คะแนนก่อน(40)','คะแนนหลัง(40)','ผลต่าง','ทักษะชีวิตก่อน','ทักษะชีวิตหลัง','พลเมืองดีก่อน','พลเมืองดีหลัง','บทบาท','เปลี่ยนใจ(ครั้ง)','ถ้าไม่มีใครรู้','ชีวิตจริงเคยทำ','เมื่อเพื่อนไม่เห็นด้วย','สัญญาณที่ควรตรวจสอบ','ผลสัมภาษณ์','ครู-คิด','ครู-จัดการตน','ครู-สื่อสาร','ครู-พลเมืองดี'];
+  const head=['ที่','ชื่อ-สกุล','ห้อง','ภารกิจ','วันที่ทำ','เวลาเริ่ม','เวลาส่ง','ระยะห่างก่อน-หลัง(นาที)','คะแนนก่อน('+FULL_SCORE+')','คะแนนหลัง('+FULL_SCORE+')','ผลต่าง','ทักษะชีวิตก่อน','ทักษะชีวิตหลัง','พลเมืองดีก่อน','พลเมืองดีหลัง','บทบาท','เปลี่ยนใจ(ครั้ง)','ถ้าไม่มีใครรู้','ชีวิตจริงเคยทำ','เมื่อเพื่อนไม่เห็นด้วย','สัญญาณที่ควรตรวจสอบ','ผลสัมภาษณ์','ครู-คิด','ครู-จัดการตน','ครู-สื่อสาร','ครู-พลเมืองดี'];
   const body=ROSTER.map((n,i)=>{const d=all[i];
     if(!d)return [i+1,n,ROOM,MIS().title,'','','','','','','','','','','','','','','','','','','','',''];
     const ts=d.teacher?.score||{};
@@ -2016,11 +2062,23 @@ function renderSetup(){
       <div><label for="cfgGrade">ระดับชั้น (ใช้กับ AI และการแสดงผล)</label>
       <input id="cfgGrade" value="${esc(GRADE)}" placeholder="เช่น ป.6, ม.1, ม.4, ปวช.1"></div>
     </div>
+    <div class="grid3">
+      <div><label for="cfgSchool">ชื่อโรงเรียน</label>
+      <input id="cfgSchool" value="${esc(schoolName())}" placeholder="เช่น โรงเรียนมัธยมวัดหนองแขม"></div>
+      <div><label for="cfgRoomCode">รหัสห้อง (สำหรับแดชบอร์ดผู้บริหาร)</label>
+      <input id="cfgRoomCode" value="${esc(roomCode())}" placeholder="เช่น M404"></div>
+      <div><label for="cfgTeacher">ครูประจำห้อง</label>
+      <input id="cfgTeacher" value="${esc((LS.get('lc:cfg:teacher')||''))}" placeholder="ชื่อ-สกุล"></div>
+    </div>
+    <p class="small muted">ตั้ง <b>รหัสห้อง</b> ให้ไม่ซ้ำกับห้องอื่นในโรงเรียน เช่น M404 หรือ P601
+      เมื่อบันทึกแล้วให้กดปุ่ม <b>ส่งสรุปให้ผู้บริหาร</b> ห้องนี้จะปรากฏในแดชบอร์ดระดับโรงเรียน
+      โดยส่งเฉพาะข้อมูลสรุป ไม่มีคำตอบรายบุคคลของผู้เรียน</p>
     <label for="cfgRoster">รายชื่อนักเรียน พิมพ์บรรทัดละ 1 ชื่อ</label>
     <textarea id="cfgRoster" style="min-height:280px">${esc(ROSTER.join('\n'))}</textarea>
     <p class="small muted">ขณะนี้มี ${ROSTER.length} คน · การเปลี่ยนรายชื่อจะไม่ลบข้อมูลเดิมที่บันทึกไว้ แต่ลำดับที่ของนักเรียนจะเปลี่ยนตามรายชื่อใหม่ ควรตั้งค่าให้เสร็จก่อนเริ่มเก็บข้อมูลจริง</p>
     <div class="row" style="margin-top:14px">
       <button class="primary" onclick="saveClassConfig()">บันทึกการตั้งค่า</button>
+      <button onclick="publishRoomSummary()">ส่งสรุปให้ผู้บริหาร</button>
       <button onclick="resetClassConfig()">คืนค่าเริ่มต้น</button>
       <button onclick="go('home')">กลับหน้าแรก</button>
     </div>
@@ -2055,14 +2113,24 @@ function saveClassConfig(){
   if(lines.length>60){ bad('cfgRoster','รายชื่อเกิน 60 คน ระบบออกแบบสำหรับ 1 ห้องเรียน'); return; }
   const dup=lines.filter((x,i)=>lines.indexOf(x)!==i);
   if(dup.length){ bad('cfgRoster','มีชื่อซ้ำกัน: '+dup[0]+' กรุณาแก้ให้ไม่ซ้ำ เพราะระบบใช้ชื่อแยกข้อมูลรายคน'); return; }
+  /* ข้อมูลระดับโรงเรียน ไม่บังคับ กรอกเมื่อต้องการให้ห้องนี้ปรากฏในแดชบอร์ดผู้บริหาร */
+  const school=($('cfgSchool')||{}).value?.trim()||'';
+  const rcode=(($('cfgRoomCode')||{}).value?.trim()||'').toUpperCase();
+  const tname=($('cfgTeacher')||{}).value?.trim()||'';
+  if(rcode && !/^[A-Z0-9ก-๙._-]{2,12}$/.test(rcode)){
+    bad('cfgRoomCode','รหัสห้องควรเป็นตัวอักษรหรือตัวเลข 2 ถึง 12 ตัว เช่น M404'); return; }
   ROOM=room; ROSTER=lines; GRADE=grade;
   try{
     localStorage.setItem('lc:cfg:room',ROOM);
     localStorage.setItem('lc:cfg:grade',GRADE);
     localStorage.setItem('lc:cfg:roster',JSON.stringify(ROSTER));
+    localStorage.setItem('lc:cfg:school',school);
+    localStorage.setItem('lc:cfg:roomcode',rcode);
+    localStorage.setItem('lc:cfg:teacher',tname);
   }catch(e){}
   const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
-  toast('บันทึกแล้ว ห้อง '+ROOM+' ('+GRADE+') จำนวน '+ROSTER.length+' คน',1);
+  if(rcode) registerRoom();
+  toast('บันทึกแล้ว ห้อง '+ROOM+' ('+GRADE+') จำนวน '+ROSTER.length+' คน'+(rcode?' · รหัสห้อง '+rcode:''),1);
   renderSetup(); renderMissionList();
 }
 function resetClassConfig(){
@@ -2244,7 +2312,7 @@ function validitySignals(d){
   // 7. เลือกคำตอบระดับสูงทุกข้อในแบบวัดหลัง (ตอบเต็มทุกข้อ)
   if(d.done){
     const allMax=Object.values(d.post||{}).every(v=>v===4);
-    if(allMax&&Object.keys(d.post||{}).length>=10)
+    if(allMax&&answeredCount(d.post)>=ITEMS.length)
       sig.push({k:'all-max',t:'เลือกระดับสูงสุดทุกข้อในแบบวัดหลัง ควรยืนยันด้วยการสัมภาษณ์',lv:'check'});
   }
   return sig;
@@ -2686,7 +2754,7 @@ function renderBatchGrid(){
 async function saveBatch(){
   if(!B){ toast('เลือกนักเรียนก่อน'); return; }
   const preN=Object.keys(B.pre).length, postN=Object.keys(B.post).length;
-  if(preN<10||postN<10){ toast('กรอกให้ครบ 10 ข้อทั้งก่อนและหลัง ตอนนี้ ก่อน '+preN+'/10 · หลัง '+postN+'/10'); return; }
+  if(preN<ITEMS.length||postN<ITEMS.length){ toast('กรอกให้ครบ '+ITEMS.length+' ข้อทั้งก่อนและหลัง ตอนนี้ ก่อน '+preN+'/'+ITEMS.length+' · หลัง '+postN+'/'+ITEMS.length); return; }
   const now=Date.now();
   const d=B.base||blank(B.idx);
   d.idx=B.idx; d.name=ROSTER[B.idx]; d.room=ROOM; d.missionId=curMission;
@@ -2721,7 +2789,7 @@ function scoringKey(){
       <tr><td class="mono">ค</td><td class="mono">3</td><td class="small">ระดับสามารถ — ใช้ข้อมูลประกอบการตัดสินใจ และคำนึงถึงผู้ได้รับผลกระทบ</td></tr>
       <tr><td class="mono">ง</td><td class="mono">4</td><td class="small">ระดับเชี่ยวชาญ — ใช้ข้อมูลรอบด้าน ดูแลผู้เสียประโยชน์ และรับผิดชอบผลที่ตามมา</td></tr>
     </tbody></table>
-    <p class="small">คะแนนรวมทั้งฉบับ = 10 ข้อ × 4 คะแนน = <b>40 คะแนน</b> (คะแนนต่ำสุด 10 คะแนน)</p>
+    <p class="small">คะแนนรวมทั้งฉบับ = ${ITEMS.length} ข้อ × 4 คะแนน = <b>${FULL_SCORE} คะแนน</b> (คะแนนต่ำสุด ${ITEMS.length} คะแนน)</p>
 
     <h3>2. ข้อคำถามจำแนกตามด้านที่วัด</h3>
     <table><thead><tr><th style="width:34%">ด้านที่วัด</th><th style="width:22%">กลุ่มสมรรถนะ</th><th>ข้อที่</th></tr></thead><tbody>
@@ -2732,10 +2800,12 @@ function scoringKey(){
 
     <h3>3. เกณฑ์การแปลผลคะแนนรวม</h3>
     <table><thead><tr><th style="width:22%">ช่วงคะแนน</th><th style="width:22%">ค่าเฉลี่ยรายข้อ</th><th>ระดับสมรรถนะ</th></tr></thead><tbody>
-      <tr><td class="mono">10.00 – 17.50</td><td class="mono">1.00 – 1.75</td><td>ระดับเริ่มต้น (ต้องได้รับการพัฒนาเร่งด่วน)</td></tr>
-      <tr><td class="mono">17.51 – 25.00</td><td class="mono">1.76 – 2.50</td><td>ระดับกำลังพัฒนา</td></tr>
-      <tr><td class="mono">25.01 – 32.50</td><td class="mono">2.51 – 3.25</td><td>ระดับสามารถ (ผ่านเกณฑ์)</td></tr>
-      <tr><td class="mono">32.51 – 40.00</td><td class="mono">3.26 – 4.00</td><td>ระดับเชี่ยวชาญ</td></tr>
+      ${[[1.00,1.75,'ระดับเริ่มต้น (ต้องได้รับการพัฒนาเร่งด่วน)'],
+          [1.76,2.50,'ระดับกำลังพัฒนา'],
+          [2.51,3.25,'ระดับสามารถ (ผ่านเกณฑ์)'],
+          [3.26,4.00,'ระดับเชี่ยวชาญ']].map(([lo,hi,lab])=>
+        `<tr><td class="mono">${(lo*ITEMS.length).toFixed(2)} – ${(hi*ITEMS.length).toFixed(2)}</td>
+          <td class="mono">${lo.toFixed(2)} – ${hi.toFixed(2)}</td><td>${lab}</td></tr>`).join('')}
     </tbody></table>
 
     <h3>4. เกณฑ์รูบริกประเมินสมรรถนะ (ครูเป็นผู้ประเมิน)</h3>
@@ -2788,7 +2858,7 @@ function renderPaper(){
   <div class="card noprint">
     <div class="eyebrow">ใบงาน/แบบวัดสำหรับพิมพ์ (นักเรียนไม่มีมือถือ)</div>
     <h1>พิมพ์เอกสารกระดาษ · ${esc(mi.title)}</h1>
-    <p class="muted" style="max-width:66ch">พิมพ์แจกนักเรียนที่ไม่มีมือถือ ให้ทำแบบวัด 10 ข้อ (ทั้งก่อนและหลังเรียน) และใบงาน UP TO GROW บนกระดาษ จากนั้นครูนำคำตอบมากรอกที่ "โหมดไม่มีมือถือ" เพื่อเข้าสู่ระบบ · การแปลงคำตอบ: ก = 1, ข = 2, ค = 3, ง = 4</p>
+    <p class="muted" style="max-width:66ch">พิมพ์แจกนักเรียนที่ไม่มีมือถือ ให้ทำแบบวัด ${ITEMS.length} ข้อ (ทั้งก่อนและหลังเรียน) และใบงาน UP TO GROW บนกระดาษ จากนั้นครูนำคำตอบมากรอกที่ "โหมดไม่มีมือถือ" เพื่อเข้าสู่ระบบ · การแปลงคำตอบ: ก = 1, ข = 2, ค = 3, ง = 4</p>
     <div class="row">
       <button class="primary" onclick="window.print()">พิมพ์ / บันทึก PDF</button>
       <button onclick="openBatch()">ไปหน้ากรอกแทนนักเรียน</button>
@@ -2800,7 +2870,7 @@ function renderPaper(){
       <b>UP TO GROW · ${esc(GRADE)} ${esc(ROOM)} · ${esc(mi.title)}</b>
       <span class="small">ชื่อ–สกุล ______________________ เลขที่ ____ วันที่ ________</span>
     </div>
-    <h2 style="margin-top:2px">แบบวัดสถานการณ์ 10 ข้อ</h2>
+    <h2 style="margin-top:2px">แบบวัดสถานการณ์ ${ITEMS.length} ข้อ</h2>
     <p class="small muted">เลือกข้อที่ตรงกับสิ่งที่จะทำจริงมากที่สุด ไม่มีคำตอบถูกหรือผิด และไม่มีผลต่อคะแนนเก็บ · ทำทั้งก่อนเรียนและหลังเรียนโดยใช้ช่องแยกกัน</p>
     ${sjt}
     <div style="page-break-before:always;break-before:page"></div>
@@ -2817,9 +2887,9 @@ function renderPaper(){
    ใช้อ้างอิงในรายงานบทที่ 3 และใช้เปิดนำเสนอต่อกรรมการได้โดยตรง
    ================================================================= */
 const MODEL={
-  input:['สภาพปัญหาพฤติกรรมในชั้นเรียน','แบบวัดสถานการณ์ 10 ข้อ (ก่อนเรียน)','รายชื่อและบริบทของห้องเรียน','ฐานงานวิจัย '+28+' รายการ'],
+  input:['สภาพปัญหาพฤติกรรมในชั้นเรียน','แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (ก่อนเรียน)','รายชื่อและบริบทของห้องเรียน','ฐานงานวิจัย '+28+' รายการ'],
   process:['ภารกิจสถานการณ์รายสัปดาห์','กระบวนการ UP TO GROW 8 ขั้น','AI Coach ตั้งคำถาม ไม่ให้คำตอบ','ครูสังเกตพฤติกรรมและให้รูบริก'],
-  output:['แบบวัดสถานการณ์ 10 ข้อ (หลังเรียน)','หลักฐานการตัดสินใจรายบุคคล','ระดับรูบริก 4 ด้านที่ครูยืนยัน','ข้อตกลงและการลงมือจริงของห้อง'],
+  output:['แบบวัดสถานการณ์ '+ITEMS.length+' ข้อ (หลังเรียน)','หลักฐานการตัดสินใจรายบุคคล','ระดับรูบริก 4 ด้านที่ครูยืนยัน','ข้อตกลงและการลงมือจริงของห้อง'],
   outcome:['ทักษะชีวิตและพลเมืองดีสูงขึ้น','พัฒนาการสะสมรายเดือน/ภาคเรียน','ข้อตกลงของห้องที่ยั่งยืน','เครือข่ายครูแลกเปลี่ยนภารกิจ']
 };
 function openModel(){ go('model'); renderModel(); }
@@ -2881,7 +2951,7 @@ function renderMore(){
       ${it('📐','ผลวิเคราะห์ทางสถิติ (บทที่ 4)','t-test · ดัชนีประสิทธิผล E.I. · ขนาดอิทธิพล',"openStats()")}
       ${it('✅','ค่าดัชนีความสอดคล้อง IOC (ภาคผนวก ก)','กรอกผลผู้เชี่ยวชาญ ระบบคำนวณให้',"openIOC()")}
       ${it('📋','แผนการจัดกิจกรรมโฮมรูม (ภาคผนวก ก)','แผนต้นแบบพร้อมพิมพ์แนบรายงาน',"openPlan()")}
-      ${it('🖨️','เครื่องมือวัดฉบับจริง / ใบงาน (ภาคผนวก ข)','แบบวัด 10 ข้อ + เกณฑ์ให้คะแนน',"openPaper()")}
+      ${it('🖨️','เครื่องมือวัดฉบับจริง / ใบงาน (ภาคผนวก ข)','แบบวัด '+ITEMS.length+' ข้อ + เกณฑ์ให้คะแนน',"openPaper()")}
       ${it('🧭','แผนภาพระบบนวัตกรรม (บทที่ 3)','Input → Process → Output → Outcome',"openModel()")}
     </div>
     <h3 style="font-size:14px;margin-top:16px;color:var(--teal-d)">การใช้งานทั่วไป</h3>
@@ -3005,7 +3075,10 @@ async function openStats(){
   }
   const pre=done.map(d=>total(d.pre)), post=done.map(d=>total(d.post));
   const R=pairedT(pre,post);
-  const EI=effIndex(pre,post,40);
+  /* ข้อมูลที่เก็บก่อนปรับแบบวัดจะมีจำนวนข้อไม่เท่าฉบับปัจจุบัน นำมารวมกันไม่ได้ */
+  const nSet=[...new Set(done.map(d=>answeredCount(d.pre)))].sort((a,b)=>a-b);
+  const mixedVersion = nSet.length>1 || (nSet.length===1 && nSet[0]!==ITEMS.length);
+  const EI=effIndex(pre,post,FULL_SCORE);
   const growth=R.mPre?((R.mPost-R.mPre)/R.mPre*100):0;
   /* รายด้าน 7 ด้าน */
   const dimRows=Object.keys(DIMS).map(k=>{
@@ -3048,6 +3121,11 @@ async function openStats(){
       <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยหลัง</div><div class="bignum ok">${R.mPost.toFixed(2)}</div><div class="small muted">SD ${R.sdPost.toFixed(2)}</div></div>
       <div class="card tight"><div class="eyebrow">พัฒนาการ</div><div class="bignum ${R.mD>0?'ok':''}">${(R.mD>=0?'+':'')+R.mD.toFixed(2)}</div><div class="small muted">+${growth.toFixed(1)}%</div></div>
     </div>
+    ${mixedVersion?`<div class="notice" style="margin-top:12px"><b>ข้อมูลมาจากแบบวัดคนละฉบับ</b><br>
+      <span class="small">พบผู้เรียนที่ทำแบบวัด ${nSet.join(' และ ')} ข้อ ขณะที่ฉบับปัจจุบันมี ${ITEMS.length} ข้อ
+      (คะแนนเต็ม ${FULL_SCORE}) <b>คะแนนรวมและดัชนีประสิทธิผลในหน้านี้จึงยังเทียบกันไม่ได้โดยตรง</b>
+      ให้ผู้เรียนที่ทำฉบับเดิมทำแบบวัดหลังเรียนด้วยฉบับปัจจุบันก่อนนำไปรายงาน
+      ส่วนตารางรายด้านและตารางพระบรมราโชบายใช้ค่าเฉลี่ยระดับพฤติกรรม 1–4 จึงยังเทียบกันได้ตามปกติ</span></div>`:''}
   </div>
 
   <div class="card">
@@ -3059,7 +3137,7 @@ async function openStats(){
         <td class="mono" rowspan="2"><b>${pTxt(R.p)}</b></td></tr>
       <tr><td>หลังเรียน</td><td class="mono">${R.n}</td><td class="mono">${R.mPost.toFixed(2)}</td><td class="mono">${R.sdPost.toFixed(2)}</td></tr>
     </tbody></table>
-    <p class="small muted" style="margin-top:6px">คะแนนเต็ม 40 คะแนน · * มีนัยสำคัญที่ระดับ .05 · ** มีนัยสำคัญที่ระดับ .01</p>
+    <p class="small muted" style="margin-top:6px">คะแนนเต็ม ${FULL_SCORE} คะแนน (${ITEMS.length} ข้อ × 4) · * มีนัยสำคัญที่ระดับ .05 · ** มีนัยสำคัญที่ระดับ .01</p>
     <div class="notice ${(isFinite(R.p)&&R.p<0.05)||(R.sD===0&&R.mD>0)?'good':''}" style="margin-top:10px">
       <b>การแปลผล</b><br><span class="small">
       ${isFinite(R.p)&&R.p<0.05
@@ -3075,7 +3153,7 @@ async function openStats(){
     <table style="margin-top:8px"><tbody>
       <tr><td>ผลรวมคะแนนก่อนเรียน (ΣPre)</td><td class="mono">${pre.reduce((a,b)=>a+b,0)}</td></tr>
       <tr><td>ผลรวมคะแนนหลังเรียน (ΣPost)</td><td class="mono">${post.reduce((a,b)=>a+b,0)}</td></tr>
-      <tr><td>จำนวนผู้เรียน (N) × คะแนนเต็ม (40)</td><td class="mono">${R.n} × 40 = ${R.n*40}</td></tr>
+      <tr><td>จำนวนผู้เรียน (N) × คะแนนเต็ม (${FULL_SCORE})</td><td class="mono">${R.n} × ${FULL_SCORE} = ${R.n*FULL_SCORE}</td></tr>
       <tr><td><b>ดัชนีประสิทธิผล (E.I.)</b></td><td class="mono"><b>${isFinite(EI)?EI.toFixed(4):'-'}</b></td></tr>
       <tr><td>คิดเป็นความก้าวหน้า</td><td class="mono">${isFinite(EI)?(EI*100).toFixed(2)+'%':'-'}</td></tr>
       <tr><td><b>ขนาดอิทธิพล Cohen's d</b></td><td class="mono"><b>${isFinite(R.d)?R.d.toFixed(3):'-'}</b> (${dTxt(R.d)})</td></tr>
@@ -3089,21 +3167,41 @@ async function openStats(){
   </div>
 
   <div class="card">
-    <h2>ตารางที่ 3 ผลการเปรียบเทียบรายกลุ่มสมรรถนะ</h2>
+    <h2>ตารางที่ 3 ผลตามพระบรมราโชบายด้านการศึกษา ในหลวงรัชกาลที่ 10</h2>
+    <p class="small muted">คะแนนแต่ละด้านคำนวณจากค่าเฉลี่ยของสมรรถนะที่รองรับด้านนั้น (ระดับพฤติกรรม 1–4)</p>
+    <table style="margin-top:8px"><thead><tr><th style="width:26%">พระบรมราโชบาย</th><th>สมรรถนะที่รองรับ</th>
+      <th>x̄ ก่อน</th><th>x̄ หลัง</th><th>ผลต่าง</th><th>t</th><th>p</th></tr></thead><tbody>
+    ${Object.entries(ROYAL).map(([rk,r])=>{
+      const a=done.map(d=>royalScore(d.pre,rk)), b=done.map(d=>royalScore(d.post,rk));
+      const x=pairedT(a,b);
+      return `<tr><td><b>${esc(r.n)}</b><br><span class="small muted">${esc(r.d)}</span></td>
+        <td class="small">${r.dims.map(k=>esc(DIMS[k].n)).join(' · ')}</td>
+        <td class="mono">${x.mPre.toFixed(2)}</td><td class="mono">${x.mPost.toFixed(2)}</td>
+        <td class="mono ${x.mD>0?'ok':x.mD<0?'bad':''}">${(x.mD>=0?'+':'')+x.mD.toFixed(2)}</td>
+        <td class="mono">${isFinite(x.t)?x.t.toFixed(3):'-'}</td><td class="mono">${pTxt(x.p)}</td></tr>`;
+    }).join('')}
+    </tbody></table>
+    <div class="notice good" style="margin-top:10px"><span class="small">
+      ตารางนี้ตอบวัตถุประสงค์ของโครงการโดยตรง คือการส่งเสริมการดำเนินงานตามพระบรมราโชบายด้านการศึกษา
+      ทั้ง 4 ด้าน โดยแปลงจากพฤติกรรมที่วัดได้จริงของผู้เรียน มิใช่การประเมินตามความรู้สึก</span></div>
+  </div>
+
+  <div class="card">
+    <h2>ตารางที่ 4 ผลการเปรียบเทียบรายกลุ่มสมรรถนะ</h2>
     <table style="margin-top:8px"><thead><tr><th>กลุ่มสมรรถนะ</th><th>x̄ ก่อน</th><th>S.D.</th><th>x̄ หลัง</th><th>S.D.</th><th>ผลต่าง</th><th>t</th><th>p</th><th></th></tr></thead>
       <tbody>${grpRows}</tbody></table>
     <p class="small muted" style="margin-top:6px">คะแนนรายด้านเป็นค่าเฉลี่ยระดับพฤติกรรม 1–4 · df = ${R.df}</p>
   </div>
 
   <div class="card">
-    <h2>ตารางที่ 4 ผลการเปรียบเทียบรายด้าน 7 ด้าน</h2>
+    <h2>ตารางที่ 5 ผลการเปรียบเทียบรายด้าน ${Object.keys(DIMS).length} ด้าน</h2>
     <table style="margin-top:8px"><thead><tr><th>ด้าน</th><th>x̄ ก่อน</th><th>S.D.</th><th>x̄ หลัง</th><th>S.D.</th><th>ผลต่าง</th><th>t</th><th>p</th><th></th></tr></thead>
       <tbody>${dimRows}</tbody></table>
     <p class="small muted" style="margin-top:6px">df = ${R.df} · * p &lt; .05 · ** p &lt; .01 · ns = ไม่มีนัยสำคัญ</p>
   </div>
 
   <div class="card">
-    <h2>ตารางที่ 5 คะแนนรายบุคคลและการคำนวณ (ภาคผนวก ก)</h2>
+    <h2>ตารางที่ 6 คะแนนรายบุคคลและการคำนวณ (ภาคผนวก ก)</h2>
     <table style="margin-top:8px"><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>ก่อน</th><th>หลัง</th><th>D</th><th>D−D̄</th><th>(D−D̄)²</th></tr></thead>
       <tbody>${indRows}
       <tr style="border-top:2px solid var(--line)"><td colspan="4"><b>รวม</b></td>
@@ -3143,7 +3241,7 @@ let IOC=null;
 const IOC_KEY='lc:ioc';
 function loadIOC(){
   try{ const r=LS.get(IOC_KEY); if(r) return JSON.parse(r); }catch(e){}
-  return {nExp:5,names:['','','','',''],r:{},tool:'แบบวัดสถานการณ์ทักษะชีวิตและความเป็นพลเมืองดี (10 ข้อ)'};
+  return {nExp:5,names:['','','','',''],r:{},tool:'แบบวัดสถานการณ์ทักษะชีวิตและความเป็นพลเมืองดี ('+ITEMS.length+' ข้อ)'};
 }
 function saveIOC(){ LS.set(IOC_KEY,JSON.stringify(IOC)); flagSaved(); }
 function openIOC(){ IOC=loadIOC(); go('ioc'); renderIOC(); }
@@ -3299,7 +3397,7 @@ function renderPlan(){
 
     <h3>7. การวัดและประเมินผล</h3>
     <table><thead><tr><th>สิ่งที่วัด</th><th>วิธีวัด</th><th>เครื่องมือ</th><th>เกณฑ์</th></tr></thead><tbody>
-      <tr><td>พัฒนาการทักษะชีวิตและพลเมืองดี</td><td>ทดสอบก่อน–หลัง</td><td>แบบวัดเชิงสถานการณ์ 10 ข้อ</td><td>คะแนนหลังสูงกว่าก่อน</td></tr>
+      <tr><td>พัฒนาการทักษะชีวิตและพลเมืองดี</td><td>ทดสอบก่อน–หลัง</td><td>แบบวัดเชิงสถานการณ์ ${ITEMS.length} ข้อ</td><td>คะแนนหลังสูงกว่าก่อน</td></tr>
       <tr><td>กระบวนการคิดและการตัดสินใจ</td><td>ตรวจผลงาน</td><td>เกณฑ์รูบริก 4 ระดับ</td><td>ระดับ 3 ขึ้นไป</td></tr>
       <tr><td>พฤติกรรมระหว่างทำกิจกรรม</td><td>สังเกต</td><td>แบบบันทึกการสังเกตของครู</td><td>ระดับ 3 ขึ้นไป</td></tr>
       <tr><td>ความตรงของคำตอบ</td><td>สัมภาษณ์</td><td>แบบสัมภาษณ์เชิงกระบวนการคิด</td><td>สอดคล้องกับคำตอบในระบบ</td></tr>
@@ -3466,7 +3564,7 @@ function seedDemo(){
   }
   LS.set('lc:ioc',JSON.stringify({nExp:5,
     names:['รศ.ดร. ผู้เชี่ยวชาญด้านหลักสูตร','ผศ.ดร. ผู้เชี่ยวชาญด้านวัดผล','ดร. ผู้เชี่ยวชาญด้านจิตวิทยา','ครูชำนาญการพิเศษ','ศึกษานิเทศก์'],
-    r:iocR,tool:'แบบวัดสถานการณ์ทักษะชีวิตและความเป็นพลเมืองดี (10 ข้อ)',demo:true}));
+    r:iocR,tool:'แบบวัดสถานการณ์ทักษะชีวิตและความเป็นพลเมืองดี ('+ITEMS.length+' ข้อ)',demo:true}));
   /* เช็คอินใจย้อนหลัง 4 สัปดาห์ เพื่อสาธิตแดชบอร์ดสุขภาวะ */
   try{
     const clamp15=v=>Math.max(1,Math.min(5,Math.round(v)));
@@ -3517,6 +3615,209 @@ function clearDemo(){
 }
 function openDemoPanel(){
   go('more'); renderMore();
+}
+
+/* ================= ระดับโรงเรียน: ทะเบียนห้องเรียนและแดชบอร์ดผู้บริหาร =================
+   ปิดช่องว่างสำคัญ คือเดิมระบบเป็นเครื่องมือของครูรายห้อง ผู้บริหารมองไม่เห็นภาพรวม
+
+   หลักการออกแบบ
+   1. ครูแต่ละห้องตั้ง "รหัสห้อง" ครั้งเดียวที่หน้าตั้งค่า แล้วระบบขึ้นทะเบียนให้อัตโนมัติ
+   2. ทะเบียนเก็บเฉพาะข้อมูลสรุประดับห้อง ไม่มีคำตอบรายบุคคล
+      ผู้บริหารจึงเห็นภาพรวมได้โดยไม่ล่วงล้ำความเป็นส่วนตัวของผู้เรียน
+   3. ห้องที่ยังไม่ตั้งรหัส ระบบยังทำงานเหมือนเดิมทุกอย่าง ไม่กระทบข้อมูลเดิม
+   ======================================================================== */
+const ROOMS_KEY='lc:school:rooms';
+const roomSumKey = code => 'lc:school:sum:'+code;
+
+function roomCode(){ return (LS.get('lc:cfg:roomcode')||'').trim(); }
+function schoolName(){ return (LS.get('lc:cfg:school')||'').trim(); }
+
+async function loadRooms(){
+  const raw=await S.get(ROOMS_KEY,true);
+  try{ const a=JSON.parse(raw||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; }
+}
+/* ขึ้นทะเบียนห้องนี้เข้าสู่ทะเบียนโรงเรียน เรียกตอนบันทึกการตั้งค่าห้องเรียน */
+async function registerRoom(){
+  const code=roomCode(); if(!code) return false;
+  const rooms=await loadRooms();
+  const i=rooms.findIndex(r=>r.code===code);
+  const rec={code, room:ROOM, grade:GRADE, school:schoolName(),
+             n:ROSTER.length, teacher:(LS.get('lc:cfg:teacher')||'').trim(), at:Date.now()};
+  if(i>=0) rooms[i]=Object.assign(rooms[i],rec); else rooms.push(rec);
+  const j=JSON.stringify(rooms);
+  LS.set(ROOMS_KEY,j); queueRemote(ROOMS_KEY,'ทะเบียนห้องเรียน',j);
+  await flushRemote(true);
+  return true;
+}
+
+/* สร้างสรุประดับห้อง ไม่มีคำตอบรายบุคคล เพื่อให้ผู้บริหารรวมภาพได้ */
+async function buildRoomSummary(){
+  const code=roomCode();
+  if(!code){ toast('ตั้งรหัสห้องที่หน้าตั้งค่าห้องเรียนก่อน'); return null; }
+  const perMission=[];
+  for(const m of MISSIONS.filter(x=>x.enabled)){
+    const all=await loadAllForMission(m.id);
+    const done=all.filter(x=>x&&x.done);
+    if(!done.length){ perMission.push({mid:m.id,week:m.week,title:m.title,n:0}); continue; }
+    const pre=done.map(d=>total(d.pre)), post=done.map(d=>total(d.post));
+    const R=pairedT(pre,post);
+    const rub=[0,0,0,0];
+    done.forEach(d=>Object.keys(RUBRICS).forEach(k=>{const v=d.teacher&&d.teacher.score&&d.teacher.score[k]; if(v)rub[v-1]++;}));
+    perMission.push({mid:m.id,week:m.week,title:m.title,n:done.length,
+      total:ROSTER.length, items:answeredCount(done[0].pre),
+      mPre:+R.mPre.toFixed(2), mPost:+R.mPost.toFixed(2), mD:+R.mD.toFixed(2),
+      t:isFinite(R.t)?+R.t.toFixed(3):null, p:isFinite(R.p)?R.p:null,
+      ei:+effIndex(pre,post,FULL_SCORE).toFixed(4),
+      dims:Object.fromEntries(Object.keys(DIMS).map(k=>[k,
+        [+stMean(done.map(d=>dimScore(d.pre,k))).toFixed(2),
+         +stMean(done.map(d=>dimScore(d.post,k))).toFixed(2)]])),
+      royal:Object.fromEntries(Object.keys(ROYAL).map(k=>[k,
+        [+stMean(done.map(d=>royalScore(d.pre,k))).toFixed(2),
+         +stMean(done.map(d=>royalScore(d.post,k))).toFixed(2)]])),
+      rubric:rub});
+  }
+  /* สุขภาวะสัปดาห์ปัจจุบัน */
+  const wk=isoWeekKey(); const moods=[]; let help=0;
+  for(let i=0;i<ROSTER.length;i++){
+    const r=await pulseRec(wk,i);
+    if(r){ moods.push(r.mood); if(r.help&&r.help.need) help++; }
+  }
+  const sum={code, room:ROOM, grade:GRADE, school:schoolName(),
+    teacher:(LS.get('lc:cfg:teacher')||'').trim(), n:ROSTER.length,
+    missions:perMission, pulse:{week:wk,n:moods.length,avg:moods.length?+stMean(moods).toFixed(2):null,help},
+    at:Date.now()};
+  const j=JSON.stringify(sum);
+  LS.set(roomSumKey(code),j); queueRemote(roomSumKey(code),'สรุปห้อง '+code,j);
+  await flushRemote(true);
+  await registerRoom();
+  return sum;
+}
+async function publishRoomSummary(){
+  const s=await buildRoomSummary();
+  if(s) toast('ส่งสรุปของห้อง '+s.code+' ให้ผู้บริหารแล้ว',1);
+}
+
+/* ---------- แดชบอร์ดผู้บริหาร ---------- */
+async function openSchool(){
+  go('school');
+  $('v-school').innerHTML='<div class="card"><h2>กำลังรวบรวมข้อมูลทุกห้อง…</h2></div>';
+  await pullAll('lc:school:');
+  const rooms=await loadRooms();
+  const sums=[];
+  for(const r of rooms){
+    const raw=await S.get(roomSumKey(r.code),true);
+    if(!raw) continue;
+    try{ sums.push(JSON.parse(raw)); }catch(e){}
+  }
+  if(!sums.length){
+    $('v-school').innerHTML=`<div class="card">
+      <div class="eyebrow">ระดับโรงเรียน · แดชบอร์ดผู้บริหาร</div>
+      <h1>ยังไม่มีห้องส่งข้อมูล</h1>
+      <p class="muted" style="max-width:64ch">แดชบอร์ดนี้รวมผลจากทุกห้องเรียนที่ครูเปิดใช้ระบบ
+      เพื่อให้ผู้บริหารเห็นภาพรวมทั้งโรงเรียนตามพระบรมราโชบาย 4 ด้าน</p>
+      <div class="notice good"><b>วิธีให้ห้องเรียนเข้าสู่ระบบโรงเรียน</b><br><span class="small">
+        ครูประจำห้องเปิดเมนู ตั้งค่าห้องเรียน → กรอก <b>ชื่อโรงเรียน</b> และ <b>รหัสห้อง</b> → บันทึก
+        → แล้วกดปุ่ม <b>ส่งสรุปให้ผู้บริหาร</b> เพียงเท่านี้ห้องนั้นจะปรากฏในแดชบอร์ดนี้ทันที</span></div>
+      <div class="row"><button onclick="openSchool()">รีเฟรช</button>
+        <button onclick="needTeacher(openSetup)">ไปหน้าตั้งค่าห้องเรียน</button>
+        <button onclick="go('home')">หน้าแรก</button></div></div>`;
+    return;
+  }
+  const sname=sums.find(s=>s.school)?.school||'โรงเรียน';
+  const agg=(pick)=>{ const v=sums.map(pick).filter(x=>x!=null&&isFinite(x)); return v.length?stMean(v):null; };
+  const latest=s=>{ const ms=(s.missions||[]).filter(m=>m.n>0); return ms.length?ms[ms.length-1]:null; };
+  const withData=sums.filter(s=>latest(s));
+  const totalStudents=sums.reduce((a,s)=>a+(s.n||0),0);
+  const totalDone=withData.reduce((a,s)=>a+(latest(s).n||0),0);
+  const cc=CPAL();
+  /* ผลตามพระบรมราโชบายรวมทั้งโรงเรียน ถ่วงน้ำหนักตามจำนวนผู้เรียนของแต่ละห้อง */
+  const royalAgg=Object.keys(ROYAL).map(rk=>{
+    let wPre=0,wPost=0,w=0;
+    withData.forEach(s=>{ const m=latest(s); const r=m.royal&&m.royal[rk]; if(!r) return;
+      wPre+=r[0]*m.n; wPost+=r[1]*m.n; w+=m.n; });
+    return {rk, pre:w?wPre/w:0, post:w?wPost/w:0};
+  });
+  $('v-school').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานภาพรวมระดับโรงเรียน</div>
+  <div class="card">
+    <div class="eyebrow">ระดับโรงเรียน · แดชบอร์ดผู้บริหาร</div>
+    <h1>${esc(sname)}</h1>
+    <p class="muted small">รวมผลจาก ${sums.length} ห้องเรียน · ผู้เรียนทั้งหมด ${totalStudents} คน · ข้อมูลล่าสุด ${fmtDT(Math.max(...sums.map(s=>s.at||0)))}</p>
+    <div class="grid3" style="margin-top:12px">
+      <div class="card tight"><div class="eyebrow">ห้องที่เข้าร่วม</div><div class="bignum">${sums.length}</div></div>
+      <div class="card tight"><div class="eyebrow">ผู้เรียนที่ทำครบ</div><div class="bignum">${totalDone}/${totalStudents}</div></div>
+      <div class="card tight"><div class="eyebrow">ดัชนีประสิทธิผลเฉลี่ย</div>
+        <div class="bignum ${(agg(s=>latest(s)&&latest(s).ei)||0)>=0.5?'ok':''}">${(()=>{const v=agg(s=>latest(s)&&latest(s).ei); return v==null?'-':v.toFixed(4);})()}</div>
+        <div class="small muted">เกณฑ์ 0.50</div></div>
+    </div>
+    <div class="row noprint" style="margin-top:10px">
+      <button onclick="openSchool()">รีเฟรช</button>
+      <button onclick="schoolCSV()">ส่งออก CSV</button>
+      <button onclick="window.print()">พิมพ์รายงาน</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>
+
+  <div class="card">
+    <h2>ผลตามพระบรมราโชบายด้านการศึกษา ระดับโรงเรียน</h2>
+    <p class="small muted">ถ่วงน้ำหนักตามจำนวนผู้เรียนของแต่ละห้อง · ระดับพฤติกรรม 1–4</p>
+    ${svgBar(royalAgg.map(r=>ROYAL[r.rk].s), royalAgg.map(r=>r.pre), royalAgg.map(r=>r.post),{max:4})}
+    <table style="margin-top:12px"><thead><tr><th>พระบรมราโชบาย</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th></tr></thead><tbody>
+      ${royalAgg.map(r=>`<tr><td>${esc(ROYAL[r.rk].n)}<br><span class="small muted">${esc(ROYAL[r.rk].d)}</span></td>
+        <td class="mono">${r.pre.toFixed(2)}</td><td class="mono">${r.post.toFixed(2)}</td>
+        <td class="mono ${r.post-r.pre>0?'ok':''}">${(r.post-r.pre>=0?'+':'')+(r.post-r.pre).toFixed(2)}</td></tr>`).join('')}
+    </tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>เปรียบเทียบระหว่างห้องเรียน</h2>
+    <div style="overflow-x:auto"><table><thead><tr><th>รหัสห้อง</th><th>ห้อง</th><th>ระดับชั้น</th><th>ครูผู้สอน</th>
+      <th>ทำครบ</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th><th>E.I.</th><th>สุขภาวะ</th><th>ขอช่วยเหลือ</th></tr></thead><tbody>
+    ${sums.map(s=>{const m=latest(s);
+      return `<tr><td class="mono">${esc(s.code)}</td><td>${esc(s.room||'-')}</td><td>${esc(s.grade||'-')}</td>
+        <td class="small">${esc(s.teacher||'-')}</td>
+        <td class="mono">${m?m.n+'/'+(m.total||s.n):'<span class="muted">ยังไม่มี</span>'}</td>
+        <td class="mono">${m?m.mPre.toFixed(2):'-'}</td><td class="mono">${m?m.mPost.toFixed(2):'-'}</td>
+        <td class="mono ${m&&m.mD>0?'ok':''}">${m?((m.mD>=0?'+':'')+m.mD.toFixed(2)):'-'}</td>
+        <td class="mono ${m&&m.ei>=0.5?'ok':m?'bad':''}">${m?m.ei.toFixed(3):'-'}</td>
+        <td>${s.pulse&&s.pulse.avg!=null?`<span class="mono">${s.pulse.avg.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(s.pulse.avg)}</span>`:'<span class="muted small">—</span>'}</td>
+        <td class="mono ${s.pulse&&s.pulse.help?'bad':''}">${s.pulse?s.pulse.help:0}</td></tr>`;}).join('')}
+    </tbody></table></div>
+    <p class="small muted" style="margin-top:8px">ตัวเลขมาจากภารกิจล่าสุดที่แต่ละห้องดำเนินการแล้วเสร็จ
+      ห้องที่ยังไม่มีข้อมูลแสดงว่ายังอยู่ระหว่างจัดกิจกรรม</p>
+  </div>
+
+  <div class="card">
+    <h2>ห้องที่ควรได้รับการสนับสนุนก่อน</h2>
+    ${(()=>{const w=[];
+      sums.forEach(s=>{const m=latest(s); const r=[];
+        if(!m) r.push('ยังไม่มีภารกิจที่ทำครบ');
+        else{ if(m.ei<0.5) r.push('ดัชนีประสิทธิผลต่ำกว่าเกณฑ์ 0.50');
+              if(m.n<(m.total||s.n)*0.7) r.push('ผู้เรียนทำครบไม่ถึงร้อยละ 70'); }
+        if(s.pulse&&s.pulse.help>0) r.push('มีผู้เรียนขอความช่วยเหลือ '+s.pulse.help+' คน');
+        if(s.pulse&&s.pulse.avg!=null&&s.pulse.avg<3) r.push('อารมณ์เฉลี่ยของห้องต่ำกว่า 3.00');
+        if(r.length) w.push({s,r});});
+      return w.length?w.map(x=>`<div class="opt" style="cursor:default">
+          <h4 style="margin:0">${esc(x.s.room||x.s.code)} <span class="small muted">(${esc(x.s.code)})</span></h4>
+          <p class="small muted" style="margin:3px 0 0">${x.r.map(esc).join(' · ')}</p></div>`).join('')
+        :'<p class="muted small">ทุกห้องอยู่ในเกณฑ์ปกติ</p>';})()}
+    <div class="notice good" style="margin-top:10px"><span class="small">
+      แดชบอร์ดนี้แสดงเฉพาะข้อมูลสรุประดับห้อง <b>ไม่มีคำตอบรายบุคคลของผู้เรียน</b>
+      ผู้บริหารจึงเห็นภาพรวมเพื่อวางแผนสนับสนุนได้ โดยไม่ล่วงล้ำความเป็นส่วนตัว
+      ข้อมูลรายบุคคลยังอยู่กับครูประจำห้องตามระบบดูแลช่วยเหลือนักเรียน</span></div>
+  </div>`;
+}
+function schoolCSV(){
+  const el=$('v-school'); if(!el) return;
+  const rows=[];
+  el.querySelectorAll('table').forEach((t,ti)=>{
+    rows.push(['ตารางที่ '+(ti+1)]);
+    t.querySelectorAll('tr').forEach(tr=>rows.push([...tr.querySelectorAll('th,td')].map(c=>c.textContent.trim())));
+    rows.push(['']);
+  });
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='uptogrow_school_summary.csv'; a.click();
 }
 
 /* ================= เช็คอินใจ · Pulse: ตรวจสุขภาวะรายสัปดาห์ 60 วินาที =================
