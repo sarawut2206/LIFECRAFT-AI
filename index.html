@@ -278,24 +278,108 @@ body.pwa .navrow,body.pwa #body .card>.row:last-of-type{
 #demoBar.hide{display:none}
 body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 @media print{#demoBar{background:#fff;border:2px solid #000;color:#000}}
+
+/* ===== แถบเมนูบนสุด ===== */
+.navbar{position:sticky;top:0;z-index:60;background:var(--panel);border-bottom:1px solid var(--line);
+  box-shadow:0 1px 3px #0e402f0f}
+.navin{max-width:1060px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:6px;min-height:58px;flex-wrap:wrap}
+.navbrand{font-family:var(--display);font-weight:700;font-size:17px;white-space:nowrap;margin-right:8px;
+  background:none;border:0;padding:6px 4px;color:var(--text)}
+.navbrand span{color:var(--teal)}
+.navbrand:hover{border:0;color:var(--teal-d)}
+.navitem{position:relative}
+.navbtn{background:transparent;border:0;padding:9px 13px;border-radius:10px;font-size:16px;color:var(--text);
+  white-space:nowrap;min-height:44px}
+.navbtn:hover{background:var(--panel2);border:0;color:var(--teal-d)}
+.navbtn.on{background:var(--teal);color:#fff;font-weight:600}
+.navbtn.on:hover{background:var(--teal-d);color:#fff}
+.navbtn .cev{font-size:11px;opacity:.65;margin-left:5px}
+.navmenu{position:absolute;top:calc(100% + 6px);left:0;min-width:290px;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px #0e402f22;padding:7px;z-index:70}
+.navmenu.right{left:auto;right:0}
+.navmenu button{display:flex;width:100%;text-align:left;background:transparent;border:0;padding:10px 12px;
+  border-radius:9px;gap:11px;align-items:flex-start;font-size:16px;color:var(--text);min-height:44px}
+.navmenu button:hover{background:var(--panel2);border:0;color:var(--text)}
+.navmenu button b{display:block;font-weight:600;line-height:1.35}
+.navmenu button small{display:block;color:var(--muted);font-size:13px;line-height:1.4;margin-top:1px;font-weight:400}
+.navmenu .mi{font-size:19px;line-height:1.2;flex:0 0 24px}
+.navmenu hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
+.navmenu .mhead{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-d);
+  font-family:var(--mono);padding:8px 12px 4px}
+.navsp{flex:1}
+.navtag{font-size:13px;color:var(--muted);white-space:nowrap}
+@media(max-width:860px){
+  .navin{min-height:52px;gap:3px;padding:6px 12px}
+  .navbrand{font-size:15px;width:100%;margin:0}
+  .navbtn{padding:8px 10px;font-size:15px;min-height:44px}
+  .navmenu{min-width:min(300px,calc(100vw - 30px))}
+  .navtag{display:none}
+}
+/* ===== หน้าแรกแบบใหม่ ===== */
+.hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+@media(max-width:860px){.hgrid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:430px){.hgrid{grid-template-columns:1fr}}
+.htile{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 15px;height:100%}
+.htile:hover{border-color:var(--teal);background:var(--soft)}
+.htile .ic{font-size:26px;line-height:1}
+.htile b{font-family:var(--display);font-size:16.5px;font-weight:700;line-height:1.3}
+.htile small{color:var(--muted);font-size:13.5px;line-height:1.45;font-weight:400}
+.htile.acc{background:var(--teal);border-color:var(--teal)}
+.htile.acc b,.htile.acc small{color:#fff}
+.htile.acc small{opacity:.9}
+.htile.acc:hover{background:var(--teal-d);border-color:var(--teal-d)}
+.lvrow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+@media(max-width:860px){.lvrow{grid-template-columns:repeat(2,1fr)}}
+.lvcard{border:1px solid var(--line);border-radius:12px;padding:13px;background:var(--soft);text-align:left}
+.lvcard .n{font-family:var(--mono);font-size:11.5px;color:var(--teal-d);letter-spacing:.1em}
+.lvcard b{display:block;font-size:15.5px;margin:3px 0 2px}
+.lvcard small{color:var(--muted);font-size:13px;display:block;line-height:1.4}
+.lvcard:hover{border-color:var(--teal);background:var(--panel2)}
+/* การ์ดวันจันทร์-ศุกร์ตามปฏิทิน */
+.dayrow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+@media(max-width:760px){.dayrow{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:400px){.dayrow{grid-template-columns:1fr}}
+.daycard{border:1px solid var(--line);border-radius:12px;padding:14px 12px;background:var(--panel);text-align:center}
+.daycard .dn{font-family:var(--mono);font-size:11.5px;color:var(--muted);letter-spacing:.08em}
+.daycard .di{font-size:25px;line-height:1.3;margin:5px 0}
+.daycard .dt{font-size:14.5px;font-weight:600;line-height:1.3}
+.daycard .ds{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.35}
+.daycard.today{border-color:var(--teal);border-width:2px;background:var(--soft)}
+.daycard.past{opacity:.72}
+.daycard.future{opacity:.5;border-style:dashed}
+.daycard.done{background:var(--panel2);border-color:var(--teal)}
+.daycard:hover{border-color:var(--teal)}
 </style>
 
+<nav class="navbar noprint" id="navbar">
+  <div class="navin">
+    <button class="navbrand" onclick="go('home');navClose()">Life Competency <span>UP TO GROW</span></button>
+    <div class="navitem">
+      <button class="navbtn" id="navb-mission" onclick="navToggle('mission')" aria-haspopup="true" aria-expanded="false">ภารกิจ<span class="cev">▾</span></button>
+      <div class="navmenu hide" id="navm-mission"></div>
+    </div>
+    <div class="navitem">
+      <button class="navbtn" id="navb-teacher" onclick="navToggle('teacher')" aria-haspopup="true" aria-expanded="false">สำหรับครู<span class="cev">▾</span></button>
+      <div class="navmenu hide" id="navm-teacher"></div>
+    </div>
+    <div class="navitem">
+      <button class="navbtn" id="navb-admin" onclick="navToggle('admin')" aria-haspopup="true" aria-expanded="false">ผู้บริหาร<span class="cev">▾</span></button>
+      <div class="navmenu right hide" id="navm-admin"></div>
+    </div>
+    <div class="navsp"></div>
+    <span class="navtag" id="tagRoom">ห้องเรียนภารกิจพลเมืองดี</span>
+    <div class="badge empty" id="whoami">ยังไม่ได้เลือกชื่อ</div>
+    <span class="saved" id="savedTag">บันทึกในเครื่อง</span>
+    <span class="saved" id="netTag"></span>
+    <div class="navitem">
+      <button class="navbtn" id="navb-more" onclick="navToggle('more')" aria-haspopup="true" aria-expanded="false" title="ตั้งค่าการแสดงผล" aria-label="ตั้งค่าการแสดงผล">⋯</button>
+      <div class="navmenu right hide" id="navm-more"></div>
+    </div>
+  </div>
+</nav>
+
 <div class="wrap">
-<header class="top noprint">
-  <div><div class="logo">Life Competency <span>UP TO GROW</span></div>
-  <div class="tagline" id="tagRoom">LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี</div></div>
-  <div class="spacer"></div>
-  <div class="badge empty" id="whoami">ยังไม่ได้เลือกชื่อ</div>
-  <span class="saved" id="savedTag">บันทึกในเครื่อง</span>
-  <span class="saved" id="netTag"></span>
-  <span class="a11y noprint" style="margin-left:2px">
-    <button class="ghost" title="ตัวอักษรเล็กลง" aria-label="ตัวอักษรเล็กลง" onclick="bumpZoom(-1)">ก-</button>
-    <button class="ghost" title="ตัวอักษรใหญ่ขึ้น" aria-label="ตัวอักษรใหญ่ขึ้น" onclick="bumpZoom(1)">ก+</button>
-    <button class="ghost" title="โหมดความคมชัดสูง" aria-label="โหมดความคมชัดสูง" onclick="toggleHC()">◐</button>
-  </span>
-  <button class="ghost small" onclick="retryNow()">ส่งข้อมูลซ้ำ</button>
-  <button class="ghost small" onclick="go('home')">หน้าแรก</button>
-</header>
 <div id="demoBar" class="hide"></div>
 
 <section id="v-home">
@@ -312,31 +396,45 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
     <div id="resumeBox" style="margin-top:16px"></div>
   </div>
 
-  <div class="grid2">
-    <div class="card zone zone-student">
-      <div class="zh"><span class="ic">🎒</span><h2>สำหรับนักเรียน</h2></div>
-      <p class="small muted" style="margin:2px 0 0">เลือกภารกิจของสัปดาห์นี้ แล้วเริ่มได้ทันที ระบบจะจำที่ค้างไว้ให้</p>
-      <div class="btncol">
-        <button class="primary mbtn" onclick="scrollToMissions()"><span class="mi">▶</span><span class="mt">เริ่มทำภารกิจประจำสัปดาห์<small>เลือกจากรายการภารกิจด้านล่าง</small></span></button>
-        <button class="mbtn" onclick="openDaily()"><span class="mi">📅</span><span class="mt">ภารกิจวันนี้ · 5 นาที<small>จันทร์-ศุกร์ · รู้ คิด ลงมือ เคารพผู้อื่น สะท้อน</small></span></button>
-        <button class="mbtn" onclick="qStart()"><span class="mi">⚡</span><span class="mt">ทำภารกิจด่วนที่ครูเปิดไว้<small>สำหรับสถานการณ์เร่งด่วนในคาบ</small></span></button>
-        <button class="mbtn" onclick="openPulse()"><span class="mi">💚</span><span class="mt">เช็คอินใจ 60 วินาที<small>บอกความรู้สึกสัปดาห์นี้ · ขอความช่วยเหลือจากครูได้</small></span></button>
-      </div>
+  <div class="card">
+    <h2 style="margin:0">นักเรียนเริ่มตรงนี้</h2>
+    <p class="small muted" style="margin:4px 0 0">แตะปุ่มที่ครูบอก ระบบจะจำที่ค้างไว้ให้เสมอ</p>
+    <div class="hgrid">
+      <button class="htile acc" onclick="openDaily()"><span class="ic">📅</span>
+        <b>ภารกิจวันนี้</b><small>ใช้เวลา 5 นาที · จันทร์ถึงศุกร์</small></button>
+      <button class="htile" onclick="scrollToMissions()"><span class="ic">🎯</span>
+        <b>ภารกิจสัปดาห์นี้</b><small>สถานการณ์เต็มรูปแบบ 8 ขั้น</small></button>
+      <button class="htile" onclick="openPulse()"><span class="ic">💚</span>
+        <b>เช็คอินใจ</b><small>60 วินาที · ขอให้ครูช่วยได้</small></button>
+      <button class="htile" onclick="qStart()"><span class="ic">⚡</span>
+        <b>ภารกิจด่วน</b><small>เฉพาะเมื่อครูเปิดไว้</small></button>
     </div>
-    <div class="card zone zone-teacher">
-      <div class="zh"><span class="ic">🧑‍🏫</span><h2>สำหรับครู</h2></div>
-      <p class="small muted" style="margin:2px 0 0">ติดตามผล ประเมิน และจัดการห้องเรียน (มีรหัสป้องกัน)</p>
-      <div class="btncol">
-        <button class="mbtn" onclick="needTeacher(openTeacher)"><span class="mi">📊</span><span class="mt">Dashboard และผลก่อน–หลัง<small>กราฟ ตารางคะแนน ส่งออก CSV</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openEvid)"><span class="mi">🏅</span><span class="mt">หลักฐานความสำเร็จ 5 ด้าน<small>ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม · ครูยืนยันการลงมือทำจริง</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openCycle)"><span class="mi">🧩</span><span class="mt">ภารกิจต่อเนื่อง 4 ชั้น<small>วัน → สัปดาห์ → เดือน → เทอม · ครูกดปิดรอบเอง</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openDailyTeach)"><span class="mi">📅</span><span class="mt">ติดตามภารกิจรายวัน · รายงานผล<small>ใครทำวันนี้ · สรุปรายสัปดาห์ / เดือน / ภาคเรียน</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openPulseDash)"><span class="mi">💚</span><span class="mt">แดชบอร์ดสุขภาวะ · เช็คอินใจ<small>ใครขอความช่วยเหลือ · แนวโน้มรายสัปดาห์</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openSchool)"><span class="mi">🏫</span><span class="mt">แดชบอร์ดผู้บริหาร · ทั้งโรงเรียน<small>เทียบทุกห้อง · ผลตามพระบรมราโชบาย 4 ด้าน</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openQuick)"><span class="mi">⚡</span><span class="mt">สร้างภารกิจด่วนรายวัน<small>AI ร่างสถานการณ์ ครูอนุมัติ</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openBatch)"><span class="mi">📝</span><span class="mt">โหมดไม่มีมือถือ · กรอกแทน<small>ครูกรอกคะแนนจากใบงานกระดาษ</small></span></button>
-        <button class="mbtn" onclick="needTeacher(openMoreTeacher)"><span class="mi">⋯</span><span class="mt">เครื่องมือครูเพิ่มเติม<small>ภาพรวมภาคเรียน · พิมพ์ใบงาน · ตั้งค่า</small></span></button>
-      </div>
+  </div>
+
+  <div class="card" id="teacherQuick">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><h2 style="margin:0">🧑‍🏫 สำหรับครู · ภารกิจ 4 ระดับ</h2>
+        <p class="small muted" style="margin:4px 0 0">แตะระดับที่ต้องการ หรือใช้เมนู <b>ภารกิจ</b> ด้านบนก็ได้ · ระดับล่างจะไหลขึ้นเป็นระดับบนให้อัตโนมัติ</p></div>
+    </div>
+    <div class="lvrow">
+      <button class="lvcard" onclick="needTeacher(openDayPlan)"><span class="n">ระดับ 1</span>
+        <b>📅 รายวัน</b><small>จันทร์–ศุกร์ ตามปฏิทิน</small></button>
+      <button class="lvcard" onclick="needTeacher(()=>openLevel('week'))"><span class="n">ระดับ 2</span>
+        <b>🗓️ รายสัปดาห์</b><small>สรุปจาก 5 วัน</small></button>
+      <button class="lvcard" onclick="needTeacher(()=>openLevel('month'))"><span class="n">ระดับ 3</span>
+        <b>📆 รายเดือน</b><small>สรุปจาก 4 สัปดาห์</small></button>
+      <button class="lvcard" onclick="needTeacher(()=>openLevel('term'))"><span class="n">ระดับ 4</span>
+        <b>🎓 รายเทอม</b><small>สรุปจาก 4–5 เดือน</small></button>
+    </div>
+    <div class="hgrid" style="margin-top:14px">
+      <button class="htile" onclick="needTeacher(openTeacher)"><span class="ic">📊</span>
+        <b>Dashboard ผลก่อน–หลัง</b><small>กราฟ ตารางคะแนน CSV</small></button>
+      <button class="htile" onclick="needTeacher(openEvid)"><span class="ic">🏅</span>
+        <b>หลักฐานความสำเร็จ 5 ด้าน</b><small>ตัวชี้วัดและเกณฑ์</small></button>
+      <button class="htile" onclick="needTeacher(openPulseDash)"><span class="ic">💚</span>
+        <b>แดชบอร์ดสุขภาวะ</b><small>ใครขอความช่วยเหลือ</small></button>
+      <button class="htile" onclick="needTeacher(openMoreTeacher)"><span class="ic">⋯</span>
+        <b>เครื่องมือเพิ่มเติม</b><small>พิมพ์ใบงาน · ตั้งค่าห้อง</small></button>
     </div>
   </div>
 
@@ -396,6 +494,8 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <section id="v-dailyteach" class="hide"></section>
 <section id="v-dailyrep" class="hide"></section>
 <section id="v-cycle" class="hide"></section>
+<section id="v-dayplan" class="hide"></section>
+<section id="v-level" class="hide"></section>
 <section id="v-school" class="hide"></section>
 <section id="v-evid" class="hide"></section>
 <section id="v-act" class="hide"></section>
@@ -732,10 +832,91 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
-  paintDemoBar();
+  paintDemoBar(); navClose();
   if(v==='home') renderMissionList();}
+
+/* ===== แถบเมนูบนสุด =====
+   เมนู "ภารกิจ" เรียงตามความสัมพันธ์ 4 ระดับ วัน→สัปดาห์→เดือน→เทอม
+   เมนูของครูและผู้บริหารย้ายขึ้นมาบนสุด ทำให้หน้าแรกเหลือเฉพาะสิ่งที่นักเรียนต้องใช้ */
+const NAV_MENUS={
+  mission:[
+    {h:'ภารกิจ 4 ระดับ · ระดับล่างไหลขึ้นเป็นระดับบน'},
+    {i:'📅',t:'ภารกิจรายวัน',d:'จันทร์–ศุกร์ ตามปฏิทิน วันละ 5 นาที',fn:"needTeacher(openDayPlan)"},
+    {i:'🗓️',t:'ภารกิจรายสัปดาห์',d:'สรุปจากภารกิจรายวัน 5 วัน',fn:"needTeacher(()=>openLevel('week'))"},
+    {i:'📆',t:'ภารกิจรายเดือน',d:'สรุปจากภารกิจรายสัปดาห์ 4 สัปดาห์',fn:"needTeacher(()=>openLevel('month'))"},
+    {i:'🎓',t:'ภารกิจรายเทอม',d:'สรุปจากภารกิจรายเดือน 4–5 เดือน',fn:"needTeacher(()=>openLevel('term'))"},
+    {sep:1},
+    {i:'🧩',t:'ผังภารกิจต่อเนื่องทั้ง 4 ชั้น',d:'ดูภาพรวมและกดปิดรอบแต่ละชั้น',fn:"needTeacher(openCycle)"},
+    {sep:1},
+    {h:'สำหรับนักเรียน'},
+    {i:'▶',t:'ทำภารกิจวันนี้',d:'นักเรียนแตะชื่อตัวเองแล้วเริ่มได้เลย',fn:"openDaily()"},
+    {i:'🎯',t:'ทำภารกิจประจำสัปดาห์',d:'สถานการณ์เต็มรูปแบบ 8 ขั้น',fn:"scrollToMissions()"},
+    {i:'⚡',t:'ทำภารกิจด่วน',d:'เฉพาะที่ครูเปิดไว้',fn:"qStart()"},
+  ],
+  teacher:[
+    {h:'ติดตามและประเมิน'},
+    {i:'📊',t:'Dashboard และผลก่อน–หลัง',d:'กราฟ ตารางคะแนน ส่งออก CSV',fn:"needTeacher(openTeacher)"},
+    {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม',fn:"needTeacher(openEvid)"},
+    {i:'📅',t:'ติดตามภารกิจรายวัน',d:'ใครทำวันนี้ · บันทึกแทนเด็กไม่มีมือถือ',fn:"needTeacher(openDailyTeach)"},
+    {i:'💚',t:'แดชบอร์ดสุขภาวะ · เช็คอินใจ',d:'ใครขอความช่วยเหลือ · แนวโน้ม',fn:"needTeacher(openPulseDash)"},
+    {i:'📐',t:'ผลวิเคราะห์ทางสถิติ',d:'t-test · E.I. · ความเที่ยงตรงเชิงสภาพ',fn:"needTeacher(openStats)"},
+    {sep:1},
+    {h:'สร้างและจัดการ'},
+    {i:'⚡',t:'สร้างภารกิจด่วนรายวัน',d:'AI ร่างสถานการณ์ ครูอนุมัติ',fn:"needTeacher(openQuick)"},
+    {i:'📝',t:'โหมดไม่มีมือถือ · กรอกแทน',d:'ครูกรอกคะแนนจากใบงานกระดาษ',fn:"needTeacher(openBatch)"},
+    {i:'🖨️',t:'พิมพ์ใบงาน / แบบวัดกระดาษ',d:'สำหรับนักเรียนที่ไม่มีอุปกรณ์',fn:"needTeacher(openPaper)"},
+    {i:'⚙️',t:'ตั้งค่าห้องเรียน',d:'รายชื่อ ระดับชั้น รหัสห้อง',fn:"needTeacher(openSetup)"},
+    {i:'⋯',t:'เครื่องมือครูเพิ่มเติม',d:'IOC · แผนการสอน · ฐานงานวิจัย · โหมดสาธิต',fn:"needTeacher(openMoreTeacher)"},
+  ],
+  admin:[
+    {h:'ระดับโรงเรียน'},
+    {i:'🏫',t:'แดชบอร์ดผู้บริหาร',d:'เทียบทุกห้อง · พระบรมราโชบาย 4 ด้าน',fn:"needTeacher(openSchool)"},
+    {i:'🎓',t:'สรุปผลรายเทอมของห้อง',d:'ตารางตัวชี้วัดสะสม พิมพ์แนบรายงานได้',fn:"needTeacher(()=>openLevel('term'))"},
+    {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ใช้ประกอบการประเมินโครงการ',fn:"needTeacher(openEvid)"},
+    {sep:1},
+    {i:'🧭',t:'แผนภาพระบบนวัตกรรม',d:'Input → Process → Output → Outcome',fn:"openModel()"},
+    {i:'📚',t:'ฐานงานวิจัยอ้างอิง',d:'งานวิจัยและตารางจับคู่',fn:"openResearch('list')"},
+  ],
+  more:[
+    {h:'การแสดงผล'},
+    {i:'ก+',t:'ตัวอักษรใหญ่ขึ้น',d:'ขยายได้ถึง 160%',fn:"bumpZoom(1)"},
+    {i:'ก-',t:'ตัวอักษรเล็กลง',d:'ย่อได้ถึง 85%',fn:"bumpZoom(-1)"},
+    {i:'◐',t:'โหมดความคมชัดสูง',d:'สำหรับห้องที่แสงจ้า',fn:"toggleHC()"},
+    {sep:1},
+    {i:'🔄',t:'ส่งข้อมูลซ้ำ',d:'ถ้าเน็ตหลุดแล้วข้อมูลยังค้างในเครื่อง',fn:"retryNow()"},
+    {i:'🏠',t:'กลับหน้าแรก',d:'',fn:"go('home')"},
+  ],
+};
+let NAV_OPEN=null;
+function navHTML(key){
+  return NAV_MENUS[key].map(x=>{
+    if(x.sep) return '<hr>';
+    if(x.h) return `<div class="mhead">${esc(x.h)}</div>`;
+    return `<button onclick="navClose();${x.fn}"><span class="mi">${x.i}</span>
+      <span><b>${esc(x.t)}</b>${x.d?`<small>${esc(x.d)}</small>`:''}</span></button>`;
+  }).join('');
+}
+function navToggle(key){
+  if(NAV_OPEN===key){ navClose(); return; }
+  navClose();
+  const m=$('navm-'+key), b=$('navb-'+key);
+  if(!m) return;
+  m.innerHTML=navHTML(key);
+  m.classList.remove('hide'); b.classList.add('on'); b.setAttribute('aria-expanded','true');
+  NAV_OPEN=key;
+}
+function navClose(){
+  if(!NAV_OPEN) return;
+  const m=$('navm-'+NAV_OPEN), b=$('navb-'+NAV_OPEN);
+  if(m) m.classList.add('hide');
+  if(b){ b.classList.remove('on'); b.setAttribute('aria-expanded','false'); }
+  NAV_OPEN=null;
+}
+/* ปิดเมนูเมื่อคลิกที่อื่น หรือกด Esc */
+document.addEventListener('click',e=>{ if(NAV_OPEN&&!e.target.closest('.navitem')) navClose(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') navClose(); });
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
 function renderMissionList(){
   const el=$('missionList'); if(!el) return;
@@ -2236,7 +2417,7 @@ function saveClassConfig(){
     localStorage.setItem('lc:cfg:roomcode',rcode);
     localStorage.setItem('lc:cfg:teacher',tname);
   }catch(e){}
-  const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
+  const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent=ROOM+' · '+GRADE;
   if(rcode) registerRoom();
   toast('บันทึกแล้ว ห้อง '+ROOM+' ('+GRADE+') จำนวน '+ROSTER.length+' คน'+(rcode?' · รหัสห้อง '+rcode:''),1);
   renderSetup(); renderMissionList();
@@ -4990,6 +5171,209 @@ function renderCycle(D){
   </div>`;
 }
 
+/* ---------- ระดับ 1 · ภารกิจรายวันตามปฏิทิน จันทร์–ศุกร์ ---------- */
+let DP_SHIFT=0;
+async function openDayPlan(shift){
+  if(shift!==undefined) DP_SHIFT=shift;
+  go('dayplan');
+  $('v-dayplan').innerHTML='<div class="card"><h2>กำลังโหลดภารกิจรายวัน…</h2></div>';
+  try{
+    const wk=weekKeyShift(DP_SHIFT);
+    await pullAll('lc:daily:'+wk); loadCycle();
+    const recs=[]; for(let i=0;i<ROSTER.length;i++) recs.push(await dailyRec(wk,i));
+    renderDayPlan(wk,recs);
+  }catch(e){ $('v-dayplan').innerHTML=`<div class="card"><h1>แสดงผลไม่สำเร็จ</h1>
+    <div class="notice"><span class="small">${esc(e.message||e)}</span></div>
+    <div class="row"><button class="primary" onclick="openDayPlan()">ลองใหม่</button>
+      <button onclick="go('home')">หน้าแรก</button></div></div>`; }
+}
+function renderDayPlan(wk,recs){
+  const mon=mondayOfWeek(wk), n=ROSTER.length;
+  const isThisWeek=(wk===isoWeekKey()), td=isThisWeek?dailyToday():0;
+  const [d1,d2]=dailyDims(wk); const carried=CYCLE.focus[wk];
+  const wClosed=CYCLE.w[wk];
+  const fmt=d=>d.getDate()+' '+TH_MON[d.getMonth()];
+  const fri=new Date(mon); fri.setDate(mon.getDate()+4);
+  const cards=DAILY_DAYS.map(([dnum,ab,nm,ic])=>{
+    const dt=new Date(mon); dt.setDate(mon.getDate()+dnum-1);
+    const cnt=recs.filter(r=>r&&r.days[dnum]&&r.days[dnum].done).length;
+    const all=cnt>=n&&n>0;
+    const cls=all?'done':(isThisWeek&&dnum===td?'today':(!isThisWeek||dnum<td?'past':'future'));
+    return `<button class="daycard ${cls}" onclick="openDailyTeach(${DP_SHIFT})">
+      <div class="dn">${['','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'][dnum]} ${fmt(dt)}</div>
+      <div class="di">${ic}</div><div class="dt">${esc(nm)}</div>
+      <div class="ds">${cnt}/${n} คน${all?' ✓':''}</div></button>`;}).join('');
+  const totalDone=recs.reduce((a,r)=>a+dailyDoneCount(r),0);
+  const pct=n?Math.round(totalDone/(5*n)*100):0;
+  $('v-dayplan').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · ภารกิจรายวัน ${esc(wk)}</div>
+  <div class="card">
+    <div class="eyebrow">ระดับ 1 · ภารกิจรายวัน</div>
+    <h1>สัปดาห์ ${fmt(mon)} – ${fmt(fri)} ${mon.getFullYear()+543}</h1>
+    <p class="small muted">ภารกิจรายวันมี 5 ภารกิจ จันทร์ถึงศุกร์ วันละประมาณ 5 นาที
+      ครบทั้ง 5 วันคือวงจรพลเมือง 1 รอบ แล้วสรุปขึ้นเป็นภารกิจรายสัปดาห์
+      · ด้านเป้าหมายสัปดาห์นี้ <b>${DIMS[d1].n}</b> + <b>${DIMS[d2].n}</b>
+      ${carried?'<span style="color:var(--teal-d)"> (ต่อเนื่องจากผลสัปดาห์ก่อน)</span>':''}</p>
+    <div class="dayrow">${cards}</div>
+    <div class="grid3" style="margin-top:14px">
+      <div class="card tight"><div class="eyebrow">ทำแล้วทั้งสัปดาห์</div>
+        <div class="bignum ${pct>=60?'ok':''}">${pct}%</div><div class="small muted">${totalDone}/${5*n} ช่อง</div></div>
+      <div class="card tight"><div class="eyebrow">${isThisWeek&&td?'วันนี้':'สถานะ'}</div>
+        <div class="bignum">${isThisWeek&&td?recs.filter(r=>r&&r.days[td]&&r.days[td].done).length+'/'+n:(wClosed?'ปิดแล้ว':'—')}</div>
+        <div class="small muted">${isThisWeek&&td?'คนทำแล้ว':(isThisWeek?'เสาร์-อาทิตย์':'สัปดาห์ย้อนหลัง')}</div></div>
+      <div class="card tight"><div class="eyebrow">รอบสัปดาห์</div>
+        <div class="bignum ${wClosed?'ok':''}">${wClosed?'✓':'เปิด'}</div>
+        <div class="small muted">${wClosed?'สรุปขึ้นรายสัปดาห์แล้ว':'ยังไม่ปิดรอบ'}</div></div>
+    </div>
+    <div class="row noprint" style="margin-top:12px">
+      <button onclick="openDayPlan(${DP_SHIFT-1})">← สัปดาห์ก่อน</button>
+      ${DP_SHIFT<0?`<button onclick="openDayPlan(${DP_SHIFT+1})">สัปดาห์ถัดไป →</button>`:''}
+      ${DP_SHIFT!==0?`<button onclick="openDayPlan(0)">สัปดาห์นี้</button>`:''}
+      <button class="primary" onclick="openDailyTeach(${DP_SHIFT})">ดูตารางรายคน</button>
+      ${wClosed?`<button onclick="reopenCycle('w','${wk}')">เปิดรอบใหม่</button>`
+               :`<button class="primary" onclick="closeWeek('${wk}')">ปิดรอบสัปดาห์นี้ →</button>`}
+      <button onclick="openLevel('week')">ไประดับรายสัปดาห์</button>
+    </div>
+    ${wClosed?`<p class="small muted" style="margin-top:8px">ปิดรอบแล้วเมื่อ ${fmtDT(wClosed.at)}
+      · ด้านที่ยังอ่อนที่สุดคือ <b>${DIMS[wClosed.weakest].n}</b> ถูกตั้งเป็นเป้าของสัปดาห์ถัดไปแล้ว</p>`:''}
+  </div>`;
+}
+
+/* ---------- ระดับ 2-4 · หน้าสรุปของแต่ละระดับ ---------- */
+async function openLevel(period){
+  go('level');
+  $('v-level').innerHTML='<div class="card"><h2>กำลังสรุปข้อมูล…</h2></div>';
+  try{
+    await pullAll('lc:daily:'); await pullAll('lc:cycle'); loadCycle();
+    renderLevel(period||'week');
+  }catch(e){ $('v-level').innerHTML=`<div class="card"><h1>สรุปไม่สำเร็จ</h1>
+    <div class="notice"><span class="small">${esc(e.message||e)}</span></div>
+    <div class="row"><button class="primary" onclick="openLevel('week')">ลองใหม่</button>
+      <button onclick="go('home')">หน้าแรก</button></div></div>`; }
+}
+function renderLevel(period){
+  const mk=monthKeyOf(), tk=termKeyOf(), wkNow=isoWeekKey();
+  const tabs=[['week','🗓️ รายสัปดาห์'],['month','📆 รายเดือน'],['term','🎓 รายเทอม']].map(([p,t])=>
+    `<button class="${period===p?'primary':''}" onclick="openLevel('${p}')">${t}</button>`).join('');
+  const kpi=(l,v,s,ok)=>`<div class="card tight"><div class="eyebrow">${l}</div>
+    <div class="bignum ${ok?'ok':''}">${v}</div><div class="small muted">${s}</div></div>`;
+  let head='',body='';
+
+  if(period==='week'){
+    const wks=weeksInMonth(mk);
+    const rows=wks.map(w=>{
+      const c=CYCLE.w[w], isNow=(w===wkNow);
+      return `<tr>
+        <td><b>${weekLabel(w)}</b>${isNow?' <span class="pill" style="color:var(--gold);border-color:var(--gold)">สัปดาห์นี้</span>':''}</td>
+        <td class="small">${c?c.dims.map(d=>esc(DIMS[d].n)).join(' + '):esc(dailyDims(w).map(d=>DIMS[d].n).join(' + '))}</td>
+        <td class="mono">${c?c.done+'/'+c.slots:'—'}</td>
+        <td class="mono ${c&&c.pct>=60?'ok':''}">${c?c.pct+'%':'—'}</td>
+        <td class="small">${c?esc(DIMS[c.weakest].n):'—'}</td>
+        <td class="small">${c?'<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ปิดรอบแล้ว</span>':'<span class="muted">ยังไม่ปิด</span>'}</td>
+        <td class="noprint">${c?`<button class="small" onclick="reopenCycle('w','${w}')">เปิดใหม่</button>`
+          :`<button class="small primary" onclick="closeWeek('${w}')">ปิดรอบ</button>`}</td></tr>`;}).join('');
+    const closedN=wks.filter(w=>CYCLE.w[w]).length;
+    head=`<div class="eyebrow">ระดับ 2 · ภารกิจรายสัปดาห์</div>
+      <h1>ภารกิจรายสัปดาห์ · ${monthLabel(mk)}</h1>
+      <p class="small muted">แต่ละสัปดาห์สรุปมาจาก<b>ภารกิจรายวัน 5 วัน</b> ครูกดปิดรอบเมื่อจบสัปดาห์
+        ระบบจะรวมผลและตั้งด้านที่ยังอ่อนที่สุดเป็นเป้าของสัปดาห์ถัดไป</p>
+      <div class="grid3" style="margin-top:10px">
+        ${kpi('สัปดาห์ที่ปิดรอบแล้ว',closedN+'/'+wks.length,'ในเดือนนี้',closedN>0)}
+        ${kpi('รวมทั้งเดือน',(rollupMonth(mk).pct||0)+'%','จากสัปดาห์ที่ปิดแล้ว',(rollupMonth(mk).pct||0)>=60)}
+        ${kpi('พร้อมสรุปขึ้นรายเดือน',closedN>=1?'ใช่':'ยัง',closedN>=1?'กดที่ระดับ 3 ได้':'ต้องปิดรอบอย่างน้อย 1 สัปดาห์',closedN>=1)}
+      </div>`;
+    body=`<div class="card"><h2>สัปดาห์ในเดือนนี้</h2>
+      <div style="overflow-x:auto"><table><thead><tr><th>สัปดาห์</th><th>ด้านเป้าหมาย</th><th>ทำแล้ว</th><th>%</th><th>ด้านที่ยังอ่อน</th><th>สถานะ</th><th class="noprint"></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <div class="row noprint" style="margin-top:12px">
+        <button onclick="openDayPlan()">← ระดับ 1 รายวัน</button>
+        <button class="primary" onclick="openLevel('month')">ระดับ 3 รายเดือน →</button>
+        <button onclick="openDailyRep('week')">รายงานฉบับเต็ม</button></div></div>`;
+  }
+
+  if(period==='month'){
+    const mons=monthsInTerm();
+    const rows=mons.map(m=>{
+      const c=CYCLE.m[m], live=rollupMonth(m), isNow=(m===mk);
+      const wkAll=weeksInMonth(m), wkClosed=wkAll.filter(w=>CYCLE.w[w]).length;
+      return `<tr>
+        <td><b>${monthLabel(m)}</b>${isNow?' <span class="pill" style="color:var(--gold);border-color:var(--gold)">เดือนนี้</span>':''}</td>
+        <td class="mono">${wkClosed}/${wkAll.length}</td>
+        <td class="mono">${c?c.done+'/'+c.slots:(live.any?live.done+'/'+live.slots:'—')}</td>
+        <td class="mono ${(c?c.pct:live.pct)>=60?'ok':''}">${c?c.pct+'%':(live.any?live.pct+'%':'—')}</td>
+        <td class="mono">${c?((c.trend>=0?'+':'')+c.trend+'%'):'—'}</td>
+        <td class="small">${c?'<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ปิดรอบแล้ว</span>':'<span class="muted">ยังไม่ปิด</span>'}</td>
+        <td class="noprint">${c?`<button class="small" onclick="reopenCycle('m','${m}')">เปิดใหม่</button>`
+          :`<button class="small primary" onclick="closeMonth('${m}')" ${live.any?'':'disabled'}>ปิดรอบ</button>`}</td></tr>`;}).join('');
+    const closedN=mons.filter(m=>CYCLE.m[m]).length;
+    head=`<div class="eyebrow">ระดับ 3 · ภารกิจรายเดือน</div>
+      <h1>ภารกิจรายเดือน · เทอม ${esc(tk)}</h1>
+      <p class="small muted">แต่ละเดือนสรุปมาจาก<b>ภารกิจรายสัปดาห์ 4 สัปดาห์</b>ที่ปิดรอบแล้ว
+        ปุ่มปิดรอบจะกดได้เมื่อเดือนนั้นมีสัปดาห์ที่ปิดรอบอย่างน้อย 1 สัปดาห์</p>
+      <div class="grid3" style="margin-top:10px">
+        ${kpi('เดือนที่ปิดรอบแล้ว',closedN+'/'+mons.length,'ในเทอมนี้',closedN>0)}
+        ${kpi('รวมทั้งเทอม',(rollupTerm(tk).pct||0)+'%','จากเดือนที่ปิดแล้ว',(rollupTerm(tk).pct||0)>=60)}
+        ${kpi('พร้อมสรุปขึ้นรายเทอม',closedN>=1?'ใช่':'ยัง',closedN>=1?'กดที่ระดับ 4 ได้':'ต้องปิดรอบอย่างน้อย 1 เดือน',closedN>=1)}
+      </div>`;
+    body=`<div class="card"><h2>เดือนในเทอมนี้</h2>
+      <div style="overflow-x:auto"><table><thead><tr><th>เดือน</th><th>สัปดาห์ที่ปิด</th><th>ทำแล้ว</th><th>%</th><th>แนวโน้ม</th><th>สถานะ</th><th class="noprint"></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <div class="row noprint" style="margin-top:12px">
+        <button onclick="openLevel('week')">← ระดับ 2 รายสัปดาห์</button>
+        <button class="primary" onclick="openLevel('term')">ระดับ 4 รายเทอม →</button>
+        <button onclick="openDailyRep('month')">รายงานฉบับเต็ม</button></div></div>`;
+  }
+
+  if(period==='term'){
+    const T=rollupTerm(tk), isClosed=CYCLE.t[tk];
+    head=`<div class="eyebrow">ระดับ 4 · ภารกิจรายเทอม</div>
+      <h1>ภารกิจรายเทอม · ${esc(tk)}</h1>
+      <p class="small muted">สรุปปลายทางจาก<b>ภารกิจรายเดือน 4–5 เดือน</b>ที่ปิดรอบแล้ว
+        ตารางนี้พิมพ์แนบรายงานโครงการสร้างและส่งเสริมความเป็นพลเมืองดีฯ ได้ทันที</p>
+      ${T.any?`<div class="grid3" style="margin-top:10px">
+        ${kpi('รวมทั้งเทอม',T.pct+'%',T.done+'/'+T.slots+' ช่อง',T.pct>=60)}
+        ${kpi('ด้านที่ฝึกแล้ว',T.dims.length+'/9','จากสมรรถนะ 9 ด้าน',T.dims.length>=9)}
+        ${kpi('เดือนที่รวม',T.closed,'เดือนที่ปิดรอบแล้ว',T.closed>0)}
+      </div>`:''}`;
+    body=T.any?`<div class="card"><h2>ตารางตัวชี้วัดสะสมทั้งเทอม</h2>
+      <table style="margin-top:8px"><thead><tr><th>ตัวชี้วัด</th><th>ผลที่วัดได้</th><th>เกณฑ์</th><th>สถานะ</th></tr></thead><tbody>
+      ${[['การฝึกอย่างต่อเนื่อง',T.pct+'%',60,T.pct],
+         ['ความรู้หน้าที่-สิทธิ (จันทร์)',T.monAll?Math.round(T.monOk/T.monAll*100)+'%':'—',70,T.monAll?Math.round(T.monOk/T.monAll*100):null],
+         ['ตัดสินใจระดับ 3-4 (อังคาร)',T.tueAll?Math.round(T.tueHi/T.tueAll*100)+'%':'—',60,T.tueAll?Math.round(T.tueHi/T.tueAll*100):null],
+         ['ลงมือทำเพื่อส่วนรวม (พุธ)',T.acts+' ครั้ง',null,null],
+         ['บันทึกการเคารพผู้อื่น (พฤหัส)',T.resp+' ครั้ง',null,null],
+         ['เล่าต่อที่บ้าน (ศุกร์)',T.friAll?Math.round(T.told/T.friAll*100)+'%':'—',50,T.friAll?Math.round(T.told/T.friAll*100):null],
+         ['ครอบคลุมสมรรถนะ',T.dims.length+'/9 ด้าน',100,Math.round(T.dims.length/9*100)],
+        ].map(r=>`<tr><td>${r[0]}</td><td class="mono">${r[1]}</td>
+          <td class="mono">${r[2]?'≥ '+r[2]+'%':'—'}</td>
+          <td>${r[3]===null?'<span class="small muted">รายงานเชิงปริมาณ</span>':(r[3]>=r[2]
+            ?'<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ผ่านเกณฑ์</span>'
+            :'<span class="pill" style="color:var(--red);border-color:var(--red)">ยังไม่ถึง</span>')}</td></tr>`).join('')}
+      </tbody></table>
+      <p class="small muted" style="margin-top:8px">รวมจาก ${T.closed} เดือน · ${T.months.map(monthLabel).join(' · ')}</p>
+      <div class="row noprint" style="margin-top:12px">
+        <button onclick="openLevel('month')">← ระดับ 3 รายเดือน</button>
+        ${isClosed?`<button onclick="reopenCycle('t','${tk}')">เปิดรอบเทอมใหม่</button>`
+          :`<button class="primary" onclick="closeTerm('${tk}')">ปิดรอบเทอม</button>`}
+        <button onclick="window.print()">พิมพ์ / บันทึก PDF</button>
+        <button onclick="openDailyRep('term')">รายงานฉบับเต็ม</button>
+        <button onclick="openEvid()">หลักฐาน 5 ด้าน</button></div></div>`
+      :`<div class="card"><div class="notice">ยังไม่มีเดือนที่ปิดรอบในเทอมนี้
+        <br><span class="small">ลำดับคือ ปิดรอบสัปดาห์ที่ระดับ 1 → ปิดรอบเดือนที่ระดับ 3 → จึงจะสรุปเทอมได้</span></div>
+        <div class="row"><button class="primary" onclick="openDayPlan()">ไประดับ 1 รายวัน</button>
+          <button onclick="openLevel('month')">ระดับ 3 รายเดือน</button></div></div>`;
+  }
+
+  $('v-level').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · ${esc(ROOM)} ${esc(GRADE)}</div>
+  <div class="card">${head}
+    <div class="row noprint" style="margin-top:12px">
+      <button onclick="openDayPlan()">📅 ระดับ 1 รายวัน</button>${tabs}
+      <button onclick="openCycle()">ผังทั้ง 4 ชั้น</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>${body}`;
+}
+
 /* ================= หลักฐานความสำเร็จ 5 ด้าน (Evidence of Success) =================
    กรอบ: ความสำเร็จของงานพลเมืองดีต้องมีหลักฐานอย่างน้อย 5 ด้าน ไม่ใช่แค่คะแนนหลังเรียนสูงขึ้น
    1 ความรู้ความเข้าใจ  2 คิดวิเคราะห์ตัดสินใจด้วยเหตุผล  3 เคารพความแตกต่างและสิทธิผู้อื่น
@@ -5627,7 +6011,7 @@ loadImportedMissions();
 applyZoom(); applyHC(); paintDemoBar();
 initSW(); maybeShowIOSHint(); routeShortcut();
 routeFromURL();
-const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent='LIFECRAFT AI · ห้องเรียนภารกิจพลเมืองดี · '+ROOM;
+const _tr=document.getElementById('tagRoom'); if(_tr) _tr.textContent=ROOM+' · '+GRADE;
 renderMissionList(); renderPick(); checkResume();
 </script>
 </html>
