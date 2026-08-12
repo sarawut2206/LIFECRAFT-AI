@@ -255,7 +255,7 @@ body.pwa .navrow,body.pwa #body .card>.row:last-of-type{
 #installBar .sp{flex:1}
 #installBar button{padding:8px 14px;font-size:15px;min-height:auto}
 @media print{#installBar{display:none!important}}
-/* ---- เช็คอินใจ · Pulse (ตรวจสุขภาวะรายสัปดาห์) ---- */
+/* ---- เช็คอินใจ · Pulse (ตรวจสุขภาวะรายวัน) ---- */
 .moodrow{display:flex;gap:8px;margin:10px 0 4px}
 .moodbtn{flex:1;min-height:auto;padding:11px 4px;border-radius:14px;background:var(--soft);
   display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -412,11 +412,11 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
     <p class="small muted" style="margin:4px 0 0">แตะปุ่มที่ครูบอก ระบบจะจำที่ค้างไว้ให้เสมอ</p>
     <div class="hgrid">
       <button class="htile acc" onclick="openDaily()"><span class="ic">📅</span>
-        <b>ภารกิจวันนี้</b><small>ครบ 8 ขั้น 10 นาที · จันทร์ถึงศุกร์</small></button>
+        <b>ภารกิจวันนี้</b><small id="hsDaily">ครบ 8 ขั้น 10 นาที · ทำทุกวันจันทร์ถึงศุกร์</small></button>
       <button class="htile" onclick="openWeekMissions()"><span class="ic">🎯</span>
         <b>ภารกิจสัปดาห์นี้</b><small>สถานการณ์เต็มรูปแบบ 8 ขั้น</small></button>
       <button class="htile" onclick="openPulse()"><span class="ic">💚</span>
-        <b>เช็คอินใจ</b><small>60 วินาที · ขอให้ครูช่วยได้</small></button>
+        <b>เช็คอินใจ</b><small id="hsPulse">ทำทุกวัน 30 วินาที · ขอให้ครูช่วยได้</small></button>
       <button class="htile" onclick="qStart()"><span class="ic">⚡</span>
         <b>ภารกิจด่วน</b><small>เฉพาะเมื่อครูเปิดไว้</small></button>
     </div>
@@ -868,7 +868,7 @@ const NAV_MENUS={
     {i:'📊',t:'Dashboard และผลก่อน–หลัง',d:'กราฟ ตารางคะแนน ส่งออก CSV',fn:"needTeacher(openTeacher)"},
     {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม',fn:"needTeacher(openEvid)"},
     {i:'📅',t:'ติดตามภารกิจรายวัน',d:'ใครทำวันนี้ · บันทึกแทนเด็กไม่มีมือถือ',fn:"needTeacher(openDailyTeach)"},
-    {i:'💚',t:'แดชบอร์ดสุขภาวะ · เช็คอินใจ',d:'ใครขอความช่วยเหลือ · แนวโน้ม',fn:"needTeacher(openPulseDash)"},
+    {i:'💚',t:'แดชบอร์ดสุขภาวะ · เช็คอินใจรายวัน',d:'วันนี้ใครยังไม่เช็คอิน · ใครขอความช่วยเหลือ',fn:"needTeacher(openPulseDash)"},
     {i:'📐',t:'ผลวิเคราะห์ทางสถิติ',d:'t-test · E.I. · ความเที่ยงตรงเชิงสภาพ',fn:"needTeacher(openStats)"},
     {sep:1},
     {h:'สร้างและจัดการ'},
@@ -926,6 +926,29 @@ function navClose(){
 document.addEventListener('click',e=>{ if(NAV_OPEN&&!e.target.closest('.navitem')) navClose(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') navClose(); });
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
+/* สถานะรายวันบนการ์ดหน้าแรก: ทั้งภารกิจรายวันและเช็คอินใจต้องทำ "ทุกวัน"
+   จึงบอกไปเลยว่าวันนี้ทั้งห้องทำไปกี่คนแล้ว นักเรียนและครูเห็นตรงกันตั้งแต่หน้าแรก
+   อ่านจากเครื่องล้วน ๆ (ข้อมูลถูก pull ไว้แล้วตอนเปิดหน้าที่เกี่ยวข้อง) จึงไม่ยิงเครือข่าย */
+function paintHomeToday(){
+  const wk=isoWeekKey(), td=dailyToday(), pd=pulseDayNo(), n=ROSTER.length;
+  const rd=$('hsDaily');
+  if(rd){
+    if(!td) rd.textContent='วันนี้เป็นวันพัก · ภารกิจรายวันมีจันทร์ถึงศุกร์';
+    else{
+      let k=0;
+      for(let i=0;i<n;i++){ try{ const r=JSON.parse(LS.get(dailyKey(wk,i))||'null');
+        if(r&&r.days&&r.days[td]&&r.days[td].done) k++; }catch(e){} }
+      rd.textContent='ครบ 8 ขั้น 10 นาที · วัน'+PDAY_TH[pd]+' ทำแล้ว '+k+'/'+n+' คน';
+    }
+  }
+  const rp=$('hsPulse');
+  if(rp){
+    let k=0;
+    for(let i=0;i<n;i++){ try{ const r=JSON.parse(LS.get(pulseKey(wk,i))||'null');
+      if(pulseOf(r,pd)&&r&&r.days) k++; }catch(e){} }
+    rp.textContent='ทำทุกวัน 30 วินาที · วันนี้เช็คอินแล้ว '+k+'/'+n+' คน';
+  }
+}
 function renderMissionList(){
   const el=$('missionList'); if(!el) return;
   el.innerHTML = MISSIONS.map(m=>`
@@ -938,6 +961,7 @@ function renderMissionList(){
         <button class="small primary" onclick="enterMission(${m.id})">เข้าทำภารกิจ</button>
         <button class="small noprint" onclick="openShare('week',${m.id},'สัปดาห์ ${m.week} · ${esc(m.title)}')">สร้างลิงก์ / QR ให้นักเรียน</button>
       </div>`:''}</div>`).join('');
+  try{ paintHomeToday(); }catch(e){}
 }
 async function renderSemester(){
   $('v-semester').innerHTML=`<div class="card"><h2>กำลังตรวจสอบข้อมูล...</h2></div>`;
@@ -4049,31 +4073,40 @@ function seedDemo(){
   LS.set('lc:ioc',JSON.stringify({nExp:5,
     names:['รศ.ดร. ผู้เชี่ยวชาญด้านหลักสูตร','ผศ.ดร. ผู้เชี่ยวชาญด้านวัดผล','ดร. ผู้เชี่ยวชาญด้านจิตวิทยา','ครูชำนาญการพิเศษ','ศึกษานิเทศก์'],
     r:iocR,tool:'แบบวัดสถานการณ์ทักษะชีวิตและความเป็นพลเมืองดี ('+ITEMS.length+' ข้อ)',demo:true}));
-  /* เช็คอินใจย้อนหลัง 4 สัปดาห์ เพื่อสาธิตแดชบอร์ดสุขภาวะ */
+  /* เช็คอินใจรายวันย้อนหลัง 4 สัปดาห์ เพื่อสาธิตแดชบอร์ดสุขภาวะ */
   try{
     const clamp15=v=>Math.max(1,Math.min(5,Math.round(v)));
     const wks=[-3,-2,-1,0].map(weekKeyShift);
     const NOTES=['ช่วยติวเลขให้ก่อนสอบ','ช่วยถือของตอนทำเวร','ให้ยืมปากกาตอนลืมกล่องดินสอ','ชวนเล่นบอลตอนพัก','อธิบายการบ้านให้เข้าใจ'];
+    /* เช็คอินใจเป็นรายวันแล้ว ข้อมูลตัวอย่างจึงสร้างเป็น days{1..5} ให้ตรงกับของจริง
+       สัปดาห์ล่าสุดสร้างถึงวันปัจจุบันเท่านั้น จะได้ดูสมจริงเหมือนห้องที่กำลังใช้อยู่ */
+    const todayNo=pulseDayNo();
     wks.forEach((wk,w)=>{
-      const qsW=weekQs(wk);
+      const last=(w===3), maxDay=last?Math.min(5,todayNo):5;
       for(let i=0;i<ROSTER.length;i++){
         const exP=LS.get(pulseKey(wk,i));
         if(exP){ try{ if(JSON.parse(exP).demo!==true) continue; }catch(e){ continue; } }
         const r=rng_(51000+w*997+i*53);
-        if(w<3&&r()<0.12) continue;                       // บางคนขาดเช็คอินบ้างเหมือนห้องจริง
-        let mood;
-        if(i===13) mood=[4,3,2,2][w];                     // เคสอารมณ์ลดลงต่อเนื่อง
-        else if(i===10&&w===3) mood=2;                    // เคสขอความช่วยเหลือสัปดาห์นี้
-        else mood=clamp15(3.6+(r()-0.45)*2.2);
-        const qs={};
-        qsW.forEach(q=>{ qs[q.id]=clamp15(mood+(r()-0.5)*1.6); });
-        if(i===5&&w===3) qs.bul=2;                        // เคสสัญญาณอาจถูกกลั่นแกล้ง
-        const rec={idx:i,name:ROSTER[i],week:wk,mood,qs,
-          help:{need:false,who:HELPERS[0],note:''},thanks:{to:'',msg:''},
+        const days={};
+        for(let d=1;d<=maxDay;d++){
+          if(r()<0.14) continue;                          // บางวันมีคนลืมเช็คอิน เหมือนห้องจริง
+          let mood;
+          if(i===13) mood=clamp15([4,3,2,2][w]+(d>=4?-0.5:0));   // เคสอารมณ์ลดลงต่อเนื่อง
+          else if(i===10&&last&&d>=maxDay-1) mood=2;             // เคสขอความช่วยเหลือช่วงท้าย
+          else mood=clamp15(3.6+(r()-0.45)*2.2);
+          const q=dayQ(wk,d), qs={};
+          qs[q.id]=clamp15(mood+(r()-0.5)*1.6);
+          if(i===5&&last&&d===maxDay) qs.bul=2;                  // เคสสัญญาณอาจถูกกลั่นแกล้ง
+          const e={mood,qs,help:{need:false,who:HELPERS[0],note:''},thanks:{to:'',msg:''},
+            at:Date.now()-((3-w)*7+(5-d))*86400000+i*60000};
+          if(i===13&&last&&d===maxDay) e.help={need:true,who:'ครูที่ปรึกษา',note:'ช่วงนี้ไม่ค่อยมีสมาธิ มีเรื่องที่บ้านครับ'};
+          if(i===10&&last&&d===maxDay) e.help={need:true,who:'ครูแนะแนว',note:'อยากปรึกษาเรื่องเพื่อนครับ'};
+          if(i%5===2&&w>=2&&d===3){ e.thanks={to:ROSTER[(i+3)%ROSTER.length],msg:NOTES[i%NOTES.length]}; }
+          days[d]=e;
+        }
+        if(!Object.keys(days).length) continue;
+        const rec={v:2,idx:i,name:ROSTER[i],week:wk,days,
           at:Date.now()-(3-w)*7*86400000+i*60000,demo:true};
-        if(i===13&&w===3) rec.help={need:true,who:'ครูที่ปรึกษา',note:'ช่วงนี้ไม่ค่อยมีสมาธิ มีเรื่องที่บ้านครับ'};
-        if(i===10&&w===3) rec.help={need:true,who:'ครูแนะแนว',note:'อยากปรึกษาเรื่องเพื่อนครับ'};
-        if(i%5===2&&w>=2){ rec.thanks={to:ROSTER[(i+3)%ROSTER.length],msg:NOTES[i%NOTES.length]}; }
         LS.set(pulseKey(wk,i),JSON.stringify(rec)); n++;
       }
     });
@@ -4168,15 +4201,27 @@ async function buildRoomSummary(){
          +stMean(done.map(d=>royalScore(d.post,k))).toFixed(2)]])),
       rubric:rub});
   }
-  /* สุขภาวะสัปดาห์ปัจจุบัน */
-  const wk=isoWeekKey(); const moods=[]; let help=0;
+  /* สุขภาวะสัปดาห์ปัจจุบัน · เช็คอินเป็นรายวันแล้ว จึงส่งขึ้นทั้งภาพวันนี้และภาพทั้งสัปดาห์
+     - n/avg = จำนวนคนและอารมณ์เฉลี่ยของ "วันนี้" (ผู้บริหารเห็นสถานะปัจจุบัน)
+     - wAvg/days/rate = ค่าเฉลี่ยและความสม่ำเสมอของทั้งสัปดาห์
+     - help = จำนวนครั้งที่ขอความช่วยเหลือในสัปดาห์นี้ (นับทุกวัน) */
+  const wk=isoWeekKey(), tday=pulseDayNo();
+  const moods=[], wMoods=[]; let help=0, low=0, people=0;
   for(let i=0;i<ROSTER.length;i++){
     const r=await pulseRec(wk,i);
-    if(r){ moods.push(r.mood); if(r.help&&r.help.need) help++; }
+    const es=pulseEntries(r);
+    if(es.length) people++;
+    es.forEach(e=>{ wMoods.push(e.mood); if(e.help&&e.help.need) help++; if(e.mood<=2) low++; });
+    const t=pulseOf(r,tday); if(t) moods.push(t.mood);
   }
   const sum={code, room:ROOM, grade:GRADE, school:schoolName(),
     teacher:(LS.get('lc:cfg:teacher')||'').trim(), n:ROSTER.length,
-    missions:perMission, pulse:{week:wk,n:moods.length,avg:moods.length?+stMean(moods).toFixed(2):null,help},
+    missions:perMission,
+    pulse:{week:wk, day:tday, n:moods.length,
+      avg:moods.length?+stMean(moods).toFixed(2):null,
+      wAvg:wMoods.length?+stMean(wMoods).toFixed(2):null,
+      days:wMoods.length, people, low, help,
+      rate:Math.round(wMoods.length/Math.max(1,ROSTER.length*5)*100)},
     at:Date.now()};
   const j=JSON.stringify(sum);
   LS.set(roomSumKey(code),j); queueRemote(roomSumKey(code),'สรุปห้อง '+code,j);
@@ -4263,7 +4308,10 @@ async function openSchool(){
   <div class="card">
     <h2>เปรียบเทียบระหว่างห้องเรียน</h2>
     <div style="overflow-x:auto"><table><thead><tr><th>รหัสห้อง</th><th>ห้อง</th><th>ระดับชั้น</th><th>ครูผู้สอน</th>
-      <th>ทำครบ</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th><th>E.I.</th><th title="สหสัมพันธ์ระหว่างแบบวัดของนักเรียนกับแบบสังเกตของครู">ความเที่ยงตรง r</th><th>สุขภาวะ</th><th>ขอช่วยเหลือ</th></tr></thead><tbody>
+      <th>ทำครบ</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th><th>E.I.</th><th title="สหสัมพันธ์ระหว่างแบบวัดของนักเรียนกับแบบสังเกตของครู">ความเที่ยงตรง r</th>
+      <th title="อารมณ์เฉลี่ยจากเช็คอินใจของวันนี้">สุขภาวะวันนี้</th>
+      <th title="ร้อยละของช่องเช็คอินรายวันที่ทำแล้วในสัปดาห์นี้ (คน × 5 วัน)">เช็คอินสัปดาห์นี้</th>
+      <th>ขอช่วยเหลือ</th></tr></thead><tbody>
     ${sums.map(s=>{const m=latest(s);
       return `<tr><td class="mono">${esc(s.code)}</td><td>${esc(s.room||'-')}</td><td>${esc(s.grade||'-')}</td>
         <td class="small">${esc(s.teacher||'-')}</td>
@@ -4272,7 +4320,8 @@ async function openSchool(){
         <td class="mono ${m&&m.mD>0?'ok':''}">${m?((m.mD>=0?'+':'')+m.mD.toFixed(2)):'-'}</td>
         <td class="mono ${m&&m.ei>=0.5?'ok':m?'bad':''}">${m?m.ei.toFixed(3):'-'}</td>
         <td class="mono ${m&&m.cv!=null&&m.cv>=0.6?'ok':''}">${m&&m.cv!=null?m.cv.toFixed(3)+`<span class="small muted"> (n=${m.cvN})</span>`:'<span class="muted small">—</span>'}</td>
-        <td>${s.pulse&&s.pulse.avg!=null?`<span class="mono">${s.pulse.avg.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(s.pulse.avg)}</span>`:'<span class="muted small">—</span>'}</td>
+        <td>${s.pulse&&s.pulse.avg!=null?`<span class="mono">${s.pulse.avg.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(s.pulse.avg)}</span> <span class="small muted">(${s.pulse.n} คน)</span>`:'<span class="muted small">—</span>'}</td>
+        <td class="mono ${s.pulse&&s.pulse.rate!=null&&s.pulse.rate>=60?'ok':''}">${s.pulse&&s.pulse.rate!=null?s.pulse.rate+'%':'<span class="muted small">—</span>'}</td>
         <td class="mono ${s.pulse&&s.pulse.help?'bad':''}">${s.pulse?s.pulse.help:0}</td></tr>`;}).join('')}
     </tbody></table></div>
     <p class="small muted" style="margin-top:8px">ตัวเลขมาจากภารกิจล่าสุดที่แต่ละห้องดำเนินการแล้วเสร็จ
@@ -4289,8 +4338,11 @@ async function openSchool(){
         if(!m) r.push('ยังไม่มีภารกิจที่ทำครบ');
         else{ if(m.ei<0.5) r.push('ดัชนีประสิทธิผลต่ำกว่าเกณฑ์ 0.50');
               if(m.n<(m.total||s.n)*0.7) r.push('ผู้เรียนทำครบไม่ถึงร้อยละ 70'); }
-        if(s.pulse&&s.pulse.help>0) r.push('มีผู้เรียนขอความช่วยเหลือ '+s.pulse.help+' คน');
-        if(s.pulse&&s.pulse.avg!=null&&s.pulse.avg<3) r.push('อารมณ์เฉลี่ยของห้องต่ำกว่า 3.00');
+        if(s.pulse&&s.pulse.help>0) r.push('มีคำขอความช่วยเหลือ '+s.pulse.help+' ครั้งในสัปดาห์นี้');
+        if(s.pulse&&s.pulse.wAvg!=null&&s.pulse.wAvg<3) r.push('อารมณ์เฉลี่ยทั้งสัปดาห์ต่ำกว่า 3.00');
+        else if(s.pulse&&s.pulse.wAvg==null&&s.pulse.avg!=null&&s.pulse.avg<3) r.push('อารมณ์เฉลี่ยของห้องต่ำกว่า 3.00');
+        if(s.pulse&&s.pulse.rate!=null&&s.pulse.rate<40) r.push('เช็คอินใจรายวันไม่ถึงร้อยละ 40 ของสัปดาห์');
+        if(s.pulse&&s.pulse.low>0&&s.pulse.days) r.push('มีอารมณ์ระดับต่ำ '+s.pulse.low+' ครั้งในสัปดาห์นี้');
         if(r.length) w.push({s,r});});
       return w.length?w.map(x=>`<div class="opt" style="cursor:default">
           <h4 style="margin:0">${esc(x.s.room||x.s.code)} <span class="small muted">(${esc(x.s.code)})</span></h4>
@@ -5984,38 +6036,43 @@ function evidCSV(){
   a.download='uptogrow_evidence_week'+MIS().week+'.csv'; a.click();
 }
 
-/* ================= เช็คอินใจ · Pulse: ตรวจสุขภาวะรายสัปดาห์ 60 วินาที =================
+/* ================= เช็คอินใจ · Pulse: ตรวจสุขภาวะ "รายวัน" 30 วินาที =================
    ออกแบบเทียบมาตรฐานสากลของระบบตรวจสุขภาวะนักเรียน (เช่น Linewize Pulse)
    ปรับให้เข้ากับบริบทนักเรียนไทยและระบบดูแลช่วยเหลือนักเรียนของ สพฐ.
 
-   องค์ประกอบหลัก
-   1. เช็คอินสัปดาห์ละครั้ง ใช้เวลา ~60 วินาที เริ่มจาก "สัปดาห์นี้รู้สึกอย่างไร"
-      ตามด้วยคำถามสุขภาวะ 5 ข้อ หมุนเวียนจากคลัง 14 ข้อ ครอบคลุม 6 มิติ
-      (จิตใจ สังคม ความปลอดภัย การเรียน สุขภาพกาย การมีคนรับฟัง)
+   ปรับเป็นรายวันเมื่อ 13 ส.ค. 2569 (เดิมสัปดาห์ละครั้ง)
+   1. เช็คอิน "ทุกวัน" ก่อนเริ่มภารกิจ ใช้เวลา ~30 วินาที
+      อารมณ์วันนี้ 1 ข้อ + คำถามสุขภาวะประจำวัน 1 ข้อ + ปุ่มขอความช่วยเหลือ
+      คำถามหมุนจากคลัง 14 ข้อ วันละข้อ ครบสัปดาห์จึงได้ครบ 5 มิติเท่าเดิม
+      แต่กระจายเป็นรายวัน ทำให้ครูเห็นสัญญาณได้เร็วขึ้นและเด็กไม่ต้องตอบทีละ 5 ข้อ
    2. ปุ่มขอความช่วยเหลือ นักเรียนเลือกครูที่ไว้ใจเองได้ ข้อความเห็นเฉพาะหลังรหัสครู
    3. ส่งคำขอบคุณถึงเพื่อนหรือครู สร้างวัฒนธรรมเชิงบวก
    4. Reflections นักเรียนเห็นประวัติอารมณ์ของตนเองย้อนหลัง
-   5. แดชบอร์ดครู เห็นภาพรวมทั้งห้อง แนวโน้มรายสัปดาห์ และรายชื่อที่ควรดูแลก่อน
+   5. แดชบอร์ดครู เห็นภาพวันนี้ ตาราง 5 วันของสัปดาห์ แนวโน้ม และรายชื่อที่ควรดูแลก่อน
+
+   โครงสร้างข้อมูล คีย์เดิม lc:pulse:<สัปดาห์>:<เลขที่> (1 แถว/คน/สัปดาห์ ไม่แตะ backend)
+   แต่ภายในเก็บเป็น days{1..7} (1=จันทร์ … 7=อาทิตย์) แบบเดียวกับภารกิจรายวัน
+   ข้อมูลเดิมที่เป็นรายสัปดาห์ (ไม่มี days) ยังอ่านได้ ระบบแปลงให้เป็น 1 รายการอัตโนมัติ
 
    หลักการเดียวกับทั้งระบบ: เครื่องมือไม่วินิจฉัยและไม่ตัดสินนักเรียน
    เป็นเพียงช่องทางให้เด็กส่งเสียง และชี้จุดให้ครูเข้าไปดูแลได้เร็วขึ้น
    ช่องทางฉุกเฉินแสดงเสมอ: สายด่วนสุขภาพจิต 1323 · มูลนิธิสายเด็ก 1387
    ==================================================================== */
 const PULSE_QS=[
- {id:'lis',d:'มีคนรับฟัง',  q:'เมื่อมีเรื่องไม่สบายใจ ฉันมีคนที่พูดคุยด้วยได้'},
- {id:'val',d:'เห็นคุณค่า',  q:'ฉันรู้สึกว่าตัวเองมีความหมายกับห้องของเรา'},
- {id:'str',d:'จิตใจ',       q:'สัปดาห์นี้ฉันจัดการความเครียดของตัวเองได้'},
- {id:'slp',d:'สุขภาพกาย',   q:'สัปดาห์นี้ฉันนอนหลับเพียงพอ'},
- {id:'act',d:'สุขภาพกาย',   q:'สัปดาห์นี้ฉันได้ออกกำลังกายหรือขยับร่างกาย'},
- {id:'saf',d:'ความปลอดภัย', q:'ฉันรู้สึกปลอดภัยเมื่ออยู่ที่โรงเรียน'},
- {id:'net',d:'โลกออนไลน์',  q:'สัปดาห์นี้ฉันใช้โซเชียลมีเดียแล้วรู้สึกโอเค ไม่มีอะไรกวนใจ'},
- {id:'lrn',d:'การเรียน',    q:'ฉันเรียนตามทันและจัดการงานที่ได้รับมอบหมายได้'},
- {id:'foc',d:'การเรียน',    q:'สัปดาห์นี้ฉันมีสมาธิกับการเรียน'},
- {id:'frd',d:'เพื่อน',      q:'ฉันมีเพื่อนที่เล่นหรือทำงานด้วยกันได้'},
- {id:'bul',d:'เพื่อน',      q:'สัปดาห์นี้ฉันไม่ถูกล้อ กลั่นแกล้ง หรือกดดันจากเพื่อน'},
- {id:'hlp',d:'จิตอาสา',     q:'สัปดาห์นี้ฉันได้ช่วยเหลือคนอื่น'},
- {id:'sef',d:'ตัวตน',       q:'สัปดาห์นี้ฉันรู้สึกดีกับตัวเอง'},
- {id:'hop',d:'ความหวัง',    q:'ฉันมีเรื่องที่ตั้งตารอในสัปดาห์หน้า'}
+ {id:'lis',d:'มีคนรับฟัง',  q:'ถ้าวันนี้มีเรื่องไม่สบายใจ ฉันมีคนที่พูดคุยด้วยได้'},
+ {id:'val',d:'เห็นคุณค่า',  q:'วันนี้ฉันรู้สึกว่าตัวเองมีความหมายกับห้องของเรา'},
+ {id:'str',d:'จิตใจ',       q:'วันนี้ฉันจัดการความเครียดของตัวเองได้'},
+ {id:'slp',d:'สุขภาพกาย',   q:'เมื่อคืนฉันนอนหลับเพียงพอ'},
+ {id:'act',d:'สุขภาพกาย',   q:'วันนี้ฉันได้ออกกำลังกายหรือขยับร่างกาย'},
+ {id:'saf',d:'ความปลอดภัย', q:'วันนี้ฉันรู้สึกปลอดภัยเมื่ออยู่ที่โรงเรียน'},
+ {id:'net',d:'โลกออนไลน์',  q:'วันนี้ฉันใช้โซเชียลมีเดียแล้วรู้สึกโอเค ไม่มีอะไรกวนใจ'},
+ {id:'lrn',d:'การเรียน',    q:'วันนี้ฉันเรียนตามทันและจัดการงานที่ได้รับมอบหมายได้'},
+ {id:'foc',d:'การเรียน',    q:'วันนี้ฉันมีสมาธิกับการเรียน'},
+ {id:'frd',d:'เพื่อน',      q:'วันนี้ฉันมีเพื่อนที่เล่นหรือทำงานด้วยกันได้'},
+ {id:'bul',d:'เพื่อน',      q:'วันนี้ฉันไม่ถูกล้อ กลั่นแกล้ง หรือกดดันจากเพื่อน'},
+ {id:'hlp',d:'จิตอาสา',     q:'วันนี้ฉันได้ช่วยเหลือคนอื่น'},
+ {id:'sef',d:'ตัวตน',       q:'วันนี้ฉันรู้สึกดีกับตัวเอง'},
+ {id:'hop',d:'ความหวัง',    q:'ฉันมีเรื่องที่ตั้งตารอในวันพรุ่งนี้'}
 ];
 const MOODS=[[1,'😢','แย่มาก'],[2,'😕','ไม่ค่อยดี'],[3,'😐','เฉย ๆ'],[4,'🙂','ดี'],[5,'😄','ดีมาก']];
 const MOOD_E=v=>{const m=MOODS.find(x=>x[0]===Math.round(v)); return m?m[1]:'·';};
@@ -6033,88 +6090,139 @@ function isoWeekKey(d){
 }
 function weekKeyShift(n){ const d=new Date(); d.setDate(d.getDate()+7*n); return isoWeekKey(d); }
 const pulseKey=(wk,i)=>'lc:pulse:'+wk+':'+i;
-/* คำถาม 5 ข้อของสัปดาห์ สุ่มแบบกำหนดค่าเริ่มต้นจากเลขสัปดาห์
-   ทั้งห้องได้ชุดเดียวกัน และหมุนเวียนอัตโนมัติทุกสัปดาห์ */
+const PDAY_AB=['','จ','อ','พ','พฤ','ศ','ส','อา'];
+const PDAY_TH=['','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์','อาทิตย์'];
+/* วันของสัปดาห์แบบเช็คอิน: 1=จันทร์ … 7=อาทิตย์ (getDay() คืน 0 สำหรับอาทิตย์) */
+function pulseDayNo(d){ const x=(d?new Date(d):new Date()).getDay(); return x===0?7:x; }
+/* คำถาม 5 ข้อประจำสัปดาห์ (เหมือนเดิม) แล้วแจกวันละ 1 ข้อ จันทร์ถึงศุกร์
+   ครบสัปดาห์จึงได้ครอบคลุมมิติเท่าฉบับรายสัปดาห์เดิมทุกประการ
+   เสาร์-อาทิตย์วนกลับมาใช้ข้อแรก ๆ เผื่อนักเรียนเข้ามาเช็คอินนอกวันเรียน */
 function weekQs(wk){
-  const seed=(parseInt(wk.replace(/\D/g,''),10)||1)*7919;
+  const seed=(parseInt(String(wk).replace(/\D/g,''),10)||1)*7919;
   const r=rng_(seed); const arr=PULSE_QS.slice();
   for(let i=arr.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
   return arr.slice(0,5);
 }
-async function pulseRec(wk,i){
-  const raw=await S.get(pulseKey(wk,i),true);
+function dayQ(wk,day){ const qs=weekQs(wk); return qs[((day||1)-1)%qs.length]; }
+/* remote=true เฉพาะตอนเปิดของนักเรียนรายคน (คีย์เดียว)
+   เส้นทางแบบกลุ่มต้อง pullAll ก่อนแล้วอ่านจากเครื่องเท่านั้น ไม่งั้นหน้าจะค้าง */
+async function pulseRec(wk,i,remote){
+  const raw=await S.get(pulseKey(wk,i),!!remote);
   if(!raw) return null;
   try{ return JSON.parse(raw); }catch(e){ return null; }
 }
+/* ---------- ตัวช่วยอ่านข้อมูลรายวัน รองรับข้อมูลเดิมที่เป็นรายสัปดาห์ ----------
+   ฉบับใหม่  {v:2, days:{1..7}}  ฉบับเดิม {mood,qs,help,thanks,at} ที่ระดับบนสุด
+   ฟังก์ชันนี้คืนอาร์เรย์ของรายการเช็คอินในสัปดาห์นั้นเสมอ ทำให้โค้ดสรุปผลเขียนครั้งเดียวใช้ได้ทั้งสองแบบ */
+function pulseEntries(rec){
+  if(!rec) return [];
+  if(rec.days&&typeof rec.days==='object'){
+    return Object.keys(rec.days).map(k=>Object.assign({day:+k},rec.days[k]))
+      .filter(e=>e&&e.mood).sort((a,b)=>a.day-b.day);
+  }
+  if(rec.mood) return [Object.assign({day:0,legacy:true},rec)];   // ข้อมูลเดิมแบบสัปดาห์
+  return [];
+}
+/* รายการของวันที่ระบุ · ข้อมูลเดิมแบบสัปดาห์ถือว่าใช้ได้กับทุกวันในสัปดาห์นั้น */
+function pulseOf(rec,day){
+  if(!rec) return null;
+  if(rec.days) return (rec.days[day]&&rec.days[day].mood)?rec.days[day]:null;
+  return rec.mood?rec:null;
+}
+const pulseDoneCount=rec=>pulseEntries(rec).length;
+const pulseMoodAvg=rec=>{const e=pulseEntries(rec); return e.length?e.reduce((a,b)=>a+b.mood,0)/e.length:null;};
 
 /* ---------- ฝั่งนักเรียน ---------- */
 let PS=null;
 /* ================= ประตูเช็คอินใจก่อนเข้าภารกิจ =================
-   ทุกภารกิจ (รายวัน รายสัปดาห์ ภารกิจด่วน) ต้องมีเช็คอินใจของสัปดาห์นี้ก่อนเสมอ
-   - ยังไม่เช็คอิน → พาไปทำเช็คอิน เสร็จแล้วระบบพาเข้าภารกิจที่ตั้งใจไว้ต่อทันที
-   - เช็คอินสัปดาห์นี้แล้ว → ผ่านเข้าภารกิจได้เลย ไม่ถามซ้ำ
-   (เช็คอินใจเป็นข้อมูลรายสัปดาห์ 1 แถว/คน การถามซ้ำทุกวันจะทับข้อมูลเดิม
-    และเพิ่มภาระโดยไม่ได้ข้อมูลใหม่) */
+   ทุกภารกิจ (รายวัน รายสัปดาห์ ภารกิจด่วน) ต้องเช็คอินใจ "ของวันนี้" ก่อนเสมอ
+   - วันนี้ยังไม่เช็คอิน → พาไปทำ เสร็จแล้วระบบพาเข้าภารกิจที่ตั้งใจไว้ต่อทันที
+   - วันนี้เช็คอินแล้ว → ผ่านเข้าภารกิจได้เลย ไม่ถามซ้ำในวันเดียวกัน */
 async function needPulse(i,fn){
-  let done=false;
-  try{ done=!!(await pulseRec(isoWeekKey(),i)); }catch(e){ done=false; }
-  if(done){ fn(); return; }
+  const wk=isoWeekKey(), day=pulseDayNo();
+  let rec=null;
+  try{ rec=await pulseRec(wk,i); }catch(e){ rec=null; }
+  if(pulseOf(rec,day)&&rec&&rec.days){ fn(); return; }   /* เช็คอินของวันนี้แล้ว */
   window._afterPulse=fn;
-  PS={idx:i,name:ROSTER[i],week:isoWeekKey(),mood:null,qs:{},
-      help:{need:false,who:HELPERS[0],note:''},thanks:{to:'',msg:''},at:0};
+  PS=pulseState(rec,wk,i,day);
   go('pulse'); renderPulseForm();
 }
+/* สร้างสถานะฟอร์มของ "วันนี้" โดยคงข้อมูลวันอื่นในสัปดาห์เดียวกันไว้ครบ */
+function pulseState(rec,wk,i,day){
+  const base=(rec&&rec.days)?rec:{v:2,idx:i,name:ROSTER[i],week:wk,days:{},at:Date.now()};
+  base.v=2; base.idx=i; base.name=ROSTER[i]; base.week=wk;
+  base.days=base.days||{};
+  const d=base.days[day]||{};
+  base.days[day]={mood:d.mood||null,qs:d.qs||{},
+    help:d.help||{need:false,who:HELPERS[0],note:''},
+    thanks:d.thanks||{to:'',msg:''},at:d.at||0};
+  base.day=day;
+  return base;
+}
+const PD=()=>PS.days[PS.day];      /* รายการของวันที่กำลังกรอก */
 function openPulse(){ go('pulse'); renderPulsePick(); }
 function renderPulsePick(){
-  const wk=isoWeekKey();
+  const wk=isoWeekKey(), day=pulseDayNo();
   $('v-pulse').innerHTML=`<div class="card">
-    <div class="eyebrow">เช็คอินใจ · สัปดาห์ ${esc(wk)}</div>
+    <div class="eyebrow">เช็คอินใจ · วัน${PDAY_TH[day]} · สัปดาห์ ${esc(wk)}</div>
     <h2>แตะชื่อของตัวเอง</h2>
-    <p class="small muted">ใช้เวลาประมาณ 60 วินาที ไม่มีคำตอบถูกผิด และไม่มีผลต่อคะแนน</p>
+    <p class="small muted">เช็คอินทุกวัน ใช้เวลาประมาณ 30 วินาที ไม่มีคำตอบถูกผิด และไม่มีผลต่อคะแนน</p>
     <div class="roster" id="proster">${ROSTER.map((n,i)=>
       `<div class="rcard" id="prc${i}" onclick="pulseOpen(${i})"><div class="no">${i+1}</div>
         <div><div class="nm">${esc(n)}</div><div class="st" id="pstat${i}"></div></div></div>`).join('')}</div>
     <div class="row" style="margin-top:16px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
-  ROSTER.forEach(async(n,i)=>{
-    const d=await pulseRec(wk,i); const el=$('pstat'+i);
-    if(el&&d){ el.textContent='เช็คอินแล้ว '+MOOD_E(d.mood); const c=$('prc'+i); if(c)c.classList.add('done'); }
-  });
+  /* ดึงของสัปดาห์นี้ครั้งเดียว แล้วอ่านสถานะรายวันจากเครื่อง */
+  pullAll('lc:pulse:'+wk).then(()=>ROSTER.forEach(async(n,i)=>{
+    const rec=await pulseRec(wk,i); const el=$('pstat'+i); if(!el||!rec) return;
+    const td=pulseOf(rec,day), k=pulseDoneCount(rec);
+    el.textContent=(td?'วันนี้เช็คอินแล้ว '+MOOD_E(td.mood)+' · ':'')+'สัปดาห์นี้ '+k+' วัน';
+    if(td){ const c=$('prc'+i); if(c) c.classList.add('done'); }
+  }));
 }
 async function pulseOpen(i){
-  const wk=isoWeekKey();
-  const old=await pulseRec(wk,i);
-  PS=old||{idx:i,name:ROSTER[i],week:wk,mood:null,qs:{},help:{need:false,who:HELPERS[0],note:''},thanks:{to:'',msg:''},at:0};
-  if(old){ await renderPulseDone(true); return; }
+  const wk=isoWeekKey(), day=pulseDayNo();
+  const old=await pulseRec(wk,i,true);
+  PS=pulseState(old,wk,i,day);
+  if(pulseOf(old,day)&&old&&old.days){ await renderPulseDone(true); return; }
   renderPulseForm();
 }
+/* ฟอร์มรายวัน: อารมณ์ 1 ข้อ + คำถามของวัน 1 ข้อ + ขอความช่วยเหลือ (คำขอบคุณไม่บังคับ) */
 function renderPulseForm(){
-  const qs=weekQs(PS.week);
+  const day=PS.day, d=PD(), q=dayQ(PS.week,day);
+  const dots=[1,2,3,4,5].map(x=>{
+    const on=pulseOf(PS,x), now=x===day;
+    return `<span style="display:inline-flex;flex-direction:column;align-items:center;gap:2px;margin-right:10px">
+      <span style="width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+        font-size:12px;font-weight:600;${on?'background:var(--teal);color:#fff':(now?'background:var(--bg2);color:var(--teal-d);border:2px solid var(--teal)':'background:var(--bg2);color:var(--muted);border:1px solid var(--line)')}">${on?MOOD_E(on.mood):PDAY_AB[x]}</span>
+      <span class="small muted" style="font-size:10px">${PDAY_AB[x]}</span></span>`;
+  }).join('');
   $('v-pulse').innerHTML=`<div class="card">
-    <div class="eyebrow">เช็คอินใจ · ${esc(PS.name)}</div>
-    ${window._afterPulse?`<div class="notice good"><span class="small"><b>เช็คอินใจสั้น ๆ ก่อนเริ่มภารกิจ</b> · ใช้เวลาไม่ถึงนาที เสร็จแล้วระบบพาเข้าภารกิจต่อทันที · สัปดาห์ละครั้งเท่านั้น</span></div>`:''}
-    <h2>สัปดาห์นี้รู้สึกอย่างไร</h2>
+    <div class="eyebrow">เช็คอินใจ · ${esc(PS.name)} · วัน${PDAY_TH[day]}</div>
+    <div style="margin:6px 0 2px">${dots}</div>
+    ${window._afterPulse?`<div class="notice good"><span class="small"><b>เช็คอินใจสั้น ๆ ก่อนเริ่มภารกิจ</b> · ประมาณ 30 วินาที เสร็จแล้วระบบพาเข้าภารกิจต่อทันที</span></div>`:''}
+    <h2 style="margin-top:10px">วันนี้รู้สึกอย่างไร</h2>
     <div class="moodrow">${MOODS.map(([v,e,t])=>
-      `<button type="button" class="moodbtn ${PS.mood===v?'on':''}" onclick="pulseMood(${v})">
+      `<button type="button" class="moodbtn ${d.mood===v?'on':''}" onclick="pulseMood(${v})">
         <span class="e">${e}</span><span class="t">${t}</span></button>`).join('')}</div>
 
-    <h3 style="margin-top:18px">คำถามสัปดาห์นี้ 5 ข้อ</h3>
+    <h3 style="margin-top:18px">คำถามของวันนี้</h3>
     <p class="small muted">1 = ไม่จริงเลย · 5 = จริงที่สุด · ตอบตามความรู้สึกจริง</p>
-    ${qs.map(q=>`<div class="pq"><div class="qd">${esc(q.d)}</div><div class="qt">${esc(q.q)}</div>
+    <div class="pq"><div class="qd">${esc(q.d)}</div><div class="qt">${esc(q.q)}</div>
       <div class="pscale">${[1,2,3,4,5].map(v=>
-        `<button type="button" class="${PS.qs[q.id]===v?'on':''}" onclick="pulseQ('${q.id}',${v})">${v}</button>`).join('')}</div>
-    </div>`).join('')}
+        `<button type="button" class="${d.qs[q.id]===v?'on':''}" onclick="pulseQ('${q.id}',${v})">${v}</button>`).join('')}</div>
+    </div>
 
-    <div class="helpcard ${PS.help.need?'need':''}" id="helpCard">
+    <div class="helpcard ${d.help.need?'need':''}" id="helpCard">
       <h3 style="margin:0 0 6px">อยากให้ครูติดต่อกลับไหม <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></h3>
       <div class="row">
-        <button type="button" class="${PS.help.need?'':'primary'}" onclick="pulseHelp(false)">ไม่เป็นไร ฉันโอเค</button>
-        <button type="button" class="${PS.help.need?'primary':''}" onclick="pulseHelp(true)">ต้องการให้ครูติดต่อกลับ</button>
+        <button type="button" class="${d.help.need?'':'primary'}" onclick="pulseHelp(false)">ไม่เป็นไร ฉันโอเค</button>
+        <button type="button" class="${d.help.need?'primary':''}" onclick="pulseHelp(true)">ต้องการให้ครูติดต่อกลับ</button>
       </div>
-      <div id="helpMore" class="${PS.help.need?'':'hide'}">
+      <div id="helpMore" class="${d.help.need?'':'hide'}">
         <label for="phWho">อยากให้ใครติดต่อกลับ</label>
-        <select id="phWho">${HELPERS.map(h=>`<option ${PS.help.who===h?'selected':''}>${h}</option>`).join('')}</select>
+        <select id="phWho">${HELPERS.map(h=>`<option ${d.help.who===h?'selected':''}>${h}</option>`).join('')}</select>
         <label for="phNote">เล่าสั้น ๆ ก็ได้ว่ามีเรื่องอะไร (ไม่บังคับ)</label>
-        <textarea id="phNote" placeholder="เช่น ช่วงนี้ไม่ค่อยมีสมาธิ อยากคุยกับครูครับ">${esc(PS.help.note||'')}</textarea>
+        <textarea id="phNote" placeholder="เช่น ช่วงนี้ไม่ค่อยมีสมาธิ อยากคุยกับครูครับ">${esc(d.help.note||'')}</textarea>
         <p class="small muted" style="margin-top:6px">🔒 ข้อความนี้เห็นได้เฉพาะครูที่เข้าหน้าครูด้วยรหัสเท่านั้น เพื่อนมองไม่เห็น</p>
       </div>
       ${HOTLINE_HTML}
@@ -6122,14 +6230,14 @@ function renderPulseForm(){
 
     <div class="helpcard">
       <h3 style="margin:0 0 6px">💛 ส่งคำขอบคุณ <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></h3>
-      <p class="small muted" style="margin:0 0 8px">ขอบคุณเพื่อนหรือครูที่ทำสิ่งดี ๆ ให้ในสัปดาห์นี้</p>
+      <p class="small muted" style="margin:0 0 8px">ขอบคุณเพื่อนหรือครูที่ทำสิ่งดี ๆ ให้วันนี้</p>
       <div class="grid2">
         <div><label for="ptTo">ขอบคุณใคร</label>
-          <select id="ptTo"><option value="">— ไม่ส่งสัปดาห์นี้ —</option>
-            ${ROSTER.map((n,j)=>j===PS.idx?'':`<option ${PS.thanks.to===n?'selected':''}>${esc(n)}</option>`).join('')}
-            <option ${PS.thanks.to==='คุณครู'?'selected':''}>คุณครู</option></select></div>
+          <select id="ptTo"><option value="">— ไม่ส่งวันนี้ —</option>
+            ${ROSTER.map((n,j)=>j===PS.idx?'':`<option ${d.thanks.to===n?'selected':''}>${esc(n)}</option>`).join('')}
+            <option ${d.thanks.to==='คุณครู'?'selected':''}>คุณครู</option></select></div>
         <div><label for="ptMsg">เพราะอะไร</label>
-          <input id="ptMsg" placeholder="เช่น ช่วยติวเลขให้ก่อนสอบ" value="${esc(PS.thanks.msg||'')}"></div>
+          <input id="ptMsg" placeholder="เช่น ช่วยติวเลขให้ก่อนสอบ" value="${esc(d.thanks.msg||'')}"></div>
       </div>
     </div>
 
@@ -6137,26 +6245,36 @@ function renderPulseForm(){
       <button onclick="pulseBack()">ย้อนกลับ</button>
       <button class="primary" onclick="pulseSubmit()">ส่งเช็คอิน${window._afterPulse?' แล้วเริ่มภารกิจ':''}</button>
     </div></div>`;
-  const w=$('phWho'); if(w) w.onchange=e=>{PS.help.who=e.target.value;};
-  const nt=$('phNote'); if(nt) nt.oninput=e=>{PS.help.note=e.target.value;};
-  const tt=$('ptTo'); if(tt) tt.onchange=e=>{PS.thanks.to=e.target.value;};
-  const tm=$('ptMsg'); if(tm) tm.oninput=e=>{PS.thanks.msg=e.target.value;};
+  const w=$('phWho'); if(w) w.onchange=e=>{PD().help.who=e.target.value;};
+  const nt=$('phNote'); if(nt) nt.oninput=e=>{PD().help.note=e.target.value;};
+  const tt=$('ptTo'); if(tt) tt.onchange=e=>{PD().thanks.to=e.target.value;};
+  const tm=$('ptMsg'); if(tm) tm.oninput=e=>{PD().thanks.msg=e.target.value;};
 }
 /* ย้อนกลับจากฟอร์มเช็คอิน: ถ้ามาจากประตูก่อนภารกิจ ให้ยกเลิกและกลับหน้าแรก */
 function pulseBack(){
   if(window._afterPulse){ window._afterPulse=null; go('home'); return; }
   renderPulsePick();
 }
-function pulseMood(v){ PS.mood=v; renderPulseForm(); }
-function pulseQ(id,v){ PS.qs[id]=v; renderPulseForm(); }
-function pulseHelp(need){ PS.help.need=need; renderPulseForm(); }
+/* เก็บช่องพิมพ์ที่อยู่บนหน้าก่อนวาดใหม่ ไม่งั้นการแตะปุ่มจะล้างข้อความที่พิมพ์ไว้ */
+function pGrab(){
+  const d=PD(); if(!d) return;
+  if($('phNote')) d.help.note=$('phNote').value;
+  if($('ptMsg')) d.thanks.msg=$('ptMsg').value;
+  if($('ptTo')) d.thanks.to=$('ptTo').value;
+  if($('phWho')) d.help.who=$('phWho').value;
+}
+function pulseMood(v){ pGrab(); PD().mood=v; renderPulseForm(); }
+function pulseQ(id,v){ pGrab(); PD().qs[id]=v; renderPulseForm(); }
+function pulseHelp(need){ pGrab(); PD().help.need=need; renderPulseForm(); }
 async function pulseSubmit(){
-  if(!PS.mood){ toast('เลือกหน้าที่ตรงกับความรู้สึกสัปดาห์นี้ก่อน'); window.scrollTo({top:0,behavior:'smooth'}); return; }
-  const need=weekQs(PS.week).filter(q=>!PS.qs[q.id]);
-  if(need.length){ toast('ตอบคำถามให้ครบ 5 ข้อ เหลืออีก '+need.length+' ข้อ'); return; }
-  if(PS.thanks.to&&!(PS.thanks.msg||'').trim()){ toast('เขียนสั้น ๆ ว่าขอบคุณเรื่องอะไร'); return; }
-  PS.at=Date.now();
-  const j=JSON.stringify(PS);
+  pGrab();
+  const d=PD(), q=dayQ(PS.week,PS.day);
+  if(!d.mood){ toast('เลือกหน้าที่ตรงกับความรู้สึกวันนี้ก่อน'); window.scrollTo({top:0,behavior:'smooth'}); return; }
+  if(!d.qs[q.id]){ toast('ตอบคำถามของวันนี้อีก 1 ข้อ'); return; }
+  if(d.thanks.to&&!(d.thanks.msg||'').trim()){ toast('เขียนสั้น ๆ ว่าขอบคุณเรื่องอะไร'); return; }
+  d.at=Date.now(); PS.at=Date.now();
+  const out=Object.assign({},PS); delete out.day;      /* day เป็นสถานะหน้าจอ ไม่ต้องเก็บ */
+  const j=JSON.stringify(out);
   LS.set(pulseKey(PS.week,PS.idx),j);
   queueRemote(pulseKey(PS.week,PS.idx),PS.name,j);
   const ok=await flushRemote(true);
@@ -6167,32 +6285,44 @@ async function pulseSubmit(){
   toast(ok?'ส่งเช็คอินเรียบร้อย ขอบคุณที่บอกความรู้สึกนะ':'บันทึกในเครื่องแล้ว จะส่งขึ้นระบบเมื่อมีอินเทอร์เน็ต',ok);
   await renderPulseDone(false);
 }
-/* Reflections: นักเรียนเห็นประวัติอารมณ์ตัวเองย้อนหลัง */
+/* Reflections: นักเรียนเห็นอารมณ์ของตัวเองทั้งรายวันในสัปดาห์นี้ และรายสัปดาห์ย้อนหลัง */
 async function renderPulseDone(already){
   const hist=[];
   for(let w=-7;w<=0;w++){
     const wk=weekKeyShift(w);
     hist.push({wk,rec:await pulseRec(wk,PS.idx)});
   }
-  const n=hist.filter(h=>h.rec).length;
-  const cur=hist[hist.length-1].rec;
+  const nWeeks=hist.filter(h=>pulseDoneCount(h.rec)).length;
+  const nDays=hist.reduce((a,h)=>a+pulseDoneCount(h.rec),0);
+  const cur=PS, today=pulseOf(PS,PS.day);
+  const kWeek=pulseDoneCount(PS);
   $('v-pulse').innerHTML=`<div class="card">
-    <div class="eyebrow">เช็คอินใจ · ${esc(PS.name)}</div>
-    <h2>${already?'สัปดาห์นี้เช็คอินแล้ว':'ส่งเช็คอินเรียบร้อย'} ${cur?MOOD_E(cur.mood):''}</h2>
+    <div class="eyebrow">เช็คอินใจ · ${esc(PS.name)} · วัน${PDAY_TH[PS.day]}</div>
+    <h2>${already?'วันนี้เช็คอินแล้ว':'ส่งเช็คอินเรียบร้อย'} ${today?MOOD_E(today.mood):''}</h2>
     <p class="muted small">ขอบคุณที่บอกความรู้สึก การรู้จักตัวเองคือจุดเริ่มของการดูแลตัวเอง</p>
 
-    <h3 style="margin-top:14px">อารมณ์ของฉัน 8 สัปดาห์ล่าสุด</h3>
+    <h3 style="margin-top:14px">สัปดาห์นี้ของฉัน</h3>
     <div class="row" style="gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px">
-      ${hist.map(h=>`<div style="text-align:center;min-width:52px">
-        <div class="mood-e" style="font-size:28px">${h.rec?MOOD_E(h.rec.mood):'·'}</div>
-        <div class="small muted" style="font-size:11px">${esc(h.wk.slice(5))}</div></div>`).join('')}
+      ${[1,2,3,4,5].map(x=>{const e=pulseOf(PS,x);
+        return `<div style="text-align:center;min-width:52px">
+        <div class="mood-e" style="font-size:28px">${e?MOOD_E(e.mood):'·'}</div>
+        <div class="small muted" style="font-size:11px">${PDAY_AB[x]}</div></div>`;}).join('')}
     </div>
-    <p class="small muted">เช็คอินแล้ว ${n} สัปดาห์ · ยิ่งเช็คอินสม่ำเสมอ ยิ่งเห็นรูปแบบของตัวเองชัด</p>
-    ${cur&&cur.thanks&&cur.thanks.to?`<div class="tnote" style="margin-top:8px">💛 สัปดาห์นี้ขอบคุณ <b>${esc(cur.thanks.to)}</b> — ${esc(cur.thanks.msg)}</div>`:''}
-    ${cur&&cur.help&&cur.help.need?`<div class="notice good" style="margin-top:10px">ครูจะเห็นคำขอของเธอเมื่อเปิดหน้าครู และจะติดต่อกลับโดยเร็ว</div>`:''}
+    <p class="small muted">สัปดาห์นี้เช็คอินแล้ว ${kWeek}/5 วัน${kWeek>=5?' · ครบทั้งสัปดาห์ เก่งมาก':''}</p>
+
+    <h3 style="margin-top:14px">อารมณ์เฉลี่ยรายสัปดาห์ 8 สัปดาห์ล่าสุด</h3>
+    <div class="row" style="gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px">
+      ${hist.map(h=>{const a=pulseMoodAvg(h.rec);
+        return `<div style="text-align:center;min-width:52px">
+        <div class="mood-e" style="font-size:28px">${a?MOOD_E(a):'·'}</div>
+        <div class="small muted" style="font-size:11px">${esc(h.wk.slice(5))}</div></div>`;}).join('')}
+    </div>
+    <p class="small muted">เช็คอินสะสม ${nDays} วัน ใน ${nWeeks} สัปดาห์ · ยิ่งเช็คอินสม่ำเสมอ ยิ่งเห็นรูปแบบของตัวเองชัด</p>
+    ${today&&today.thanks&&today.thanks.to?`<div class="tnote" style="margin-top:8px">💛 วันนี้ขอบคุณ <b>${esc(today.thanks.to)}</b> — ${esc(today.thanks.msg)}</div>`:''}
+    ${today&&today.help&&today.help.need?`<div class="notice good" style="margin-top:10px">ครูจะเห็นคำขอของเธอเมื่อเปิดหน้าครู และจะติดต่อกลับโดยเร็ว</div>`:''}
     ${HOTLINE_HTML}
     <div class="row navrow">
-      ${already?`<button onclick="renderPulseForm()">แก้ไขเช็คอินสัปดาห์นี้</button>`:''}
+      ${already?`<button onclick="renderPulseForm()">แก้ไขเช็คอินวันนี้</button>`:''}
       <button onclick="renderPulsePick()">เพื่อนคนอื่นเช็คอินต่อ</button>
       <button class="primary" onclick="go('home')">กลับหน้าแรก</button>
     </div></div>`;
@@ -6209,74 +6339,109 @@ function sparkSVG(vals){
     return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="${v<=2?'#D94F3D':'#0E9F8C'}"/>`; }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" style="width:120px;height:30px"><path d="${line}" fill="none" stroke="#0E9F8C" stroke-width="1.6" opacity=".55"/>${dots}</svg>`;
 }
+/* สัญญาณเตือนจากข้อมูลรายวัน · hist = อาร์เรย์ระเบียนรายสัปดาห์เรียงเก่า→ใหม่
+   ดูจาก "รายการเช็คอินล่าสุด" ไม่ใช่ระเบียนสัปดาห์ จึงจับสัญญาณได้เร็วขึ้นเป็นรายวัน */
 function pulseFlags(hist){
-  const f=[]; const cur=hist[hist.length-1], prev=hist[hist.length-2];
+  const f=[];
+  const all=[]; hist.forEach(r=>pulseEntries(r).forEach(e=>all.push(e)));
+  const cur=all[all.length-1], prev=all[all.length-2];
+  const week=pulseEntries(hist[hist.length-1]);          /* สัปดาห์ปัจจุบัน */
   if(cur){
     if(cur.help&&cur.help.need) f.push({t:'ขอความช่วยเหลือ',u:1});
-    if(cur.mood<=2) f.push({t:'อารมณ์ระดับต่ำสัปดาห์นี้',u:1});
+    if(cur.mood<=2) f.push({t:'อารมณ์ระดับต่ำล่าสุด',u:1});
     if(cur.qs&&cur.qs.bul&&cur.qs.bul<=2) f.push({t:'อาจถูกกลั่นแกล้ง',u:1});
     if(cur.qs&&cur.qs.saf&&cur.qs.saf<=2) f.push({t:'รู้สึกไม่ปลอดภัยที่โรงเรียน',u:1});
   }
-  if(cur&&prev&&(prev.mood-cur.mood)>=2) f.push({t:'อารมณ์ลดลงชัดเจนจากสัปดาห์ก่อน',u:0});
+  /* อารมณ์ต่ำติดกัน 2 วันขึ้นไปในสัปดาห์นี้ = สัญญาณที่รายสัปดาห์เดิมมองไม่เห็น */
+  let run=0,maxRun=0;
+  week.forEach(e=>{ if(e.mood<=2){ run++; maxRun=Math.max(maxRun,run); } else run=0; });
+  if(maxRun>=2) f.push({t:'อารมณ์ต่ำติดกัน '+maxRun+' วัน',u:1});
+  if(cur&&prev&&(prev.mood-cur.mood)>=2) f.push({t:'อารมณ์ลดลงชัดเจนจากครั้งก่อน',u:0});
   return f;
 }
 async function openPulseDash(){
   go('pulsedash');
   $('v-pulsedash').innerHTML=`<div class="card"><h2>กำลังรวบรวมข้อมูลสุขภาวะ…</h2></div>`;
+  try{ await renderPulseDash(); }
+  catch(e){ $('v-pulsedash').innerHTML=`<div class="card"><h1>แสดงผลไม่สำเร็จ</h1>
+    <div class="notice"><span class="small">${esc(e.message||e)}</span></div>
+    <div class="row"><button class="primary" onclick="openPulseDash()">ลองใหม่</button><button onclick="go('home')">หน้าแรก</button></div></div>`; }
+}
+async function renderPulseDash(){
   await pullAll('lc:pulse:');
   const WKS=[-7,-6,-5,-4,-3,-2,-1,0].map(weekKeyShift);
-  const data=[];           // data[i] = ประวัติเรียงสัปดาห์ของนักเรียน i
+  const data=[];           // data[i] = ระเบียนรายสัปดาห์ของนักเรียน i เรียงเก่า→ใหม่
   for(let i=0;i<ROSTER.length;i++){
     const hist=[];
     for(const wk of WKS) hist.push(await pulseRec(wk,i));
     data.push(hist);
   }
-  const wkNow=WKS[WKS.length-1];
-  const cur=data.map(h=>h[h.length-1]);
-  const done=cur.filter(Boolean);
+  const wkNow=WKS[WKS.length-1], today=pulseDayNo();
   const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
-  const moodAvg=avg(done.map(d=>d.mood));
-  const dist=[0,0,0,0,0]; done.forEach(d=>dist[d.mood-1]++);
-  /* คำขอความช่วยเหลือ 2 สัปดาห์ล่าสุด เรียงใหม่ก่อน */
+  const cc=CPAL();
+
+  /* ---- วันนี้ ---- */
+  const curWk=data.map(h=>h[h.length-1]);
+  const todays=curWk.map(r=>pulseOf(r,today)).filter(Boolean);
+  const moodToday=avg(todays.map(d=>d.mood));
+  const dist=[0,0,0,0,0]; todays.forEach(d=>dist[d.mood-1]++);
+
+  /* ---- ตาราง 5 วันของสัปดาห์นี้ ---- */
+  const byDay=[1,2,3,4,5].map(d=>{
+    const es=curWk.map(r=>pulseOf(r,d)).filter(Boolean);
+    return {d,n:es.length,avg:es.length?avg(es.map(e=>e.mood)):null,
+      low:es.filter(e=>e.mood<=2).length};
+  });
+  const slotsWk=ROSTER.length*5, doneWk=byDay.reduce((a,b)=>a+b.n,0);
+
+  /* ---- คำขอความช่วยเหลือ ทุกวันใน 2 สัปดาห์ล่าสุด เรียงใหม่ก่อน ---- */
   const helps=[];
   data.forEach((hist,i)=>{
     hist.slice(-2).forEach((rec,k)=>{
-      if(rec&&rec.help&&rec.help.need) helps.push({i,rec,wk:WKS[WKS.length-2+k]});
+      const wk=WKS[WKS.length-2+k];
+      pulseEntries(rec).forEach(e=>{ if(e.help&&e.help.need)
+        helps.push({i,e,wk,day:e.day}); });
     });
   });
-  helps.sort((a,b)=>(b.rec.at||0)-(a.rec.at||0));
+  helps.sort((a,b)=>(b.e.at||0)-(a.e.at||0));
   const watch=data.map((h,i)=>({i,f:pulseFlags(h)})).filter(x=>x.f.length);
   const thanks=[];
-  data.forEach(h=>h.forEach(rec=>{ if(rec&&rec.thanks&&rec.thanks.to) thanks.push(rec); }));
-  thanks.sort((a,b)=>(b.at||0)-(a.at||0));
+  data.forEach((h,i)=>h.forEach(rec=>pulseEntries(rec).forEach(e=>{
+    if(e.thanks&&e.thanks.to) thanks.push({name:ROSTER[i],e}); })));
+  thanks.sort((a,b)=>(b.e.at||0)-(a.e.at||0));
+
+  /* ---- แนวโน้มรายสัปดาห์: ใช้ค่าเฉลี่ยของทุกวันในสัปดาห์นั้น ---- */
   const weekly=WKS.map((wk,w)=>{
-    const rs=data.map(h=>h[w]).filter(Boolean);
-    return {wk,n:rs.length,avg:rs.length?avg(rs.map(r=>r.mood)):null};
+    const es=[]; data.forEach(h=>pulseEntries(h[w]).forEach(e=>es.push(e)));
+    return {wk,days:es.length,people:data.filter(h=>pulseDoneCount(h[w])).length,
+      avg:es.length?avg(es.map(e=>e.mood)):null};
   });
-  const cc=CPAL();
+
   $('v-pulsedash').innerHTML=`
   <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · แดชบอร์ดสุขภาวะ ${esc(ROOM)}</div>
   <div class="card">
-    <div class="eyebrow">เช็คอินใจ · แดชบอร์ดสุขภาวะ · ${esc(ROOM)} · สัปดาห์ ${esc(wkNow)}</div>
-    <h1>สุขภาวะของห้องสัปดาห์นี้</h1>
+    <div class="eyebrow">เช็คอินใจรายวัน · แดชบอร์ดสุขภาวะ · ${esc(ROOM)} · วัน${PDAY_TH[today]} · สัปดาห์ ${esc(wkNow)}</div>
+    <h1>สุขภาวะของห้องวันนี้</h1>
     <div class="grid3" style="margin-top:12px">
-      <div class="card tight"><div class="eyebrow">เช็คอินแล้ว</div><div class="bignum">${done.length}/${ROSTER.length}</div></div>
-      <div class="card tight"><div class="eyebrow">อารมณ์เฉลี่ย</div><div class="bignum">${done.length?moodAvg.toFixed(2):'-'} <span class="mood-e">${done.length?MOOD_E(moodAvg):''}</span></div><div class="small muted">จาก 5</div></div>
-      <div class="card tight"><div class="eyebrow">ขอความช่วยเหลือ</div><div class="bignum ${helps.length?'bad':''}">${helps.length}</div><div class="small muted">2 สัปดาห์ล่าสุด</div></div>
+      <div class="card tight"><div class="eyebrow">วันนี้เช็คอินแล้ว</div><div class="bignum ${todays.length>=Math.ceil(ROSTER.length*0.8)?'ok':''}">${todays.length}/${ROSTER.length}</div><div class="small muted">คน</div></div>
+      <div class="card tight"><div class="eyebrow">อารมณ์เฉลี่ยวันนี้</div><div class="bignum">${todays.length?moodToday.toFixed(2):'—'} <span class="mood-e">${todays.length?MOOD_E(moodToday):''}</span></div><div class="small muted">จาก 5</div></div>
+      <div class="card tight"><div class="eyebrow">ขอความช่วยเหลือ</div><div class="bignum ${helps.length?'bad':''}">${helps.length}</div><div class="small muted">ครั้ง · 2 สัปดาห์ล่าสุด</div></div>
     </div>
-    <div class="notice good" style="margin-top:12px"><span class="small"><b>ระบบไม่วินิจฉัยและไม่ตัดสินนักเรียน</b>
+    <p class="small muted" style="margin-top:8px">สัปดาห์นี้เช็คอินแล้ว ${doneWk}/${slotsWk} ช่อง (${Math.round(doneWk/Math.max(1,slotsWk)*100)}%) · นับเฉพาะจันทร์ถึงศุกร์</p>
+    <div class="notice good" style="margin-top:8px"><span class="small"><b>ระบบไม่วินิจฉัยและไม่ตัดสินนักเรียน</b>
       ข้อมูลนี้เป็นเพียงสัญญาณให้ครูเข้าไปพูดคุยได้เร็วและตรงคนขึ้น ครูเป็นผู้ดูแลและสรุปเสมอ
       ข้อมูลรายบุคคลเป็นความลับ ใช้เชื่อมกับระบบดูแลช่วยเหลือนักเรียนของโรงเรียนได้</span></div>
     <div class="row noprint" style="margin-top:10px">
       <button onclick="openPulseDash()">รีเฟรช</button>
+      <button onclick="pulseCSV()">ส่งออก CSV</button>
       <button onclick="window.print()">พิมพ์รายงาน</button>
       <button onclick="go('home')">หน้าแรก</button></div>
   </div>
 
   ${helps.length?`<div class="card"><h2>🔴 คำขอความช่วยเหลือ — ควรติดต่อกลับก่อน</h2>
     ${helps.map(h=>`<div class="helpreq"><b>${esc(ROSTER[h.i])}</b>
-      <span class="who"> · อยากให้ ${esc(h.rec.help.who)} ติดต่อกลับ · ${esc(h.wk)} · ${fmtDT(h.rec.at)}</span>
-      ${h.rec.help.note?`<p class="small" style="margin:6px 0 0">"${esc(h.rec.help.note)}"</p>`:''}</div>`).join('')}
+      <span class="who"> · อยากให้ ${esc(h.e.help.who)} ติดต่อกลับ · ${h.day?'วัน'+PDAY_TH[h.day]:'แบบสัปดาห์'} ${esc(h.wk)} · ${fmtDT(h.e.at)}</span>
+      ${h.e.help.note?`<p class="small" style="margin:6px 0 0">"${esc(h.e.help.note)}"</p>`:''}</div>`).join('')}
     <p class="small muted">เมื่อพูดคุยแล้ว บันทึกผลในระบบดูแลช่วยเหลือนักเรียนของโรงเรียนตามแนวปฏิบัติปกติ</p></div>`:''}
 
   ${watch.length?`<div class="card"><h2>นักเรียนที่ควรเข้าไปพูดคุยก่อน</h2>
@@ -6284,35 +6449,74 @@ async function openPulseDash(){
       <p class="small muted" style="margin:3px 0 0">${x.f.map(f=>esc(f.t)).join(' · ')}</p></div>`).join('')}
     <p class="small muted">สัญญาณเหล่านี้มาจากคำตอบของนักเรียนเอง ไม่ใช่คำตัดสินของระบบ</p></div>`:''}
 
+  <div class="card"><h2>รายวันของสัปดาห์นี้</h2>
+    <p class="small muted">เห็นได้ทันทีว่าวันไหนอารมณ์ห้องตก และวันไหนนักเรียนหายไปจากการเช็คอิน</p>
+    <table style="margin-top:6px"><thead><tr><th>วัน</th><th>เช็คอิน</th><th>อารมณ์เฉลี่ย</th><th>อารมณ์ต่ำ (1–2)</th></tr></thead><tbody>
+    ${byDay.map(b=>`<tr><td>${PDAY_TH[b.d]}${b.d===today?' <span class="pill">วันนี้</span>':''}</td>
+      <td class="mono">${b.n}/${ROSTER.length}</td>
+      <td>${b.avg?`<span class="mono">${b.avg.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(b.avg)}</span>`:'<span class="muted">—</span>'}</td>
+      <td class="mono ${b.low?'bad':''}">${b.n?b.low:'—'}</td></tr>`).join('')}
+    </tbody></table>
+  </div>
+
   <div class="card"><h2>ภาพรวมทั้งห้อง</h2>
     <div class="chartgrid">
-      <div><h3 style="font-size:15px">อารมณ์สัปดาห์นี้ (จำนวนคน)</h3>
-        ${svgDonut(MOODS.map(([v,e,t])=>e+' '+t),dist,[cc.red,'#E58B4B',cc.amber,cc.tealSoft,cc.teal])}</div>
+      <div><h3 style="font-size:15px">อารมณ์วันนี้ (จำนวนคน)</h3>
+        ${todays.length?svgDonut(MOODS.map(([v,e,t])=>e+' '+t),dist,[cc.red,'#E58B4B',cc.amber,cc.tealSoft,cc.teal])
+          :'<p class="muted small">วันนี้ยังไม่มีใครเช็คอิน</p>'}</div>
       <div><h3 style="font-size:15px">แนวโน้ม 8 สัปดาห์</h3>
-        <table><thead><tr><th>สัปดาห์</th><th>เช็คอิน</th><th>เฉลี่ย</th></tr></thead><tbody>
-        ${weekly.map(w=>`<tr><td class="mono small">${esc(w.wk.slice(5))}</td><td class="mono">${w.n}</td>
+        <table><thead><tr><th>สัปดาห์</th><th>คน</th><th>วัน</th><th>เฉลี่ย</th></tr></thead><tbody>
+        ${weekly.map(w=>`<tr><td class="mono small">${esc(w.wk.slice(5))}</td><td class="mono">${w.people}</td><td class="mono">${w.days}</td>
           <td>${w.avg?`<span class="mono">${w.avg.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(w.avg)}</span>`:'<span class="muted">—</span>'}</td></tr>`).join('')}
         </tbody></table></div>
     </div>
   </div>
 
   <div class="card"><h2>รายบุคคล</h2>
-    <div style="overflow-x:auto"><table><thead><tr><th>ที่</th><th>ชื่อ</th><th>สัปดาห์นี้</th><th>แนวโน้ม 8 สัปดาห์</th><th>สัญญาณ</th></tr></thead><tbody>
-    ${ROSTER.map((n,i)=>{const h=data[i]; const c=h[h.length-1]; const f=pulseFlags(h);
+    <p class="small muted noprint">ช่อง จ–ศ คืออารมณ์ที่นักเรียนเลือกในแต่ละวันของสัปดาห์นี้ · แนวโน้มคือค่าเฉลี่ย 8 สัปดาห์</p>
+    <div style="overflow-x:auto"><table><thead><tr><th>ที่</th><th>ชื่อ</th>
+      ${[1,2,3,4,5].map(d=>`<th title="${PDAY_TH[d]}">${PDAY_AB[d]}</th>`).join('')}
+      <th>สัปดาห์นี้</th><th>แนวโน้ม 8 สัปดาห์</th><th>สัญญาณ</th></tr></thead><tbody>
+    ${ROSTER.map((n,i)=>{const h=data[i], cw=h[h.length-1], f=pulseFlags(h);
       return `<tr><td class="mono">${i+1}</td><td>${esc(n)}</td>
-        <td class="mood-e">${c?MOOD_E(c.mood):'<span class="muted small">ยังไม่เช็คอิน</span>'}</td>
-        <td>${sparkSVG(h.map(r=>r?r.mood:null))}</td>
-        <td class="small">${f.length?f.map(x=>x.t).join(' · '):'<span class="muted">—</span>'}</td></tr>`;}).join('')}
+        ${[1,2,3,4,5].map(d=>{const e=pulseOf(cw,d);
+          return `<td class="mood-e" style="text-align:center">${e?MOOD_E(e.mood):'<span class="muted">·</span>'}</td>`;}).join('')}
+        <td class="mono">${pulseDoneCount(cw)}/5</td>
+        <td>${sparkSVG(h.map(r=>pulseMoodAvg(r)))}</td>
+        <td class="small">${f.length?f.map(x=>esc(x.t)).join(' · '):'<span class="muted">—</span>'}</td></tr>`;}).join('')}
     </tbody></table></div>
   </div>
 
   <div class="card"><h2>💛 กำแพงขอบคุณ</h2>
     <p class="small muted">คำขอบคุณที่นักเรียนส่งถึงกัน สร้างวัฒนธรรมเชิงบวกของห้อง อ่านให้ห้องฟังท้ายคาบได้</p>
     ${thanks.length?`<div class="thankswall" style="margin-top:10px">
-      ${thanks.slice(0,12).map(r=>`<div class="tnote"><b>${esc(r.name)}</b> ขอบคุณ <b>${esc(r.thanks.to)}</b><br>
-        <span class="small">"${esc(r.thanks.msg)}"</span></div>`).join('')}</div>`
+      ${thanks.slice(0,12).map(t=>`<div class="tnote"><b>${esc(t.name)}</b> ขอบคุณ <b>${esc(t.e.thanks.to)}</b><br>
+        <span class="small">"${esc(t.e.thanks.msg)}"</span></div>`).join('')}</div>`
       :'<p class="muted small">ยังไม่มีคำขอบคุณในช่วงนี้</p>'}
   </div>`;
+}
+/* ส่งออกเช็คอินรายวันของสัปดาห์นี้ เปิดใน Excel ได้ทันที */
+function pulseCSV(){
+  const wk=isoWeekKey();
+  (async()=>{
+    await pullAll('lc:pulse:'+wk);
+    const rows=[['เลขที่','ชื่อ-สกุล','วัน','อารมณ์ 1-5','คำถามของวัน','คะแนน 1-5','ขอความช่วยเหลือ','ผู้ที่อยากให้ติดต่อ','ข้อความ','ขอบคุณใคร','เพราะอะไร','เวลา']];
+    for(let i=0;i<ROSTER.length;i++){
+      const rec=await pulseRec(wk,i);
+      pulseEntries(rec).forEach(e=>{
+        const q=e.day?dayQ(wk,e.day):null;
+        const qid=q&&e.qs?q.id:null;
+        rows.push([i+1,ROSTER[i],e.day?PDAY_TH[e.day]:'แบบสัปดาห์(ข้อมูลเดิม)',e.mood,
+          q?q.q:'',(qid&&e.qs[qid])||'',
+          (e.help&&e.help.need)?'ใช่':'',(e.help&&e.help.need&&e.help.who)||'',
+          (e.help&&e.help.note)||'',(e.thanks&&e.thanks.to)||'',(e.thanks&&e.thanks.msg)||'',
+          e.at?new Date(e.at).toLocaleString('th-TH'):'']);
+      });
+    }
+    const csv='﻿'+rows.map(rw=>rw.map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download='uptogrow_pulse_'+wk+'.csv'; a.click();
+  })();
 }
 
 /* ================= PWA: ติดตั้งเป็นแอปบนมือถือ และทำงานออฟไลน์ =================
