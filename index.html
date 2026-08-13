@@ -532,6 +532,8 @@ table.heat td.hc{text-align:center;font-family:var(--mono);font-size:14px;
 <section id="v-school" class="hide"></section>
 <section id="v-sdemo" class="hide"></section>
 <section id="v-tdemo" class="hide"></section>
+<section id="v-studemo" class="hide"></section>
+<section id="v-aikey" class="hide"></section>
 <section id="v-evid" class="hide"></section>
 <section id="v-act" class="hide"></section>
 
@@ -888,7 +890,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','sdemo','tdemo','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role','growth'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','sdemo','tdemo','studemo','aikey','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role','growth'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar(); navClose();
   document.body.classList.toggle('rolev',v==='role');
@@ -921,6 +923,7 @@ const NAV_MENUS={
     {h:'ติดตามและประเมิน'},
     {i:'📊',t:'Dashboard และผลก่อน–หลัง',d:'กราฟ ตารางคะแนน ส่งออก CSV',fn:"needTeacher(openTeacher)"},
     {i:'🧪',t:'สาธิต · ครูเห็นอะไรบ้าง',d:'ห้องจำลอง 40 คน กลางคาบ · แยกจากข้อมูลจริงโดยสิ้นเชิง',fn:"needTeacher(openTeacherDemo)"},
+    {i:'🎒',t:'สาธิต · นักเรียนเห็นอะไรบ้าง',d:'สตอรีบอร์ด 5 จอที่นักเรียนเจอจริง กดดูได้ไม่ต้องทำภารกิจ',fn:"openStudentDemo(0)"},
     {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม',fn:"needTeacher(openEvid)"},
     {i:'📅',t:'ติดตามภารกิจรายวัน',d:'ใครทำวันนี้ · บันทึกแทนเด็กไม่มีมือถือ',fn:"needTeacher(openDailyTeach)"},
     {i:'💚',t:'แดชบอร์ดสุขภาวะ · เช็คอินใจรายวัน',d:'วันนี้ใครยังไม่เช็คอิน · ใครขอความช่วยเหลือ',fn:"needTeacher(openPulseDash)"},
@@ -928,6 +931,7 @@ const NAV_MENUS={
     {sep:1},
     {h:'สร้างและจัดการ'},
     {i:'⚡',t:'สร้างภารกิจด่วนรายวัน',d:'AI ร่างสถานการณ์ ครูอนุมัติ',fn:"needTeacher(openQuick)"},
+    {i:'🔑',t:'เปิดใช้ AI · ใส่ API key',d:'ตั้งค่าครั้งเดียวจบ ระบบส่งเข้า Apps Script ให้เอง',fn:"needTeacher(openAIKey)"},
     {i:'📝',t:'โหมดไม่มีมือถือ · กรอกแทน',d:'ครูกรอกคะแนนจากใบงานกระดาษ',fn:"needTeacher(openBatch)"},
     {i:'🖨️',t:'พิมพ์ใบงาน / แบบวัดกระดาษ',d:'สำหรับนักเรียนที่ไม่มีอุปกรณ์',fn:"needTeacher(openPaper)"},
     {i:'⚙️',t:'ตั้งค่าห้องเรียน',d:'รายชื่อ ระดับชั้น รหัสห้อง',fn:"needTeacher(openSetup)"},
@@ -2263,7 +2267,7 @@ async function qGenerate(){
 ${goals.map((g,i)=>(i+1)+' '+g).join('\n')}
 รายการงานวิจัยที่เลือกอ้างอิงได้ (ห้ามใช้ชื่ออื่นนอกรายการนี้):
 ${resList}`;
-  let def=null, warn='';
+  let def=null, warn='', noKey=false;
   try{
     const j=await apiCall({action:'coach',system:sys,prompt});
     let txt=(j.reply||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
@@ -2290,9 +2294,12 @@ ${resList}`;
       if(!qOnTopic(topic,def.situation)) warn='สถานการณ์ที่ได้อาจไม่ตรงกับหัวข้อที่ครูพิมพ์ ตรวจก่อนอนุมัติ หรือกดร่างใหม่';
       else if(miss.length) warn='ยังไม่ยืนยันว่าวัดเป้าหมายนี้ได้ — '+miss.join(' · ')+' — ตรวจตัวเลือกและเกณฑ์ให้แน่ใจ';
     }
-  }catch(e){ def=null; }
+  }catch(e){ def=null; noKey=/API key/i.test(String(e.message||e)); }
   if(!def){ def=qFallback(topic,dim,goals);
-    toast('AI ไม่พร้อมใช้งาน ระบบใช้โครงร่างสำรองตามสมรรถนะที่เลือกแทน ครูแก้ไขข้อความได้ทุกช่องก่อนเปิดใช้'); }
+    toast(noKey
+      ? 'ยังไม่ได้ใส่ API key ระบบจึงใช้โครงร่างสำรอง · เปิดเมนูครู แล้วเลือก "เปิดใช้ AI · ใส่ API key" เพื่อตั้งค่าครั้งเดียวจบ'
+      : 'AI ไม่พร้อมใช้งาน ระบบใช้โครงร่างสำรองตามสมรรถนะที่เลือกแทน ครูแก้ไขข้อความได้ทุกช่องก่อนเปิดใช้');
+    if(noKey) warn='ยังไม่ได้ตั้งค่า API key ภารกิจนี้จึงเป็นโครงร่างสำรอง ใช้งานได้ตามปกติแต่ไม่ได้ปรับให้ตรงหัวข้อด้วย AI'; }
   QDEF=Object.assign({topic,dim,goalIds,goalExtra,goals,warn,created:Date.now()},def);
   if(btn){btn.disabled=false;btn.textContent='ให้ AI ร่างภารกิจใหม่';}
   renderQuick();
@@ -3591,6 +3598,7 @@ function renderMore(){
       ${it('🗂️','แดชบอร์ดภารกิจด่วน','ดูผลภารกิจด่วนที่เปิดไว้',"openQDash()")}
       ${it('⚙️','ตั้งค่าห้องเรียน / คลังภารกิจ','รายชื่อ ระดับชั้น นำเข้า-ส่งออกภารกิจ',"openSetup()")}
       ${it('📚','ฐานงานวิจัยอ้างอิง','งานวิจัย 28 รายการและตารางจับคู่',"openResearch('list')")}
+      ${it('🔑','เปิดใช้ AI · ใส่ API key','ตั้งค่าครั้งเดียวจบ ระบบส่งเข้า Apps Script ให้เอง',"openAIKey()")}
     </div>
     <h3 style="font-size:14px;margin-top:16px;color:var(--gold)">โหมดสาธิต</h3>
     <div class="card tight" style="background:#FFFBEF;border-color:var(--amber)">
@@ -3604,6 +3612,134 @@ function renderMore(){
     <div class="row" style="margin-top:12px"><button onclick="go('home')">กลับหน้าแรก</button></div>
   </div>`;
 }
+
+/* ================= ตั้งค่า AI ผู้ช่วยสร้างภารกิจ (API key) =================
+   ปัญหาเดิม: ครูต้องเปิด Apps Script เอง ไปที่ Project Settings แล้วเพิ่ม
+   Script Property ชื่อ ANTHROPIC_API_KEY ซึ่งครูส่วนใหญ่ไม่คุ้นและมักติดตรงนี้
+   หน้านี้ทำให้จบในที่เดียว: พิมพ์คีย์แล้วกดปุ่ม ระบบส่งไปเก็บที่ Apps Script ให้เลย
+
+   หลักความปลอดภัยที่ยึดไว้
+   1. คีย์ไม่เคยถูกเก็บใน localStorage หรือใน sessionStorage ของเครื่องครู
+      อยู่ในกล่องข้อความชั่วคราวเท่านั้น และถูกล้างทิ้งทันทีที่บันทึกเสร็จ
+   2. ส่งตรงไปที่ Apps Script ของครูเอง (HTTPS) ไปเก็บใน Script Properties
+      ซึ่งอยู่ฝั่งเซิร์ฟเวอร์ นักเรียนที่เปิดเว็บเดียวกันไม่มีทางเห็นคีย์
+   3. ระบบไม่มีคำสั่งใดที่อ่านคีย์กลับออกมาได้ หน้านี้จึงแสดงได้แค่
+      "ตั้งค่าแล้วหรือยัง" กับเลข 4 ตัวท้าย เพื่อให้ครูตรวจว่าใส่คีย์ถูกใบ
+   4. คำสั่งตั้งค่าคีย์ต้องแนบรหัสครู และตรวจซ้ำที่ฝั่งเซิร์ฟเวอร์อีกชั้น */
+let AIK={hasKey:null,tail:'',msg:'',err:'',busy:false};
+function openAIKey(){ go('aikey'); renderAIKey(); aikRefresh(); }
+async function aikRefresh(){
+  try{ const j=await apiCall({action:'keyStatus'});
+       AIK.hasKey=!!j.hasKey; AIK.tail=j.tail||''; AIK.err=''; }
+  catch(e){ AIK.hasKey=null;
+    AIK.err=/ไม่รู้จักคำสั่ง/.test(String(e.message||e))
+      ? 'Apps Script ที่ใช้อยู่ยังเป็นรุ่นเก่า ยังไม่รองรับการตั้งค่าคีย์จากหน้านี้ ให้ deploy Code.gs ฉบับล่าสุดก่อน'
+      : String(e.message||e); }
+  renderAIKey();
+}
+function aikPin(){ const el=$('aikPin'); const v=el?el.value.trim():''; return v||TEACHER_PIN; }
+async function aikSave(){
+  const el=$('aikKey'); const v=(el?el.value:'').trim();
+  if(!v){ toast('พิมพ์คีย์ก่อน แล้วจึงกดบันทึก'); return; }
+  if(v.indexOf('sk-ant-')!==0){ toast('คีย์ของ Anthropic ต้องขึ้นต้นด้วย sk-ant-'); return; }
+  AIK.busy=true; AIK.msg=''; AIK.err=''; renderAIKey();
+  try{
+    const j=await apiCall({action:'setKey',key:v,pin:aikPin()});
+    AIK.hasKey=!!j.hasKey; AIK.tail=j.tail||'';
+    AIK.msg='บันทึกคีย์เข้า Apps Script แล้ว · กดปุ่มทดสอบเพื่อยืนยันว่าใช้งานได้จริง';
+    if(el) el.value='';                       /* ล้างช่องทันที ไม่ให้ค้างบนจอ */
+  }catch(e){ AIK.err=String(e.message||e); }
+  AIK.busy=false; renderAIKey();
+}
+async function aikTest(){
+  AIK.busy=true; AIK.msg=''; AIK.err=''; renderAIKey();
+  try{ const j=await apiCall({action:'testKey',pin:aikPin()});
+       AIK.msg=(j.msg||'คีย์ใช้งานได้จริง')+' · ตอนนี้ภารกิจด่วนจะสร้างด้วย AI แล้ว'; }
+  catch(e){ AIK.err=String(e.message||e); }
+  AIK.busy=false; renderAIKey();
+}
+async function aikRemove(){
+  if(!confirm('ลบ API key ออกจาก Apps Script หรือไม่\n\nระบบจะยังใช้งานได้ตามปกติ แต่ภารกิจด่วนจะกลับไปใช้โครงร่างสำรองแทนการสร้างด้วย AI')) return;
+  AIK.busy=true; AIK.msg=''; AIK.err=''; renderAIKey();
+  try{ await apiCall({action:'setKey',key:'',pin:aikPin()});
+       AIK.hasKey=false; AIK.tail=''; AIK.msg='ลบคีย์ออกจาก Apps Script แล้ว'; }
+  catch(e){ AIK.err=String(e.message||e); }
+  AIK.busy=false; renderAIKey();
+}
+function aikToggle(){
+  const el=$('aikKey'); if(!el) return;
+  el.type = el.type==='password' ? 'text' : 'password';
+  const b=$('aikEye'); if(b) b.textContent = el.type==='password' ? 'แสดงคีย์' : 'ซ่อนคีย์';
+}
+function renderAIKey(){
+  const st = AIK.hasKey===null
+    ? `<span class="pill" style="color:var(--muted)">กำลังตรวจสอบ…</span>`
+    : AIK.hasKey
+      ? `<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ตั้งค่าแล้ว</span>
+         <span class="small muted">คีย์ลงท้ายด้วย <b class="mono">…${esc(AIK.tail)}</b></span>`
+      : `<span class="pill" style="color:var(--gold);border-color:var(--gold)">ยังไม่ได้ตั้งค่า</span>
+         <span class="small muted">ตอนนี้ภารกิจด่วนใช้โครงร่างสำรอง ซึ่งใช้งานได้ปกติแต่ไม่ตรงหัวข้อเท่า AI</span>`;
+  $('v-aikey').innerHTML=`<div class="card">
+    <div class="eyebrow">เครื่องมือครู · ตั้งค่าครั้งเดียวจบ</div>
+    <h1>เปิดใช้ AI ผู้ช่วยสร้างภารกิจ</h1>
+    <p class="muted small" style="max-width:70ch">ใส่ API key ของ Anthropic ที่นี่ที่เดียว
+      ระบบจะส่งไปเก็บไว้ใน Apps Script ของคุณครูให้เอง <b>ไม่ต้องเปิด Apps Script ไปตั้งค่าเอง</b></p>
+    <div class="row" style="gap:10px;align-items:center;margin-top:8px">
+      <b>สถานะปัจจุบัน</b> ${st}
+      <span class="sp"></span>
+      <button class="ghost small noprint" onclick="aikRefresh()">ตรวจสอบใหม่</button></div>
+
+    ${AIK.msg?`<div class="notice good" style="margin-top:12px"><b>สำเร็จ</b><br><span class="small">${esc(AIK.msg)}</span></div>`:''}
+    ${AIK.err?`<div class="notice" style="margin-top:12px"><b>ยังไม่สำเร็จ</b><br><span class="small">${esc(AIK.err)}</span></div>`:''}
+
+    <h3 style="margin-top:18px">1 · ขอคีย์จาก Anthropic (ทำครั้งเดียว)</h3>
+    <p class="small muted">สมัครบัญชีและเติมเครดิตขั้นต่ำ แล้วกด Create Key จะได้ข้อความยาวขึ้นต้นด้วย <span class="mono">sk-ant-</span></p>
+    <div class="row"><a class="mbtn" style="text-decoration:none;display:inline-flex"
+      href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">
+      <span class="mi">🔑</span><span class="mt">เปิดหน้าสร้างคีย์ของ Anthropic<small>console.anthropic.com · เปิดในแท็บใหม่</small></span></a></div>
+
+    <h3 style="margin-top:18px">2 · วางคีย์ที่นี่ แล้วกดบันทึก</h3>
+    <label for="aikKey">API key</label>
+    <input id="aikKey" type="password" autocomplete="off" spellcheck="false"
+      placeholder="sk-ant-..." ${AIK.busy?'disabled':''}>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" onclick="aikSave()" ${AIK.busy?'disabled':''}>บันทึกเข้า Apps Script</button>
+      <button id="aikEye" onclick="aikToggle()">แสดงคีย์</button>
+      <button onclick="aikTest()" ${AIK.busy?'disabled':''}>ทดสอบว่าใช้ได้จริง</button>
+      ${AIK.hasKey?`<button onclick="aikRemove()" ${AIK.busy?'disabled':''}>ลบคีย์ออก</button>`:''}
+    </div>
+    <details style="margin-top:10px"><summary class="small muted">ตั้งรหัสยืนยันไว้ต่างจากค่าเริ่มต้นใน Apps Script</summary>
+      <p class="small muted" style="margin:6px 0">ถ้าเพิ่ม Script Property ชื่อ <span class="mono">TEACHER_PIN</span> ไว้ใน Apps Script
+        ให้กรอกรหัสนั้นตรงนี้ ปล่อยว่างไว้ถ้ายังใช้ค่าเริ่มต้น</p>
+      <input id="aikPin" type="password" autocomplete="off" placeholder="เว้นว่างถ้ายังไม่เคยตั้ง" style="max-width:280px">
+    </details>
+
+    <h3 style="margin-top:18px">สิ่งที่ควรรู้ก่อนใส่คีย์</h3>
+    <div class="grid3" style="margin-top:8px">
+      <div class="card tight"><b>มีค่าใช้จ่าย</b><p class="small muted" style="margin:4px 0 0">
+        คีย์นี้เป็นบริการแบบเติมเครดิต การสร้างภารกิจด้วย AI 1 ครั้ง ประมาณ 1–2 บาท
+        ถ้าไม่ใส่คีย์ ระบบยังใช้งานได้ครบทุกอย่าง เพียงแต่ภารกิจด่วนจะใช้โครงร่างสำรอง</p></div>
+      <div class="card tight"><b>คีย์อยู่ที่ไหน</b><p class="small muted" style="margin:4px 0 0">
+        เก็บใน Script Properties ของ Apps Script ฝั่งเซิร์ฟเวอร์
+        <b>ไม่ถูกเก็บในเครื่องนี้</b> และนักเรียนที่เปิดเว็บเดียวกันไม่มีทางเห็น
+        ระบบไม่มีคำสั่งอ่านคีย์กลับออกมา หน้านี้จึงแสดงได้แค่ 4 ตัวท้าย</p></div>
+      <div class="card tight"><b>ครูยังเป็นผู้ตัดสิน</b><p class="small muted" style="margin:4px 0 0">
+        AI ทำหน้าที่ร่างสถานการณ์ให้ตรงหัวข้อและเป้าหมายที่ครูกำหนดเท่านั้น
+        <b>ไม่ให้คำตอบกับนักเรียน และไม่ให้คะแนนขั้นสุดท้าย</b> ครูเป็นผู้อนุมัติทุกภารกิจก่อนใช้</p></div>
+    </div>
+    <div class="notice" style="margin-top:12px"><span class="small">
+      <b>ข้อควรระวังด้านความปลอดภัย</b> ลิงก์ Apps Script ของระบบเป็นแบบเปิด (เพื่อให้นักเรียนใช้ได้โดยไม่ต้องล็อกอิน)
+      คำสั่งตั้งค่าคีย์จึงป้องกันด้วยรหัสครูเท่านั้น และรหัสเริ่มต้นอยู่ในโค้ดที่เผยแพร่แบบสาธารณะ
+      ถ้าจะใช้คีย์ที่มีเครดิตสูง <b>ควรเพิ่ม Script Property ชื่อ TEACHER_PIN แล้วตั้งรหัสใหม่ใน Apps Script ก่อน</b>
+      และตั้งวงเงินรายเดือนของคีย์ไว้ที่หน้า Anthropic Console</span></div>
+
+    <div class="row" style="margin-top:14px">
+      <button onclick="needTeacher(openQuick)">ไปสร้างภารกิจด่วน</button>
+      <button onclick="openMoreTeacher()">เครื่องมือครูอื่น ๆ</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>`;
+}
+
 /* รายการภารกิจรายสัปดาห์ ย้ายออกจากหน้าแรกมาเป็นหน้าของตัวเอง
    เพราะภารกิจรายสัปดาห์ควรเกิดจากผลรวมของภารกิจรายวัน ไม่ใช่รายการให้เลือกอิสระ */
 function openWeekMissions(){
@@ -4172,12 +4308,20 @@ function renderPlan(){
    ============================================================== */
 const DEMO_KEY='lc:demo';
 const isDemo=()=>LS.get(DEMO_KEY)==='1';
+/* หน้าที่ "แสดงข้อมูลของผู้เรียน" จริง ๆ จึงมีโอกาสปนข้อมูลสาธิตที่เคยสร้างไว้
+   แถบเตือนขึ้นเฉพาะหน้ากลุ่มนี้เท่านั้น
+   หน้าอื่น (หน้าแรก เลือกบทบาท ตั้งค่า แผนภาพ ฐานวิจัย ฯลฯ) ไม่ต้องเตือน
+   เพราะไม่มีตัวเลขของผู้เรียนให้เข้าใจผิดได้ และการเตือนทุกหน้าทำให้คนเลิกอ่านแถบนี้
+   ส่วนหน้าสาธิตเฉพาะทาง (sdemo/tdemo/studemo) มีแบนเนอร์ของตัวเองอยู่แล้ว จึงไม่ซ้ำอีก */
+const DEMO_DATA_VIEWS=['teacher','report','stats','semester','school','evid','growth',
+  'pulsedash','dailyteach','dailyrep','cycle','level','weekmis','batch','qdash','interview'];
 function paintDemoBar(){
   const el=$('demoBar'); if(!el) return;
-  if(!isDemo()){ el.classList.add('hide'); el.innerHTML=''; return; }
+  const cur=views.find(v=>!$('v-'+v).classList.contains('hide'));
+  if(!isDemo()||DEMO_DATA_VIEWS.indexOf(cur)<0){ el.classList.add('hide'); el.innerHTML=''; return; }
   el.classList.remove('hide');
-  el.innerHTML=`<b>⚠ โหมดสาธิต · ข้อมูลจำลอง</b>
-    <span>ตัวเลขและคำตอบทั้งหมดในขณะนี้เป็นข้อมูลสมมติที่ระบบสร้างขึ้นเพื่อสาธิตการทำงาน <b>ไม่ใช่ผลการทดลองจริง</b></span>
+  el.innerHTML=`<b>⚠ หน้านี้มีข้อมูลสาธิตปนอยู่</b>
+    <span>เคยกดสร้างข้อมูลสาธิตทั้งห้องไว้ ตัวเลขในหน้านี้จึงรวมข้อมูลสมมติที่ระบบสร้างขึ้นด้วย <b>ยังไม่ใช่ผลการทดลองจริงล้วน</b> · กดล้างเพื่อให้เหลือเฉพาะข้อมูลจริง</span>
     <span class="sp"></span>
     <button class="ghost small noprint" onclick="clearDemo()">ล้างข้อมูลสาธิต</button>`;
 }
@@ -4894,6 +5038,7 @@ function renderSDemo(){
     ${sdemoGradeBtns()}
     <div class="row noprint" style="margin-top:8px">
       <button onclick="openSchool()">← กลับสู่ข้อมูลจริง</button>
+      <button onclick="openStudentDemo(0)">🎒 ดูมุมมองนักเรียน</button>
       <button onclick="openTeacherDemo()">🧑‍🏫 ดูมุมมองของครู</button>
       <button onclick="sdemoCSV()">ส่งออก CSV (กำกับว่าจำลอง)</button>
       <button onclick="window.print()">พิมพ์</button>
@@ -5171,6 +5316,7 @@ function renderTDemo(){
     </div>
     <div class="row noprint" style="margin-top:10px">
       <button onclick="needTeacher(openTeacher)">← กลับสู่ข้อมูลจริงของห้อง</button>
+      <button onclick="openStudentDemo(0)">🎒 ดูมุมมองนักเรียน</button>
       <button onclick="openSchoolDemo()">🏫 ดูมุมมองผู้บริหาร</button>
       <button onclick="tdemoCSV()">ส่งออก CSV (กำกับว่าจำลอง)</button>
       <button onclick="window.print()">พิมพ์</button>
@@ -5322,6 +5468,190 @@ function tdemoCSV(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='uptogrow_teacher_DEMO.csv'; a.click();
+}
+
+/* ================= สาธิตมุมมองของนักเรียน (Student Demo View) =================
+   วัตถุประสงค์: ตอบคำถาม "นักเรียนเห็นอะไร" บนเวทีได้โดยไม่ต้องกดทำภารกิจจริง
+   ซึ่งเสี่ยงทั้งเรื่องเวลา และเสี่ยงบันทึกข้อมูลปลอมทับของนักเรียนจริง
+
+   หน้านี้เป็น "สตอรีบอร์ด" 5 จอที่นักเรียนเจอจริง กดถัดไปทีละจอได้
+   เนื้อหาทุกจอ**ดึงจากคลังจริงของระบบ** (DAILY_SIT, PULSE_QS, dStepDef, dUOpts, ITEMS)
+   ไม่ใช่ข้อความที่เขียนขึ้นใหม่เพื่อการนำเสนอ สิ่งที่กรรมการเห็นจึงเป็นของจริงทุกบรรทัด
+
+   ความปลอดภัย: อ่านอย่างเดียว ไม่เขียน localStorage ไม่แตะสถานะภารกิจของใคร
+   ปุ่มทุกปุ่มในจอจำลองไม่ทำงาน (เป็นภาพนิ่ง) จึงกดเล่นบนเวทีได้ไม่มีผลข้างเคียง */
+const SDU_WK='2569-W33', SDU_DAY=1;          /* วันจันทร์ของสัปดาห์ตัวอย่าง คงที่เสมอ */
+let SDU_I=0;
+const SDU_TITLES=['หน้าแรกของนักเรียน','เช็คอินใจ 30 วินาที',
+                  'ภารกิจวันนี้ ครบ 8 ขั้น','แบบวัดก่อน–หลังเรียน','พัฒนาการของฉัน'];
+function openStudentDemo(i){
+  SDU_I=Math.max(0,Math.min(SDU_TITLES.length-1, typeof i==='number'?i:0));
+  go('studemo'); renderSDU();
+}
+/* จอจำลอง: ครอบเนื้อหาด้วยกรอบโทรศัพท์ และปิดการคลิกทั้งหมดด้วย pointer-events */
+const sduPhone=(inner,cap)=>`<div class="card tight" style="max-width:520px;margin:0 auto;
+    border:2px solid var(--line);border-radius:18px;background:var(--soft,#F6FAF8)">
+  <div class="small muted" style="text-align:center;margin-bottom:6px">${esc(cap||'จอที่นักเรียนเห็น')}</div>
+  <div style="pointer-events:none;background:#fff;border-radius:12px;padding:12px">${inner}</div>
+</div>`;
+function sduSituation(){
+  try{ return dailySit(SDU_WK,SDU_DAY); }
+  catch(e){ return {s:'ครูแจ้งว่าห้องต้องส่งตัวแทนไปประชุมสภานักเรียน เพื่อนบางคนบอกว่าใครก็ได้ ไม่สำคัญหรอก',
+    dim:'resp', o:[{t:'เห็นด้วยว่าไม่สำคัญ',l:1},{t:'ไม่พูดอะไร รอครูเลือกให้',l:2},
+      {t:'บอกเพื่อนว่าตัวแทนคือคนที่ไปพูดแทนห้อง',l:3},
+      {t:'เสนอให้ห้องตั้งเกณฑ์เลือกตัวแทนร่วมกันก่อน แล้วค่อยโหวต',l:4}]}; }
+}
+function renderSDU(){
+  const it=sduSituation();
+  const nav=`<div class="row noprint" style="flex-wrap:wrap;margin-top:10px">
+    ${SDU_TITLES.map((t,i)=>`<button class="${SDU_I===i?'primary':''}" onclick="openStudentDemo(${i})">${i+1}. ${esc(t)}</button>`).join('')}</div>`;
+  let body='';
+
+  if(SDU_I===0){
+    body=`${sduPhone(`
+      <div class="eyebrow">นักเรียน</div>
+      <h2 style="margin:2px 0 8px">สวัสดี วันนี้มี 2 อย่างที่ต้องทำ</h2>
+      <div class="opt"><b>📅 ภารกิจวันนี้</b><div class="small muted">ครบ 8 ขั้น ใช้เวลา 10 นาที · จันทร์ถึงศุกร์</div></div>
+      <div class="opt"><b>💚 เช็คอินใจ</b><div class="small muted">30 วินาที · กดขอให้ครูช่วยได้</div></div>
+      <div class="opt"><b>📈 พัฒนาการของฉัน</b><div class="small muted">ฝึกอะไรไปแล้ว เปลี่ยนไปอย่างไร</div></div>`,
+      'เปิดเว็บ → กดปุ่ม "นักเรียน" → เจอหน้านี้')}
+      <div class="notice good" style="margin-top:14px"><span class="small">
+        <b>ทำไมหน้านักเรียนถึงสั้นมาก</b> เพราะระบบซ่อนทุกอย่างของครูและผู้บริหารออกไปหมด
+        นักเรียนเห็นเฉพาะสิ่งที่ตัวเองต้องทำ ปุ่มแรกอยู่ในจอแรกโดยไม่ต้องเลื่อน
+        · ถ้าครูส่งลิงก์ภารกิจมาให้ นักเรียนจะเข้าภารกิจนั้นทันที ไม่ต้องผ่านหน้านี้เลย</span></div>`;
+  }
+
+  else if(SDU_I===1){
+    let q='วันนี้ฉันรู้สึกว่าตัวเองมีความหมายกับห้องของเรา';
+    try{ q=dayQ(SDU_WK,SDU_DAY).q||q; }catch(e){}
+    body=`${sduPhone(`
+      <div class="eyebrow">เช็คอินใจ · วันจันทร์</div>
+      <h3 style="margin:2px 0 6px">วันนี้รู้สึกอย่างไร</h3>
+      <div class="row" style="gap:6px;flex-wrap:nowrap">
+        ${MOODS.map(([v,e,t])=>`<div class="opt ${v===4?'sel':''}" style="flex:1;text-align:center;padding:8px 4px">
+          <div style="font-size:26px">${e}</div><div class="small">${esc(t)}</div></div>`).join('')}</div>
+      <h3 style="margin:14px 0 6px;font-size:15px">${esc(q)}</h3>
+      <div class="row" style="gap:6px">
+        ${['ไม่จริงเลย','จริงบ้าง','ค่อนข้างจริง','จริงมาก'].map((t,j)=>
+          `<div class="opt ${j===2?'sel':''}" style="flex:1;text-align:center;padding:8px 4px"><span class="small">${t}</span></div>`).join('')}</div>
+      <div class="opt" style="margin-top:12px;border-color:var(--gold)"><b>🙋 อยากให้ครูช่วย</b>
+        <div class="small muted">เลือกได้ว่าอยากคุยกับใคร · ครูเห็นทันที</div></div>`,
+      'เช็คอินใจ ทำทุกวันก่อนเริ่มภารกิจ')}
+      <div class="notice good" style="margin-top:14px"><span class="small">
+        <b>ทำไมต้องทำทุกวัน</b> เพราะสัญญาณที่สำคัญที่สุดคือ "อารมณ์ต่ำติดกันหลายวัน"
+        ซึ่งมองไม่เห็นถ้าถามแค่สัปดาห์ละครั้ง · คำถามหมุนเวียนวันละข้อจาก ${(()=>{try{return PULSE_QS.length;}catch(e){return 7;}})()} มิติสุขภาวะ
+        ครบสัปดาห์จึงครอบคลุมทุกด้าน แต่ละวันใช้เวลาแค่ 30 วินาที</span></div>`;
+  }
+
+  else if(SDU_I===2){
+    const cards=[];
+    /* ขั้นที่ 1 U เข้าใจ · ตัวเลือกจากคลังจริง */
+    let uo=[];
+    try{ uo=dUOpts(SDU_WK,SDU_DAY,it.dim); }catch(e){ uo=[{t:DFRAME[it.dim]||'หน้าที่ที่เรารับผิดชอบ',ok:1}]; }
+    cards.push({n:0,h:'เรื่องนี้เป็นเรื่องเกี่ยวกับอะไรมากที่สุด',
+      sub:'อ่านสถานการณ์ให้จบ แล้วเลือกข้อที่ตรงที่สุด',
+      opts:uo.map(o=>o.t), sel:uo.findIndex(o=>o.ok===1)});
+    /* ขั้นที่ 2 3 5 7 · คำถามกระบวนการคิดจากคลังจริง */
+    [1,2,4,6].forEach(n=>{ const q=dStepDef(n);
+      cards.push({n,h:q.q,sub:q.h,opts:q.o.map(o=>o.t),sel:2}); });
+    /* ขั้นที่ 4 O ตัดสินใจ · ขั้นที่ระบบใช้วัดผล */
+    cards.push({n:3,h:'ถ้าเป็นเรา จะทำแบบไหน',
+      sub:'ไม่มีถูกผิด ไม่มีผลต่อคะแนนเก็บ · ขั้นนี้คือขั้นที่ระบบใช้วัดผล',
+      opts:it.o.map(o=>o.t), sel:2, mark:1});
+    cards.push({n:5,h:'ย้อนดูตัวเอง',
+      sub:'การตอบว่าเคยทำต่างจากที่เลือก คือความกล้าที่ครูอยากเห็นมากที่สุด',
+      opts:['เคยเจอ และตอนนั้นทำเหมือนที่เลือกวันนี้','เคยเจอ แต่ตอนนั้นทำต่างจากที่เลือกวันนี้','ยังไม่เคยเจอเรื่องแบบนี้'],sel:1});
+    let acts=['มาโรงเรียนให้ตรงเวลาทั้งวัน','ช่วยเก็บของส่วนกลางหลังใช้เสร็จ'];
+    try{ const dd=dailyDims(SDU_WK); acts=[DAILY_ACTS[dd[0]][0],DAILY_ACTS[dd[1]][0]]; }catch(e){}
+    cards.push({n:7,h:'ตั้งเป้าของสัปดาห์นี้ · เลือกเอง 1 อย่าง',
+      sub:'เป้าเล็ก ๆ ที่ตั้งใจทำจริง จะกลับมาถามวันพุธและวันศุกร์',
+      opts:acts.concat(['ตั้งเองแบบอื่น (พิมพ์เอง)']),sel:0});
+    cards.sort((a,b)=>a.n-b.n);
+    body=`
+      <div class="notice"><b>สถานการณ์วันนี้</b><br><span class="small">${esc(it.s)}</span>
+        <br><span class="small muted">กำลังฝึกด้าน <b>${esc((DIMS[it.dim]||{}).n||'')}</b>
+        · ทุกขั้นใช้สถานการณ์เดียวกัน นักเรียนจึงคิดต่อเนื่องไม่หลุดประเด็น</span></div>
+      <div class="grid2" style="margin-top:12px">
+      ${cards.map(c=>`<div class="card tight" style="${c.mark?'border:2px solid var(--teal)':''}">
+        <div class="row" style="justify-content:space-between;align-items:baseline">
+          <span class="stepnum">ขั้นที่ ${c.n+1}/8 · ${STEPS[c.n][0]} ${STEPS[c.n][1]}</span>
+          <span class="small muted">${DMIN[c.n]<1?'ไม่ถึง 1':DMIN[c.n]} นาที</span></div>
+        <h4 style="margin:6px 0 2px">${esc(c.h)}</h4>
+        <p class="small muted" style="margin:0 0 6px">${esc(c.sub)}</p>
+        <div style="pointer-events:none">
+          ${c.opts.map((t,j)=>`<div class="opt ${j===c.sel?'sel':''}" style="padding:7px 10px">
+            <span class="small">${esc(t)}</span></div>`).join('')}</div>
+        ${c.mark?'<div class="small" style="color:var(--teal-d);margin-top:6px"><b>← ขั้นนี้คือคะแนนที่ไหลไปหาครูและผู้บริหาร</b></div>':''}
+      </div>`).join('')}
+      </div>
+      <div class="notice good" style="margin-top:12px"><span class="small">
+        <b>ทั้ง 8 ขั้นรวมกัน ${DMIN.reduce((a,b)=>a+b,0)} นาที</b> · ขั้นที่ 4 (O ตัดสินใจ) เพียงขั้นเดียวคือขั้นที่ให้ระดับ 1–4
+        ขั้นอื่นคือกระบวนการคิดที่พาไปถึงการตัดสินใจนั้น
+        ระบบจึงวัด "พฤติกรรมที่เลือก" ไม่ใช่ "ความรู้ที่ท่องมา"</span></div>`;
+  }
+
+  else if(SDU_I===3){
+    const ex=ITEMS.slice(0,2);
+    body=`${sduPhone(`
+      <div class="eyebrow">แบบวัดก่อนเรียน · ข้อ 1 จาก ${ITEMS.length}</div>
+      <h3 style="margin:2px 0 8px;font-size:15px">${esc(ex[0].q||ex[0].t||'')}</h3>
+      ${(ex[0].o||ex[0].opts||[]).map((o,j)=>`<div class="opt ${j===1?'sel':''}" style="padding:8px 10px">
+        <span class="small">${esc(typeof o==='string'?o:(o.t||''))}</span></div>`).join('')}
+      <div class="prog" style="margin-top:12px"><i style="width:10%"></i></div>`,
+      'แบบวัดสถานการณ์ ทำก่อนและหลังกิจกรรม อย่างละ 3 นาที')}
+      <div class="grid2" style="margin-top:14px">
+        <div class="card tight"><b>เป็นแบบวัดสถานการณ์ ไม่ใช่ข้อสอบความรู้</b>
+          <p class="small muted" style="margin:4px 0 0">ทุกข้อเป็นเหตุการณ์ที่เกิดขึ้นได้จริงในโรงเรียน
+          ตัวเลือกไล่จากพฤติกรรมระดับ 1 ถึง 4 ไม่มีข้อที่ผิดชัดจนเดาได้
+          จึงวัดการตัดสินใจจริง ไม่ใช่การจำคำตอบที่ครูอยากได้</p></div>
+        <div class="card tight"><b>${ITEMS.length} ข้อ คะแนนเต็ม ${FULL_SCORE}</b>
+          <p class="small muted" style="margin:4px 0 0">ทำ 2 ครั้ง คือก่อนและหลังกิจกรรม ครั้งละ ${TESTMIN} นาที
+          รวมกับกิจกรรม 8 ขั้นแล้วทั้งหมดไม่เกิน ${TOTALMIN} นาที จบใน 1 คาบโฮมรูม
+          · นักเรียนเห็นคะแนนของตัวเองทันทีที่ทำเสร็จ</p></div>
+      </div>`;
+  }
+
+  else{
+    body=`${sduPhone(`
+      <div class="eyebrow">พัฒนาการของฉัน</div>
+      <h3 style="margin:2px 0 8px">ฉันเปลี่ยนไปอย่างไรบ้าง</h3>
+      <div class="row" style="gap:8px">
+        <div class="card tight" style="flex:1"><div class="eyebrow">ภารกิจรายวันสะสม</div><div class="bignum">28</div></div>
+        <div class="card tight" style="flex:1"><div class="eyebrow">เช็คอินใจสะสม</div><div class="bignum">31</div></div>
+      </div>
+      <h4 style="margin:12px 0 4px;font-size:14px">สมรรถนะของฉันรายด้าน</h4>
+      <table><thead><tr><th style="font-size:12px">ด้าน</th>
+        <th style="font-size:12px">สิ่งที่ฉันเลือกทำ</th><th style="font-size:12px">สิ่งที่ครูสังเกตเห็น</th></tr></thead><tbody>
+      ${ITEM_DIMS.slice(0,4).map((k,j)=>`<tr><td class="small">${esc(DIMS[k].n)}</td>
+        <td class="mono small">${(2.8+j*0.2).toFixed(2)}</td><td class="mono small">${(2.6+j*0.25).toFixed(2)}</td></tr>`).join('')}
+      </tbody></table>`,
+      'นักเรียนเปิดดูพัฒนาการของตัวเองได้ตลอด')}
+      <div class="notice good" style="margin-top:14px"><span class="small">
+        <b>จุดที่ตั้งใจออกแบบไว้</b> หน้านี้<b>ไม่รวมค่าจาก 2 แหล่งเป็นคะแนนเดียว</b>
+        แต่แยกให้เห็นว่า "สิ่งที่ฉันเลือกทำ" กับ "สิ่งที่ครูสังเกตเห็น" ตรงกันหรือไม่
+        เพราะถ้าต่างกันมาก นั่นคือประเด็นที่ครูกับนักเรียนควรคุยกัน ไม่ใช่ตัวเลขที่ควรถูกเฉลี่ยกลบไป</span></div>`;
+  }
+
+  $('v-studemo').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · สาธิตมุมมองของนักเรียน</div>
+  <div class="card" style="background:#FFF6DF;border:1.5px solid #E3B84C">
+    <b>🧪 สาธิตมุมมองของนักเรียน</b>
+    <span class="small"> แสดง <b>จอที่นักเรียนเห็นจริง</b> ทีละจอ เพื่อให้ดูได้โดยไม่ต้องกดทำภารกิจจริงกลางการนำเสนอ
+    · ข้อความและตัวเลือกทุกข้อดึงจากคลังจริงของระบบ ไม่ได้เขียนขึ้นใหม่
+    · หน้านี้อ่านอย่างเดียว ไม่บันทึกข้อมูลใด ๆ</span></div>
+  <div class="card">
+    <div class="eyebrow">แอปของนักเรียน · จอที่ ${SDU_I+1} จาก ${SDU_TITLES.length}</div>
+    <h1>${esc(SDU_TITLES[SDU_I])}</h1>
+    ${nav}
+    <div style="margin-top:16px">${body}</div>
+    <div class="row noprint" style="margin-top:16px">
+      <button onclick="openStudentDemo(${SDU_I-1})" ${SDU_I===0?'disabled':''}>← จอก่อนหน้า</button>
+      <button class="primary" onclick="openStudentDemo(${SDU_I+1})" ${SDU_I===SDU_TITLES.length-1?'disabled':''}>จอถัดไป →</button>
+      <span class="sp"></span>
+      <button onclick="needTeacher(openTeacherDemo)">🧑‍🏫 มุมมองครู</button>
+      <button onclick="needTeacher(openSchoolDemo)">🏫 มุมมองผู้บริหาร</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>`;
 }
 
 /* ================= ติดตามการลงมือทำ (Action Follow-up) =================

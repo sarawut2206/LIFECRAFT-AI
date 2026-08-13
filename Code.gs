@@ -116,6 +116,11 @@ function doPost(e) {
     // เรียก AI ไม่ต้องล็อกและไม่ยุ่งกับชีต
     if (req.action === 'coach') return json_(coach_(req));
 
+    // ตั้งค่า / ตรวจสอบ / ทดสอบ API key ไม่ยุ่งกับชีตเช่นกัน
+    if (req.action === 'keyStatus') return json_(keyStatus_());
+    if (req.action === 'setKey')    return json_(setKey_(req));
+    if (req.action === 'testKey')   return json_(testKey_(req));
+
     lock.waitLock(25000);
 
     /* ---------- บันทึกรายการเดียว ---------- */
@@ -194,6 +199,82 @@ function apiKey_() {
     if (p) return p;
   } catch (e) {}
   return '';   // หรือพิมพ์ค่าคีย์ไว้ตรงนี้แทนก็ได้
+}
+
+/* ====================== ตั้งค่า API key จากหน้าเว็บ ======================
+   ให้ครูใส่คีย์ผ่านหน้าโปรแกรมได้เลย ไม่ต้องเปิด Apps Script เอง
+
+   หลักความปลอดภัยที่ยึดไว้
+   1. คีย์ถูกเก็บใน Script Properties ของ Apps Script เท่านั้น
+      ไม่เคยถูกส่งกลับไปหน้าเว็บ และไม่เคยถูกเก็บในเครื่องของครู
+   2. คำสั่ง setKey ต้องแนบรหัสครูมาด้วย และตรวจที่ฝั่งเซิร์ฟเวอร์
+      เพราะลิงก์ Apps Script เป็นแบบเปิด ใครก็ยิงคำสั่งเข้ามาได้
+   3. keyStatus คืนเพียง "มีคีย์แล้วหรือยัง" กับ 4 ตัวท้าย ไม่มีทางอ่านคีย์เต็มออกไป
+
+   ⚠ ควรเปลี่ยนรหัสครูให้ต่างจากค่าเริ่มต้น โดยเพิ่ม Script Property ชื่อ
+     TEACHER_PIN แล้วใส่รหัสใหม่ เพราะรหัสเริ่มต้นอยู่ในโค้ดที่เผยแพร่ public */
+function teacherPin_() {
+  try {
+    var p = PropertiesService.getScriptProperties().getProperty('TEACHER_PIN');
+    if (p) return String(p);
+  } catch (e) {}
+  return 'SaM2569';
+}
+function keyTail_(k) {
+  k = String(k || '');
+  return k.length > 4 ? k.slice(-4) : '';
+}
+function keyStatus_() {
+  var k = apiKey_();
+  return { ok: true, hasKey: !!k, tail: keyTail_(k), len: k.length };
+}
+function setKey_(req) {
+  if (String(req.pin || '') !== teacherPin_()) {
+    return { ok: false, error: 'รหัสครูไม่ถูกต้อง จึงไม่อนุญาตให้ตั้งค่าคีย์' };
+  }
+  var v = String(req.key || '').trim();
+  var props = PropertiesService.getScriptProperties();
+  if (!v) {                                   // ส่งค่าว่างมา = สั่งลบคีย์ออก
+    props.deleteProperty('ANTHROPIC_API_KEY');
+    return { ok: true, hasKey: false, tail: '', removed: true };
+  }
+  if (v.indexOf('sk-ant-') !== 0) {
+    return { ok: false, error: 'รูปแบบคีย์ไม่ถูกต้อง คีย์ของ Anthropic ขึ้นต้นด้วย sk-ant-' };
+  }
+  props.setProperty('ANTHROPIC_API_KEY', v);
+  return { ok: true, hasKey: true, tail: keyTail_(v), len: v.length };
+}
+/* ทดสอบว่าคีย์ที่เก็บไว้ใช้งานได้จริง ด้วยคำขอสั้นที่สุด (ค่าใช้จ่ายไม่ถึงสตางค์) */
+function testKey_(req) {
+  if (String(req.pin || '') !== teacherPin_()) {
+    return { ok: false, error: 'รหัสครูไม่ถูกต้อง' };
+  }
+  var key = apiKey_();
+  if (!key) return { ok: false, error: 'ยังไม่ได้ตั้งค่า API key' };
+  try {
+    var res = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', {
+      method: 'post',
+      contentType: 'application/json',
+      headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+      payload: JSON.stringify({
+        model: req.model || 'claude-sonnet-5',
+        max_tokens: 8,
+        messages: [{ role: 'user', content: 'ตอบคำเดียวว่า พร้อม' }]
+      }),
+      muteHttpExceptions: true
+    });
+    var code = res.getResponseCode();
+    if (code === 200) return { ok: true, msg: 'คีย์ใช้งานได้จริง' };
+    var body = {};
+    try { body = JSON.parse(res.getContentText()) || {}; } catch (e) {}
+    var m = (body.error && body.error.message) || ('HTTP ' + code);
+    if (code === 401) m = 'คีย์ไม่ถูกต้องหรือถูกยกเลิกแล้ว';
+    if (code === 400 && /credit|balance/i.test(m)) m = 'คีย์ถูกต้อง แต่เครดิตในบัญชีหมด';
+    if (code === 429) m = 'คีย์ถูกต้อง แต่ถูกจำกัดอัตราการเรียกชั่วคราว ลองใหม่อีกครั้ง';
+    return { ok: false, error: m };
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
 }
 
 function coach_(req) {
