@@ -530,6 +530,7 @@ table.heat td.hc{text-align:center;font-family:var(--mono);font-size:14px;
 <section id="v-level" class="hide"></section>
 <section id="v-weekmis" class="hide"></section>
 <section id="v-school" class="hide"></section>
+<section id="v-sdemo" class="hide"></section>
 <section id="v-evid" class="hide"></section>
 <section id="v-act" class="hide"></section>
 
@@ -886,7 +887,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role','growth'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','sdemo','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role','growth'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar(); navClose();
   document.body.classList.toggle('rolev',v==='role');
@@ -933,6 +934,7 @@ const NAV_MENUS={
   admin:[
     {h:'ระดับโรงเรียน'},
     {i:'🏫',t:'แดชบอร์ดผู้บริหาร',d:'เทียบทุกห้อง · เน้นคุณธรรมและพลเมืองดี',fn:"needTeacher(openSchool)"},
+    {i:'🧪',t:'สาธิตการขยายผลทั้งโรงเรียน',d:'ข้อมูลจำลอง 79 ห้อง ม.1–ม.6 · แยกจากข้อมูลจริงโดยสิ้นเชิง',fn:"needTeacher(openSchoolDemo)"},
     {i:'🎓',t:'สรุปผลรายเทอมของห้อง',d:'ตารางตัวชี้วัดสะสม พิมพ์แนบรายงานได้',fn:"needTeacher(()=>openLevel('term'))"},
     {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ใช้ประกอบการประเมินโครงการ',fn:"needTeacher(openEvid)"},
     {sep:1},
@@ -4514,6 +4516,7 @@ async function openSchool(){
         → แล้วกดปุ่ม <b>ส่งสรุปให้ผู้บริหาร</b> เพียงเท่านี้ห้องนั้นจะปรากฏในแดชบอร์ดนี้ทันที</span></div>
       <div class="row"><button onclick="openSchool()">รีเฟรช</button>
         <button onclick="needTeacher(openSetup)">ไปหน้าตั้งค่าห้องเรียน</button>
+        <button onclick="openSchoolDemo()">🧪 สาธิตการขยายผล 79 ห้อง</button>
         <button onclick="go('home')">หน้าแรก</button></div></div>`;
     return;
   }
@@ -4564,6 +4567,7 @@ async function openSchool(){
       <button onclick="openSchool()">รีเฟรช</button>
       <button onclick="schoolCSV()">ส่งออก CSV</button>
       <button onclick="window.print()">พิมพ์รายงาน</button>
+      <button onclick="openSchoolDemo()">🧪 สาธิตการขยายผล 79 ห้อง</button>
       <button onclick="go('home')">หน้าแรก</button></div>
   </div>
 
@@ -4717,6 +4721,328 @@ function schoolCSV(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='uptogrow_school_summary.csv'; a.click();
+}
+
+/* ================= สาธิตการขยายผลระดับโรงเรียน (School Demo View) =================
+   วัตถุประสงค์: ใช้นำเสนอว่า "ถ้าขยายจากห้องนำร่องไปใช้ทั้งโรงเรียน 79 ห้อง
+   ผู้บริหารจะเห็นภาพแบบใด" โดยใช้หน้าตาและตรรกะเดียวกับแดชบอร์ดผู้บริหารจริง
+
+   หลักความปลอดภัยของข้อมูล (สำคัญที่สุด — คนละแนวทางกับโหมดสาธิตรายห้องด้านบน)
+   1. ข้อมูลทั้งหมดสร้างในหน่วยความจำด้วยสูตรคงที่ (seeded) เปิดกี่ครั้งก็ได้เลขเดิม
+   2. ไม่เขียน localStorage และไม่เรียก queueRemote/flushRemote แม้แต่ครั้งเดียว
+      จึงเป็นไปไม่ได้ที่ข้อมูลจำลองจะปนกับข้อมูลจริงหรือหลุดขึ้น Google Sheet
+   3. มีแถบ "ข้อมูลจำลอง" ติดบนจอและติดไปกับงานพิมพ์/CSV เสมอ
+   4. โครงห้องอิงโรงเรียนมัธยมขนาดใหญ่ 79 ห้อง: ม.1=14 ม.2=14 ม.3=14 ม.4=13 ม.5=12 ม.6=12 */
+const SDEMO_PLAN=[['ม.1',14],['ม.2',14],['ม.3',14],['ม.4',13],['ม.5',12],['ม.6',12]];
+/* จุดแข็ง-จุดอ่อนรายด้านของโรงเรียนสมมติ กำหนดให้ต่างกันจริง
+   เพื่อให้ heatmap เล่าเรื่องได้ (มีด้านที่ควรเสริม ไม่ใช่เขียวทั้งกระดาน) */
+const SDEMO_OFF ={resp:.14,hon:.10,self:.05,comm:0,resp2:.02,common:-.12,think:-.16};
+const SDEMO_GF  ={resp:1.15,hon:1.12,resp2:1.10,common:1.18,self:.95,comm:1,think:.85};
+let SDEMO_CACHE=null;
+function sdemoData(){
+  if(SDEMO_CACHE) return SDEMO_CACHE;
+  const rooms=[]; let gi=0, idx=0;
+  for(const [g,cnt] of SDEMO_PLAN){
+    /* ม.ปลายมีพื้นฐานสูงกว่าเล็กน้อยแต่ขยับต่อกิจกรรมยากกว่า ตามธรรมชาติของวัย */
+    const base=2.30+gi*0.088;
+    for(let no=1;no<=cnt;no++){
+      const r=rng_(25690900+gi*100+no);            /* seed คงที่ต่อห้อง */
+      const n=(gi<3?38:33)+Math.floor(r()*5);
+      const done=Math.round(n*(0.68+r()*0.30));
+      const rb=base+(r()-0.5)*0.36;
+      /* ตั้งเป้าดัชนีประสิทธิผลของห้องก่อน แล้วถอยกลับเป็นพัฒนาการรายด้าน
+         เพื่อให้ภาพรวมอยู่เหนือเกณฑ์ 0.50 แบบเดียวกับผลของห้องนำร่องจริง
+         โดยมีห้องส่วนน้อย (~1 ใน 5) เข้าเงื่อนไขให้ระบบคัดกรองชี้เป้าได้จริง */
+      let eiT=(0.50-gi*0.006)+r()*0.22;
+      if(r()<0.08) eiT*=0.55;                      /* บางห้องพัฒนาน้อย → เข้าเงื่อนไขควรสนับสนุน */
+      const rg=eiT*(4-rb);
+      const dims={};
+      ITEM_DIMS.forEach(k=>{
+        const pre=Math.max(1.6,Math.min(3.55,rb+(SDEMO_OFF[k]||0)+(r()-0.5)*0.12));
+        const post=Math.max(pre,Math.min(3.95,pre+rg*(SDEMO_GF[k]||1)+(r()-0.5)*0.10));
+        dims[k]=[+pre.toFixed(2),+post.toFixed(2)];
+      });
+      const lv=a=>stMean(ITEM_DIMS.map(k=>dims[k][a]));
+      const mPre=+(lv(0)*ITEMS.length).toFixed(2), mPost=+(lv(1)*ITEMS.length).toFixed(2);
+      const ei=+(((mPost-mPre)/(FULL_SCORE-mPre))||0).toFixed(3);
+      /* พระบรมราโชบาย: เฉลี่ยจากสมรรถนะรองรับเท่าที่มีในแบบวัด (วิธีเดียวกับของจริง) */
+      const royal={};
+      Object.keys(ROYAL).forEach(rk=>{
+        const ks=ROYAL[rk].dims.filter(k=>dims[k]);
+        royal[rk]=ks.length?[+stMean(ks.map(k=>dims[k][0])).toFixed(2),
+                             +stMean(ks.map(k=>dims[k][1])).toFixed(2)]:null;
+      });
+      const cv=r()<0.68?+(0.55+r()*0.34).toFixed(3):null;
+      const mood=+Math.max(2.4,Math.min(4.5,3.0+rg*0.55+(r()-0.5)*0.7)).toFixed(2);
+      rooms.push({code:'D'+(gi+1)+String(no).padStart(2,'0'), room:g+'/'+no, grade:g, gi,
+        teacher:'ครูที่ปรึกษา '+g+'/'+no, n, done, dims, mPre, mPost,
+        mD:+(mPost-mPre).toFixed(2), ei, cv, cvN:cv?3+Math.floor(r()*6):0, royal,
+        pulse:{n:Math.round(done*(0.55+r()*0.4)), avg:mood,
+          wAvg:+Math.max(2.3,Math.min(4.5,mood+(r()-0.5)*0.25)).toFixed(2),
+          rate:Math.round(38+r()*54), help:r()<0.12?1+Math.floor(r()*3):0,
+          low:r()<0.3?1+Math.floor(r()*4):0},
+        joinIdx:idx, imp:+(rg*0.05+r()*0.01).toFixed(4)});
+      idx++;
+    }
+    gi++;
+  }
+  /* การทยอยเข้าร่วม: นำร่อง 12 ห้อง แล้วขยายจนครบ 79 ห้องภายใน 8 สัปดาห์
+     สลับลำดับด้วยเลขคงที่เพื่อให้ทุกระดับชั้นมีห้องเข้าร่วมตั้งแต่ช่วงแรก */
+  const CUM=[12,24,38,52,64,72,76,79];
+  rooms.slice().sort((a,b)=>((a.joinIdx*29)%79)-((b.joinIdx*29)%79))
+       .forEach((rm,i)=>{ rm.joinWeek=CUM.findIndex(c=>i<c)-7; });
+  SDEMO_CACHE=rooms;
+  return rooms;
+}
+/* ค่าย้อนหลังของห้องในสัปดาห์ w (-7..0) ใช้ทำแนวโน้ม 8 สัปดาห์ */
+function sdemoAt(rm,w){
+  if(w<rm.joinWeek) return null;
+  const back=-w, r=rng_(7000+rm.joinIdx*13+back);
+  return {ei:Math.max(0.05,rm.ei-back*rm.imp+(r()-0.5)*0.03),
+          mood:Math.max(2.2,rm.pulse.wAvg-back*0.035+(r()-0.5)*0.12)};
+}
+const SDEMO_NOTE=`<div class="card" style="background:#FFF6DF;border:1.5px solid #E3B84C">
+  <b>⚠ ข้อมูลจำลองเพื่อสาธิตการขยายผลระดับโรงเรียน</b>
+  <span class="small"> ตัวเลขทั้งหมดในหน้านี้สร้างขึ้นเพื่อแสดงว่าระบบรองรับโรงเรียนขนาด 79 ห้องเรียนได้อย่างไร
+  <b>ไม่ใช่ผลการดำเนินงานจริง</b> · ข้อมูลชุดนี้อยู่ในหน่วยความจำเท่านั้น
+  ไม่ถูกบันทึกลงเครื่องและไม่ถูกส่งขึ้นเซิร์ฟเวอร์ จึงไม่ปนกับข้อมูลจริงของห้องเรียน</span></div>`;
+let SD_GRADE=null;
+function openSchoolDemo(g){
+  SD_GRADE=(typeof g==='string')?g:null;
+  go('sdemo');
+  renderSDemo();
+}
+function sdemoGradeBtns(){
+  return `<div class="row noprint" style="flex-wrap:wrap;margin-top:10px">
+    <button class="${!SD_GRADE?'primary':''}" onclick="openSchoolDemo()">ทั้งโรงเรียน · 79 ห้อง</button>
+    ${SDEMO_PLAN.map(([g,c])=>`<button class="${SD_GRADE===g?'primary':''}"
+      onclick="openSchoolDemo('${g}')">${g} (${c} ห้อง)</button>`).join('')}</div>`;
+}
+/* ห้องที่เข้าเงื่อนไขควรสนับสนุน ใช้กติกาเดียวกับแดชบอร์ดจริงทุกข้อ */
+function sdemoFlags(rm){
+  const f=[];
+  if(rm.ei<0.5) f.push('ดัชนีประสิทธิผลต่ำกว่าเกณฑ์ 0.50');
+  if(rm.done<rm.n*0.7) f.push('ผู้เรียนทำครบไม่ถึงร้อยละ 70');
+  if(rm.pulse.help>0) f.push('มีคำขอความช่วยเหลือ '+rm.pulse.help+' ครั้งในสัปดาห์นี้');
+  if(rm.pulse.wAvg<3) f.push('อารมณ์เฉลี่ยทั้งสัปดาห์ต่ำกว่า 3.00');
+  if(rm.pulse.rate<40) f.push('เช็คอินใจรายวันไม่ถึงร้อยละ 40 ของสัปดาห์');
+  return f;
+}
+function renderSDemo(){
+  const all=sdemoData();
+  const rooms=SD_GRADE?all.filter(x=>x.grade===SD_GRADE):all;
+  const mean=v=>{const a=v.filter(x=>x!=null&&isFinite(x)); return a.length?stMean(a):null;};
+  const dimAvg=(rs,k,a)=>mean(rs.map(x=>x.dims[k]&&x.dims[k][a]));
+  const students=rooms.reduce((a,x)=>a+x.n,0), doneAll=rooms.reduce((a,x)=>a+x.done,0);
+  const eiAvg=mean(rooms.map(x=>x.ei)), moodAvg=mean(rooms.map(x=>x.pulse.avg));
+  const ckToday=rooms.reduce((a,x)=>a+x.pulse.n,0);
+  const sname=schoolName()||'โรงเรียนมัธยมขนาดใหญ่';
+  /* วัตถุประสงค์ 2 ข้อ คิดวิธีเดียวกับหน้าจริง */
+  const civ=ITEM_DIMS.filter(k=>DIMS[k].g==='civic');
+  const cPre=mean(civ.map(k=>dimAvg(rooms,k,0))), cPost=mean(civ.map(k=>dimAvg(rooms,k,1)));
+  const royalAgg=Object.keys(ROYAL).map(rk=>{
+    let wPre=0,wPost=0,w=0;
+    rooms.forEach(x=>{const rr=x.royal[rk]; if(!rr) return; wPre+=rr[0]*x.done; wPost+=rr[1]*x.done; w+=x.done;});
+    return {rk, pre:w?wPre/w:0, post:w?wPost/w:0};
+  });
+  const r2=royalAgg.find(x=>x.rk==='r2'), r4=royalAgg.find(x=>x.rk==='r4');
+  /* แนวโน้ม 8 สัปดาห์ จากเส้นทางย้อนหลังของแต่ละห้อง */
+  const trend=[]; for(let w=-7;w<=0;w++){
+    const at=rooms.map(x=>sdemoAt(x,w)).filter(Boolean);
+    trend.push({w, rooms:at.length, ei:mean(at.map(a=>a.ei)), mood:mean(at.map(a=>a.mood))});
+  }
+  /* heatmap: แถวคือห้อง (โหมดทั้งโรงเรียนคั่นหัวข้อตามระดับชั้น) + แถวเฉลี่ย */
+  const heatRow=rm=>`<tr><td><b>${esc(rm.room)}</b><div class="small muted">${rm.done}/${rm.n} คน</div></td>
+    ${ITEM_DIMS.map(k=>{const v=rm.dims[k][1];
+      return `<td class="hc" style="background:${heatBG(v)}" title="${esc(DIMS[k].n)} · ${v.toFixed(2)}">${v.toFixed(2)}</td>`;}).join('')}</tr>`;
+  const gradeAvgRow=g=>{
+    const rs=all.filter(x=>x.grade===g);
+    return `<tr><td><b>${esc(g)}</b><div class="small muted">${rs.length} ห้อง</div></td>
+      ${ITEM_DIMS.map(k=>{const v=dimAvg(rs,k,1);
+        return `<td class="hc" style="background:${heatBG(v)};font-weight:600">${v.toFixed(2)}</td>`;}).join('')}</tr>`;
+  };
+  const weak=ITEM_DIMS.map(k=>({k,v:dimAvg(rooms,k,1)})).filter(x=>x.v!=null)
+    .sort((a,b)=>a.v-b.v).slice(0,2);
+  const flagged=rooms.map(rm=>({rm,f:sdemoFlags(rm)})).filter(x=>x.f.length)
+    .sort((a,b)=>b.f.length-a.f.length);
+  $('v-sdemo').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · สถานการณ์จำลองการขยายผลระดับโรงเรียน — ไม่ใช่ผลการดำเนินงานจริง</div>
+  ${SDEMO_NOTE}
+  <div class="card">
+    <div class="eyebrow">แดชบอร์ดผู้บริหาร · สถานการณ์จำลองการขยายผล</div>
+    <h1>${esc(sname)} · ${SD_GRADE?esc(SD_GRADE)+' ('+rooms.length+' ห้อง)':'ทั้งโรงเรียน 79 ห้องเรียน'}</h1>
+    <p class="muted small">แสดงศักยภาพของระบบเมื่อใช้ครบทุกห้อง ม.1–ม.6 ·
+      โครงสร้าง: ม.1–ม.3 ระดับละ 14 ห้อง · ม.4 = 13 ห้อง · ม.5–ม.6 ระดับละ 12 ห้อง</p>
+    <div class="grid3" style="margin-top:12px">
+      <div class="card tight"><div class="eyebrow">ห้องเรียน${SD_GRADE?'ในระดับนี้':'ทั้งหมด'}</div><div class="bignum">${rooms.length}</div></div>
+      <div class="card tight"><div class="eyebrow">ผู้เรียนทำครบ</div><div class="bignum">${doneAll.toLocaleString()}<span style="font-size:.55em">/${students.toLocaleString()}</span></div>
+        <div class="small muted">ร้อยละ ${Math.round(doneAll/students*100)}</div></div>
+      <div class="card tight"><div class="eyebrow">ดัชนีประสิทธิผลเฉลี่ย</div>
+        <div class="bignum ${eiAvg>=0.5?'ok':''}">${eiAvg.toFixed(4)}</div><div class="small muted">เกณฑ์ 0.50</div></div>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="card tight"><div class="eyebrow">เช็คอินใจวันนี้</div>
+        <div class="bignum">${ckToday.toLocaleString()} <span style="font-size:.5em">คน</span></div>
+        <div class="small muted">อารมณ์เฉลี่ย ${moodAvg.toFixed(2)} ${MOOD_E(moodAvg)}</div></div>
+      <div class="card tight"><div class="eyebrow">ห้องที่ระบบชี้ว่าควรสนับสนุนก่อน</div>
+        <div class="bignum ${flagged.length?'bad':''}">${flagged.length} <span style="font-size:.5em">ห้อง</span></div>
+        <div class="small muted">จากกติกาเดียวกับแดชบอร์ดจริง เลื่อนดูรายห้องด้านล่าง</div></div>
+    </div>
+    ${sdemoGradeBtns()}
+    <div class="row noprint" style="margin-top:8px">
+      <button onclick="openSchool()">← กลับสู่ข้อมูลจริง</button>
+      <button onclick="sdemoCSV()">ส่งออก CSV (กำกับว่าจำลอง)</button>
+      <button onclick="window.print()">พิมพ์</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>
+
+  ${!SD_GRADE?`<div class="card">
+    <h2>ภาพรวม 6 ระดับชั้น</h2>
+    <p class="small muted">แตะการ์ดเพื่อเจาะดูรายห้องของระดับชั้นนั้น</p>
+    <div class="grid3">
+      ${SDEMO_PLAN.map(([g])=>{
+        const rs=all.filter(x=>x.grade===g);
+        const ge=mean(rs.map(x=>x.ei)), gm=mean(rs.map(x=>x.pulse.avg));
+        const gs=rs.reduce((a,x)=>a+x.n,0), gd=rs.reduce((a,x)=>a+x.done,0);
+        const gw=ITEM_DIMS.map(k=>({k,v:dimAvg(rs,k,1)})).sort((a,b)=>a.v-b.v)[0];
+        return `<div class="card tight" style="cursor:pointer" onclick="openSchoolDemo('${g}')">
+          <div class="row" style="justify-content:space-between"><b style="font-size:1.15em">${g}</b>
+            <span class="pill">${rs.length} ห้อง</span></div>
+          <div class="small" style="margin-top:6px">ผู้เรียน ${gs.toLocaleString()} คน · ทำครบร้อยละ ${Math.round(gd/gs*100)}</div>
+          <div class="small">E.I. <b class="mono ${ge>=0.5?'ok':''}">${ge.toFixed(3)}</b> · สุขภาวะ <b class="mono">${gm.toFixed(2)}</b> ${MOOD_E(gm)}</div>
+          <div class="small muted" style="margin-top:4px">ควรเสริม: ${esc(DIMS[gw.k].n)} (${gw.v.toFixed(2)})</div>
+        </div>`;}).join('')}
+    </div>
+  </div>`:''}
+
+  <div class="card">
+    <h2>ผลตามวัตถุประสงค์ของโครงการ 2 ข้อ</h2>
+    <div class="grid2" style="margin-top:10px">
+      <div class="card tight" style="border-left:4px solid var(--teal)">
+        <div class="eyebrow">วัตถุประสงค์ที่ 1</div>
+        <h3 style="margin:2px 0 6px">ส่งเสริมให้ผู้เรียนมีคุณลักษณะความเป็นพลเมืองดี</h3>
+        <div class="row" style="gap:14px;align-items:baseline">
+          <span class="mono">ก่อน ${cPre.toFixed(2)}</span><span class="mono">หลัง ${cPost.toFixed(2)}</span>
+          <span class="pill" style="color:var(--teal-d);border-color:var(--teal)">สูงขึ้น</span></div>
+        <p class="small muted" style="margin-top:6px">ค่าเฉลี่ยสมรรถนะกลุ่มพลเมืองดี ${civ.length} ด้าน (ระดับ 1–4) จาก ${rooms.length} ห้อง</p>
+      </div>
+      <div class="card tight" style="border-left:4px solid var(--violet)">
+        <div class="eyebrow">วัตถุประสงค์ที่ 2</div>
+        <h3 style="margin:2px 0 6px">สนับสนุนการดำเนินงานตามพระบรมราโชบายด้านการศึกษา</h3>
+        <div class="row" style="gap:14px;align-items:baseline">
+          <span class="small">เน้น <b>คุณธรรม</b> และ <b>การเป็นพลเมืองดี</b></span>
+          <span class="pill" style="color:var(--teal-d);border-color:var(--teal)">สูงขึ้น</span></div>
+        <p class="small muted" style="margin-top:6px">
+          พื้นฐานชีวิต มีคุณธรรม ${r2.pre.toFixed(2)} → ${r2.post.toFixed(2)}
+          · เป็นพลเมืองดี ${r4.pre.toFixed(2)} → ${r4.post.toFixed(2)}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Civic Competency Heatmap · ${SD_GRADE?esc(SD_GRADE)+' รายห้อง':'ทั้งโรงเรียน 79 ห้อง'}</h2>
+    <p class="small muted">ค่าเฉลี่ยหลังเรียนของแต่ละห้อง (ระดับ 1–4) · ใช้ชี้เป้าว่าควรจัดกิจกรรมเสริมเรื่องใดกับห้องใด</p>
+    ${heatLegend()}
+    ${!SD_GRADE?`<h3 style="margin-top:12px">สรุปย่อรายระดับชั้น</h3>
+    <div style="overflow-x:auto;margin-top:6px"><table class="heat"><thead><tr><th>ระดับชั้น</th>
+      ${ITEM_DIMS.map(k=>`<th>${esc(DIMS[k].n)}</th>`).join('')}</tr></thead>
+      <tbody>${SDEMO_PLAN.map(([g])=>gradeAvgRow(g)).join('')}</tbody></table></div>
+    <h3 style="margin-top:14px">รายห้องครบ 79 ห้อง</h3>`:''}
+    <div style="overflow-x:auto;margin-top:6px"><table class="heat"><thead><tr><th>ห้อง</th>
+      ${ITEM_DIMS.map(k=>`<th>${esc(DIMS[k].n)}</th>`).join('')}</tr></thead><tbody>
+      ${SD_GRADE?rooms.map(heatRow).join('')
+        :SDEMO_PLAN.map(([g])=>`<tr><td colspan="${ITEM_DIMS.length+1}"
+            style="background:var(--soft);font-weight:700">${g}</td></tr>`
+            +all.filter(x=>x.grade===g).map(heatRow).join('')).join('')}
+      <tr><td><b>เฉลี่ย${SD_GRADE?'ระดับชั้น':'ทั้งโรงเรียน'}</b></td>
+        ${ITEM_DIMS.map(k=>{const v=dimAvg(rooms,k,1);
+          return `<td class="hc" style="background:${heatBG(v)};font-weight:700">${v.toFixed(2)}</td>`;}).join('')}</tr>
+    </tbody></table></div>
+    <div class="notice" style="margin-top:10px"><span class="small">
+      <b>ด้านที่${SD_GRADE?esc(SD_GRADE):'ทั้งโรงเรียน'}ควรเสริมก่อน</b>
+      ${weak.map(x=>esc(DIMS[x.k].n)+' ('+x.v.toFixed(2)+')').join(' · ')}</span></div>
+  </div>
+
+  <div class="card">
+    <h2>ห้องที่ควรได้รับการสนับสนุนก่อน${SD_GRADE?' · '+esc(SD_GRADE):''} (${flagged.length} ห้อง)</h2>
+    <p class="small muted">ระบบคัดกรองอัตโนมัติด้วยกติกาเดียวกับแดชบอร์ดจริง
+      เพื่อให้ฝ่ายบริหารจัดสรรการสนับสนุนได้ตรงจุด ไม่ต้องไล่ดูทีละห้อง</p>
+    ${flagged.slice(0,SD_GRADE?99:8).map(x=>`<div class="opt" style="cursor:default">
+      <h4 style="margin:0">${esc(x.rm.room)} <span class="small muted">(${esc(x.rm.code)} · ${esc(x.rm.teacher)})</span></h4>
+      <p class="small muted" style="margin:3px 0 0">${x.f.map(esc).join(' · ')}</p></div>`).join('')}
+    ${!SD_GRADE&&flagged.length>8?`<p class="small muted">…และอีก ${flagged.length-8} ห้อง — แตะระดับชั้นด้านบนเพื่อดูครบ</p>`:''}
+  </div>
+
+  ${!SD_GRADE?`<div class="card">
+    <h2>แนวโน้มระดับโรงเรียนย้อนหลัง 8 สัปดาห์</h2>
+    <p class="small muted">จำลองการทยอยขยายผล: เริ่มนำร่อง 12 ห้อง แล้วเพิ่มขึ้นจนครบ 79 ห้อง
+      ดัชนีประสิทธิผลและสุขภาวะเฉลี่ยค่อย ๆ สูงขึ้นเมื่อครูและนักเรียนคุ้นระบบ</p>
+    <table style="margin-top:8px"><thead><tr><th>สัปดาห์</th><th>ห้องที่ส่งสรุป</th><th>ดัชนีประสิทธิผลเฉลี่ย</th><th>สุขภาวะเฉลี่ย</th></tr></thead><tbody>
+    ${trend.map(t=>`<tr><td class="mono small">${t.w===0?'สัปดาห์นี้':t.w+' สัปดาห์'}</td>
+      <td class="mono">${t.rooms}</td>
+      <td class="mono ${t.ei>=0.5?'ok':''}">${t.ei.toFixed(4)}</td>
+      <td><span class="mono">${t.mood.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(t.mood)}</span></td></tr>`).join('')}
+    </tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>การสนับสนุนพระบรมราโชบายด้านการศึกษา ระดับโรงเรียน</h2>
+    <p class="small muted"><b>${esc(ROYAL_CLAIM)}</b><br>ถ่วงน้ำหนักตามจำนวนผู้เรียน · ระดับพฤติกรรม 1–4 · อ่านคะแนนคู่กับคอลัมน์ความสอดคล้องเสมอ</p>
+    ${svgBar(royalAgg.map(x=>ROYAL[x.rk].s), royalAgg.map(x=>x.pre), royalAgg.map(x=>x.post),{max:4})}
+    <table style="margin-top:12px"><thead><tr><th>พระบรมราโชบาย</th><th>ความสอดคล้อง</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th></tr></thead><tbody>
+      ${royalAgg.map(x=>{const fit=ROYAL_FIT[x.rk];
+        return `<tr${fit.lv==='none'?' style="opacity:.62"':''}><td>${esc(ROYAL[x.rk].n)}</td>
+        <td>${royalPill(x.rk)}</td>
+        <td class="mono">${x.pre.toFixed(2)}</td><td class="mono">${x.post.toFixed(2)}</td>
+        <td class="mono ${x.post-x.pre>0?'ok':''}">${(x.post-x.pre>=0?'+':'')+(x.post-x.pre).toFixed(2)}</td></tr>`;}).join('')}
+    </tbody></table>
+  </div>`:`
+
+  <div class="card">
+    <h2>เปรียบเทียบรายห้อง · ${esc(SD_GRADE)}</h2>
+    <div style="overflow-x:auto"><table><thead><tr><th>ห้อง</th><th>ครูที่ปรึกษา</th>
+      <th>ทำครบ</th><th>ก่อน</th><th>หลัง</th><th>ผลต่าง</th><th>E.I.</th><th>ความเที่ยงตรง r</th>
+      <th>สุขภาวะวันนี้</th><th>เช็คอินสัปดาห์นี้</th><th>ขอช่วยเหลือ</th></tr></thead><tbody>
+    ${rooms.map(x=>`<tr><td><b>${esc(x.room)}</b></td><td class="small">${esc(x.teacher)}</td>
+      <td class="mono">${x.done}/${x.n}</td>
+      <td class="mono">${x.mPre.toFixed(2)}</td><td class="mono">${x.mPost.toFixed(2)}</td>
+      <td class="mono ${x.mD>0?'ok':''}">+${x.mD.toFixed(2)}</td>
+      <td class="mono ${x.ei>=0.5?'ok':'bad'}">${x.ei.toFixed(3)}</td>
+      <td class="mono ${x.cv!=null&&x.cv>=0.6?'ok':''}">${x.cv!=null?x.cv.toFixed(3)+`<span class="small muted"> (n=${x.cvN})</span>`:'<span class="muted small">—</span>'}</td>
+      <td><span class="mono">${x.pulse.avg.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(x.pulse.avg)}</span> <span class="small muted">(${x.pulse.n} คน)</span></td>
+      <td class="mono ${x.pulse.rate>=60?'ok':''}">${x.pulse.rate}%</td>
+      <td class="mono ${x.pulse.help?'bad':''}">${x.pulse.help}</td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`}
+
+  <div class="card">
+    <h2>สิ่งที่โรงเรียนอื่นต้องเตรียมเมื่อจะนำไปใช้จริง</h2>
+    <div class="grid3" style="margin-top:8px">
+      <div class="card tight"><b>1 · ครูประจำห้อง</b><p class="small muted" style="margin:4px 0 0">
+        ตั้งค่าห้องครั้งเดียว (รายชื่อ รหัสห้อง ชื่อโรงเรียน) แล้วกด "ส่งสรุปให้ผู้บริหาร" สัปดาห์ละครั้ง ใช้เวลาไม่เกิน 5 นาที</p></div>
+      <div class="card tight"><b>2 · ข้อมูลที่ผู้บริหารเห็น</b><p class="small muted" style="margin:4px 0 0">
+        เป็นสรุประดับห้องเท่านั้น ไม่มีคำตอบรายบุคคลของผู้เรียน สอดคล้องหลักคุ้มครองข้อมูลส่วนบุคคล</p></div>
+      <div class="card tight"><b>3 · อุปกรณ์</b><p class="small muted" style="margin:4px 0 0">
+        ใช้เว็บเบราว์เซอร์บนมือถือหรือคอมพิวเตอร์ ไม่ต้องติดตั้งแอป มีโหมดกระดาษสำหรับนักเรียนที่ไม่มีอุปกรณ์</p></div>
+    </div>
+    <div class="notice good" style="margin-top:10px"><span class="small">
+      หน้านี้เป็น<b>สถานการณ์จำลอง</b>ที่สร้างขึ้นในหน่วยความจำของเครื่องเท่านั้น
+      ไม่มีการบันทึกหรือส่งข้อมูลใด ๆ ขึ้นเซิร์ฟเวอร์ ข้อมูลจริงของห้องเรียนนำร่องไม่ถูกแตะต้อง
+      · ดูข้อมูลจริงได้ที่ปุ่ม "กลับสู่ข้อมูลจริง" ด้านบน</span></div>
+  </div>`;
+}
+function sdemoCSV(){
+  const el=$('v-sdemo'); if(!el) return;
+  const rows=[['ข้อมูลจำลองเพื่อสาธิตการขยายผลระดับโรงเรียน — ไม่ใช่ผลการดำเนินงานจริง'],['']];
+  el.querySelectorAll('table').forEach((t,ti)=>{
+    rows.push(['ตารางที่ '+(ti+1)]);
+    t.querySelectorAll('tr').forEach(tr=>rows.push([...tr.querySelectorAll('th,td')].map(c=>c.textContent.trim())));
+    rows.push(['']);
+  });
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='uptogrow_school_DEMO.csv'; a.click();
 }
 
 /* ================= ติดตามการลงมือทำ (Action Follow-up) =================
