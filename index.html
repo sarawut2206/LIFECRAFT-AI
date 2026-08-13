@@ -305,6 +305,19 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 .navbtn.on{background:var(--teal);color:#fff;font-weight:600}
 .navbtn.on:hover{background:var(--teal-d);color:#fff}
 .navbtn .cev{font-size:11px;opacity:.65;margin-left:5px}
+.navbtn .nvi{margin-right:6px;font-size:15px}
+/* โหมดนักเรียน: ย่อการ์ดแนะนำโปรแกรมให้เหลือบรรทัดเดียว
+   เพื่อดันปุ่ม "ภารกิจวันนี้" ขึ้นมาอยู่ในจอแรกโดยไม่ต้องเลื่อน */
+.stuonly{display:none}
+body.studentui .hero .lead:not(.stuonly),
+body.studentui .hero .eyebrow,
+body.studentui .hero .herostat{display:none}
+body.studentui .hero .stuonly{display:block;margin:6px 0 0}
+body.studentui .hero h1{font-size:clamp(22px,5vw,30px)}
+body.studentui .hero{padding:18px 20px}
+table.heat th{font-size:13px;font-weight:600;vertical-align:bottom}
+table.heat td.hc{text-align:center;font-family:var(--mono);font-size:14px;
+  border:1px solid #ffffff;min-width:64px;color:var(--text)}
 .navmenu{position:absolute;top:calc(100% + 6px);left:0;min-width:290px;background:var(--panel);
   border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px #0e402f22;padding:7px;z-index:70}
 .navmenu.right{left:auto;right:0}
@@ -367,15 +380,15 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
   <div class="navin">
     <button class="navbrand" onclick="go('home');navClose()">Life Competency <span>UP TO GROW</span></button>
     <div class="navitem">
-      <button class="navbtn" id="navb-mission" onclick="navToggle('mission')" aria-haspopup="true" aria-expanded="false">ภารกิจ<span class="cev">▾</span></button>
-      <div class="navmenu hide" id="navm-mission"></div>
+      <button class="navbtn" id="navb-student" onclick="navToggle('student')" aria-haspopup="true" aria-expanded="false"><span class="nvi">🎒</span>นักเรียน<span class="cev">▾</span></button>
+      <div class="navmenu hide" id="navm-student"></div>
     </div>
     <div class="navitem">
-      <button class="navbtn" id="navb-teacher" onclick="navToggle('teacher')" aria-haspopup="true" aria-expanded="false">สำหรับครู<span class="cev">▾</span></button>
+      <button class="navbtn" id="navb-teacher" onclick="navToggle('teacher')" aria-haspopup="true" aria-expanded="false"><span class="nvi">🧑‍🏫</span>ครู<span class="cev">▾</span></button>
       <div class="navmenu hide" id="navm-teacher"></div>
     </div>
     <div class="navitem">
-      <button class="navbtn" id="navb-admin" onclick="navToggle('admin')" aria-haspopup="true" aria-expanded="false">ผู้บริหาร<span class="cev">▾</span></button>
+      <button class="navbtn" id="navb-admin" onclick="navToggle('admin')" aria-haspopup="true" aria-expanded="false"><span class="nvi">🏫</span>ผู้บริหาร<span class="cev">▾</span></button>
       <div class="navmenu right hide" id="navm-admin"></div>
     </div>
     <div class="navsp"></div>
@@ -394,10 +407,11 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <div id="demoBar" class="hide"></div>
 
 <section id="v-home">
-  <div class="card hero">
+  <div class="card hero" id="heroCard">
     <div class="eyebrow">นวัตกรรมพัฒนาทักษะชีวิตและความเป็นพลเมืองดี</div>
     <h1>Life Competency <span class="accent">UP TO GROW</span></h1>
     <p class="lead">ชุดภารกิจสถานการณ์ตลอดภาคเรียน วัดพัฒนาการ<b>ก่อน–หลัง</b>ด้วยเครื่องมือชุดเดียวกันทุกภารกิจ ผ่านกระบวนการ UP TO GROW 8 ขั้น โดยมี AI เป็นโค้ชตั้งคำถาม และครูเป็นผู้ตัดสินระดับสมรรถนะเสมอ</p>
+    <p class="lead stuonly">สวัสดี วันนี้มาฝึกเป็นพลเมืองดีกันต่อ · แตะปุ่มด้านล่างได้เลย</p>
     <div class="herostat">
       <div class="s"><b>8 ขั้น</b><span>กระบวนการ UP TO GROW</span></div>
       <div class="s"><b>ก่อน–หลัง</b><span>วัดพัฒนาการจริง</span></div>
@@ -419,6 +433,8 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
         <b>เช็คอินใจ</b><small id="hsPulse">ทำทุกวัน 30 วินาที · ขอให้ครูช่วยได้</small></button>
       <button class="htile" onclick="qStart()"><span class="ic">⚡</span>
         <b>ภารกิจด่วน</b><small>เฉพาะเมื่อครูเปิดไว้</small></button>
+      <button class="htile" onclick="openGrowth()"><span class="ic">📈</span>
+        <b>พัฒนาการของฉัน</b><small>ฝึกอะไรไปแล้ว · ครูเห็นอะไรในตัวเรา</small></button>
     </div>
   </div>
 
@@ -451,6 +467,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 
   <!-- ภารกิจรายสัปดาห์ย้ายไปอยู่ที่ระดับ 2 ของภารกิจต่อเนื่อง เพราะต้องเกิดจากผลรวมของภารกิจรายวัน
        ไม่ใช่รายการให้เลือกอิสระที่หน้าแรก · missionList ยังคงอยู่ที่หน้า "ภาพรวมภาคเรียน" และหน้าระดับ 2 -->
+  <div id="pitchBlock">
   <div class="card" style="background:linear-gradient(180deg,#F1F0FC 0%,var(--panel) 60%)">
     <div class="row" style="justify-content:space-between;align-items:center">
       <div><div class="eyebrow" style="color:var(--violet)">โครงสร้างนวัตกรรมเชิงระบบ</div>
@@ -470,6 +487,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
   </div>
   <p class="small muted" style="text-align:center">ออกแบบจากงานวิจัย 28 รายการทั้งในและต่างประเทศ ·
     <a href="#" onclick="openResearch('list');return false" style="color:var(--teal-d)">ดูฐานอ้างอิง</a></p>
+  </div>
 </section>
 
 <section id="v-pick" class="hide"></section>
@@ -497,6 +515,7 @@ body.hc #demoBar{background:#fff;border-color:#000;color:#000}
 <section id="v-pulse" class="hide"></section>
 <section id="v-pulsedash" class="hide"></section>
 <section id="v-daily" class="hide"></section>
+<section id="v-growth" class="hide"></section>
 <section id="v-dailyteach" class="hide"></section>
 <section id="v-dailyrep" class="hide"></section>
 <section id="v-cycle" class="hide"></section>
@@ -860,7 +879,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role','growth'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar(); navClose();
   document.body.classList.toggle('rolev',v==='role');
@@ -870,21 +889,26 @@ function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window
    เมนู "ภารกิจ" เรียงตามความสัมพันธ์ 4 ระดับ วัน→สัปดาห์→เดือน→เทอม
    เมนูของครูและผู้บริหารย้ายขึ้นมาบนสุด ทำให้หน้าแรกเหลือเฉพาะสิ่งที่นักเรียนต้องใช้ */
 const NAV_MENUS={
-  mission:[
+  student:[
+    {h:'สิ่งที่ต้องทำทุกวัน'},
+    {i:'📅',t:'ภารกิจวันนี้',d:'ครบ 8 ขั้น 10 นาที · จันทร์ถึงศุกร์',fn:"openDaily()"},
+    {i:'💚',t:'เช็คอินใจ',d:'ทุกวัน 30 วินาที · ขอให้ครูช่วยได้',fn:"openPulse()"},
+    {sep:1},
+    {h:'เมื่อครูสั่ง'},
+    {i:'🎯',t:'ภารกิจประจำสัปดาห์',d:'8 ขั้นเต็มรูปแบบ ไม่เกิน 20 นาที รวมแบบวัด',fn:"scrollToMissions()"},
+    {i:'⚡',t:'ภารกิจด่วน',d:'เฉพาะที่ครูเปิดไว้',fn:"qStart()"},
+    {sep:1},
+    {h:'ดูตัวเอง'},
+    {i:'📈',t:'พัฒนาการของฉัน',d:'ฝึกอะไรไปแล้ว เปลี่ยนไปอย่างไร ครูเห็นอะไร',fn:"openGrowth()"},
+  ],
+  teacher:[
     {h:'ภารกิจ 4 ระดับ · ระดับล่างไหลขึ้นเป็นระดับบน'},
     {i:'📅',t:'ภารกิจรายวัน',d:'จันทร์–ศุกร์ ตามปฏิทิน ครบ 8 ขั้น วันละ 10 นาที',fn:"needTeacher(openDayPlan)"},
     {i:'🗓️',t:'ภารกิจรายสัปดาห์',d:'สรุปจากภารกิจรายวัน 5 วัน',fn:"needTeacher(()=>openLevel('week'))"},
     {i:'📆',t:'ภารกิจรายเดือน',d:'สรุปจากภารกิจรายสัปดาห์ 4 สัปดาห์',fn:"needTeacher(()=>openLevel('month'))"},
     {i:'🎓',t:'ภารกิจรายเทอม',d:'สรุปจากภารกิจรายเดือน 4–5 เดือน',fn:"needTeacher(()=>openLevel('term'))"},
-    {sep:1},
     {i:'🧩',t:'ผังภารกิจต่อเนื่องทั้ง 4 ชั้น',d:'ดูภาพรวมและกดปิดรอบแต่ละชั้น',fn:"needTeacher(openCycle)"},
     {sep:1},
-    {h:'สำหรับนักเรียน'},
-    {i:'▶',t:'ทำภารกิจวันนี้',d:'นักเรียนแตะชื่อตัวเองแล้วเริ่มได้เลย',fn:"openDaily()"},
-    {i:'🎯',t:'ทำภารกิจประจำสัปดาห์',d:'8 ขั้นเต็มรูปแบบ ไม่เกิน 20 นาที รวมแบบวัดก่อน–หลัง',fn:"scrollToMissions()"},
-    {i:'⚡',t:'ทำภารกิจด่วน',d:'เฉพาะที่ครูเปิดไว้',fn:"qStart()"},
-  ],
-  teacher:[
     {h:'ติดตามและประเมิน'},
     {i:'📊',t:'Dashboard และผลก่อน–หลัง',d:'กราฟ ตารางคะแนน ส่งออก CSV',fn:"needTeacher(openTeacher)"},
     {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม',fn:"needTeacher(openEvid)"},
@@ -947,6 +971,21 @@ function navClose(){
 document.addEventListener('click',e=>{ if(NAV_OPEN&&!e.target.closest('.navitem')) navClose(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') navClose(); });
 function enterMission(id){ curMission=id; go('pick'); renderPick(); }
+/* ================= หน้าแรกแสดงตามบทบาท =================
+   หัวใจของการแยก 3 แอปคือ "แต่ละคนเห็นเฉพาะสิ่งที่ตัวเองต้องใช้"
+   - นักเรียน  เห็นเฉพาะการ์ดของตัวเอง 5 ใบ · ไม่เห็นบล็อกครูและบล็อกอธิบายนวัตกรรม
+   - ครู/ผู้บริหาร เห็นครบ เพราะต้องใช้อธิบายและนำเสนอ
+   ซ่อนด้วย CSS อย่างเดียว ไม่ลบ DOM เพื่อให้สลับบทบาทแล้วกลับมาเห็นได้ทันที
+   แถบเมนูก็ซ่อนปุ่มครู/ผู้บริหารเมื่อเข้ามาในฐานะนักเรียน ให้หน้าจอสะอาดจริง */
+function applyRoleUI(){
+  const st=getRole()==='student'&&!teacherUnlocked;
+  document.body.classList.toggle('studentui',st);
+  const tq=$('teacherQuick'); if(tq) tq.classList.toggle('hide',st);
+  const pb=$('pitchBlock');   if(pb) pb.classList.toggle('hide',st);
+  ['teacher','admin'].forEach(k=>{
+    const el=$('navb-'+k); if(el) el.closest('.navitem').classList.toggle('hide',st);
+  });
+}
 /* สถานะรายวันบนการ์ดหน้าแรก: ทั้งภารกิจรายวันและเช็คอินใจต้องทำ "ทุกวัน"
    จึงบอกไปเลยว่าวันนี้ทั้งห้องทำไปกี่คนแล้ว นักเรียนและครูเห็นตรงกันตั้งแต่หน้าแรก
    อ่านจากเครื่องล้วน ๆ (ข้อมูลถูก pull ไว้แล้วตอนเปิดหน้าที่เกี่ยวข้อง) จึงไม่ยิงเครือข่าย */
@@ -983,6 +1022,7 @@ function renderMissionList(){
         <button class="small noprint" onclick="openShare('week',${m.id},'สัปดาห์ ${m.week} · ${esc(m.title)}')">สร้างลิงก์ / QR ให้นักเรียน</button>
       </div>`:''}</div>`).join('');
   try{ paintHomeToday(); }catch(e){}
+  try{ applyRoleUI(); }catch(e){}
 }
 async function renderSemester(){
   $('v-semester').innerHTML=`<div class="card"><h2>กำลังตรวจสอบข้อมูล...</h2></div>`;
@@ -2935,6 +2975,7 @@ function checkPin(){
 function lockTeacher(){
   teacherUnlocked=false;
   try{ sessionStorage.removeItem('lc:tok'); sessionStorage.removeItem('lc:role'); }catch(e){}
+  applyRoleUI();
   toast('ออกจากหน้าครูแล้ว',1); go('role'); renderRole();
 }
 
@@ -2972,12 +3013,12 @@ function renderRole(sel){
 }
 function roleStudent(){
   try{ sessionStorage.setItem('lc:role','student'); }catch(e){}
-  go('home'); checkResume();
+  applyRoleUI(); go('home'); checkResume();
 }
 function rolePinOK(r){
   const v=($('rolePin')||{}).value||'';
   if(v.trim()!==TEACHER_PIN){ bad('rolePin','รหัสไม่ถูกต้อง กรุณาลองใหม่'); return; }
-  teacherUnlocked=true;
+  teacherUnlocked=true; applyRoleUI();
   try{ sessionStorage.setItem('lc:tok','1'); sessionStorage.setItem('lc:role',r); }catch(e){}
   if(r==='admin'){ toast('เข้าสู่โหมดผู้บริหารแล้ว',1); openSchool(); }
   else{ toast('เข้าสู่โหมดครูแล้ว',1); go('home'); }
@@ -4225,6 +4266,27 @@ function openDemoPanel(){
    ======================================================================== */
 const ROOMS_KEY='lc:school:rooms';
 const roomSumKey = code => 'lc:school:sum:'+code;
+/* สรุปห้องรายสัปดาห์ เก็บแยกคีย์เพื่อไม่ให้ทับของเดิม ใช้ทำแนวโน้มระดับโรงเรียน */
+const roomHistKey = (code,wk) => 'lc:school:hist:'+code+':'+wk;
+/* ระดับสีของ heatmap · ใช้ "แถบระดับ" ไม่ใช่ไล่สีต่อเนื่อง
+   เพราะคะแนนจริงมักกระจุกอยู่ช่วง 2.5-4.0 ถ้าไล่สีต่อเนื่องจะแยกด้วยตาไม่ออก
+   แบ่งตามเกณฑ์ที่ระบบใช้อยู่แล้ว (ผ่านเกณฑ์ที่ 2.51) และคุมให้ตัวอักษรสีเข้มอ่านออกทุกช่อง */
+const HEAT_BANDS=[
+  {min:3.50,bg:'#7CD9C4',t:'ดีมาก (3.50 ขึ้นไป)'},
+  {min:3.00,bg:'#B4E9DC',t:'ดี (3.00–3.49)'},
+  {min:2.51,bg:'#DCF3EA',t:'ผ่านเกณฑ์ (2.51–2.99)'},
+  {min:2.00,bg:'#FCE3B8',t:'ต้องเสริม (2.00–2.50)'},
+  {min:0,   bg:'#F6C9BF',t:'เร่งด่วน (ต่ำกว่า 2.00)'},
+];
+function heatBG(v){
+  if(v==null||!isFinite(v)) return 'var(--soft)';
+  const b=HEAT_BANDS.find(x=>v>=x.min);
+  return b?b.bg:'var(--soft)';
+}
+const heatLegend=()=>`<div class="row" style="gap:14px;flex-wrap:wrap;margin-top:10px">
+  ${HEAT_BANDS.slice().reverse().map(b=>`<span class="small" style="display:inline-flex;align-items:center;gap:6px">
+    <span style="width:16px;height:16px;border-radius:4px;border:1px solid var(--line);background:${b.bg};display:inline-block"></span>
+    ${esc(b.t)}</span>`).join('')}</div>`;
 
 function roomCode(){ return (LS.get('lc:cfg:roomcode')||'').trim(); }
 function schoolName(){ return (LS.get('lc:cfg:school')||'').trim(); }
@@ -4305,6 +4367,10 @@ async function buildRoomSummary(){
     at:Date.now()};
   const j=JSON.stringify(sum);
   LS.set(roomSumKey(code),j); queueRemote(roomSumKey(code),'สรุปห้อง '+code,j);
+  /* เก็บสำเนาประจำสัปดาห์ไว้ด้วย เพื่อให้ผู้บริหารเห็นแนวโน้มข้ามเวลาได้
+     คีย์หลักยังถูกเขียนทับตามเดิม (ใช้เป็นค่าล่าสุด) ส่วนคีย์รายสัปดาห์ไม่ทับกัน */
+  const hk=roomHistKey(code,isoWeekKey());
+  LS.set(hk,j); queueRemote(hk,'สรุปห้อง '+code+' '+isoWeekKey(),j);
   await flushRemote(true);
   await registerRoom();
   return sum;
@@ -4354,6 +4420,22 @@ async function openSchool(){
       wPre+=r[0]*m.n; wPost+=r[1]*m.n; w+=m.n; });
     return {rk, pre:w?wPre/w:0, post:w?wPost/w:0};
   });
+  /* ---- Heatmap สมรรถนะ: ห้อง × ด้าน ใช้คะแนนหลังเรียนของภารกิจล่าสุด ---- */
+  const heatRooms=withData.filter(s=>latest(s)&&latest(s).dims);
+  const heatDims=ITEM_DIMS.filter(k=>heatRooms.some(s=>latest(s).dims[k]));
+  const dimAvgAll=k=>{const v=heatRooms.map(s=>latest(s).dims[k]&&latest(s).dims[k][1]).filter(x=>x!=null);
+    return v.length?stMean(v):null;};
+  /* ---- แนวโน้มระดับโรงเรียนข้ามสัปดาห์ จากสำเนารายสัปดาห์ของแต่ละห้อง ---- */
+  const histWeeks=[]; for(let w=-7;w<=0;w++) histWeeks.push(weekKeyShift(w));
+  const trend=histWeeks.map(wk=>{
+    const rs=[];
+    rooms.forEach(r=>{ let o=null; try{ o=JSON.parse(LS.get(roomHistKey(r.code,wk))||'null'); }catch(e){}
+      if(o) rs.push(o); });
+    const eis=rs.map(o=>{const m=(o.missions||[]).filter(x=>x.n>0).pop(); return m&&m.ei;}).filter(x=>x!=null&&isFinite(x));
+    const pl=rs.map(o=>o.pulse&&o.pulse.wAvg).filter(x=>x!=null);
+    return {wk, rooms:rs.length, ei:eis.length?stMean(eis):null, mood:pl.length?stMean(pl):null};
+  });
+  const hasTrend=trend.some(t=>t.rooms>0);
   $('v-school').innerHTML=`
   <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · รายงานภาพรวมระดับโรงเรียน</div>
   <div class="card">
@@ -4373,6 +4455,75 @@ async function openSchool(){
       <button onclick="window.print()">พิมพ์รายงาน</button>
       <button onclick="go('home')">หน้าแรก</button></div>
   </div>
+
+  <div class="card">
+    <h2>ผลตามวัตถุประสงค์ของโครงการ 2 ข้อ</h2>
+    <p class="small muted">จัดให้ตรงกับวัตถุประสงค์ที่ระบุในหนังสือของโครงการ เพื่อนำไปใช้รายงานได้โดยตรง</p>
+    ${(()=>{
+      const civ=ITEM_DIMS.filter(k=>DIMS[k].g==='civic');
+      const dAvg=(k,x)=>{const v=withData.map(s=>latest(s).dims&&latest(s).dims[k]&&latest(s).dims[k][x]).filter(y=>y!=null);
+        return v.length?stMean(v):null;};
+      const cPre=stMean(civ.map(k=>dAvg(k,0)).filter(v=>v!=null)||[0]);
+      const cPost=stMean(civ.map(k=>dAvg(k,1)).filter(v=>v!=null)||[0]);
+      const ok1=isFinite(cPost)&&cPost>cPre;
+      const r2=royalAgg.find(r=>r.rk==='r2'), r4=royalAgg.find(r=>r.rk==='r4');
+      const ok2=r2&&r4&&(r2.post>r2.pre||r4.post>r4.pre);
+      return `<div class="grid2" style="margin-top:10px">
+        <div class="card tight" style="border-left:4px solid var(--teal)">
+          <div class="eyebrow">วัตถุประสงค์ที่ 1</div>
+          <h3 style="margin:2px 0 6px">ส่งเสริมให้ผู้เรียนมีคุณลักษณะความเป็นพลเมืองดี</h3>
+          <div class="row" style="gap:14px;align-items:baseline">
+            <span class="mono">ก่อน ${isFinite(cPre)?cPre.toFixed(2):'—'}</span>
+            <span class="mono">หลัง ${isFinite(cPost)?cPost.toFixed(2):'—'}</span>
+            <span class="pill" style="${ok1?'color:var(--teal-d);border-color:var(--teal)':'color:var(--gold);border-color:var(--gold)'}">${ok1?'สูงขึ้น':'รอข้อมูลเพิ่ม'}</span></div>
+          <p class="small muted" style="margin-top:6px">ค่าเฉลี่ยสมรรถนะกลุ่มพลเมืองดี ${civ.length} ด้าน (ระดับ 1–4)
+            · หลักฐานประกอบ: แบบสังเกตพฤติกรรมของครู · การลงมือทำจริง · หลักฐานความสำเร็จ 5 ด้าน</p>
+        </div>
+        <div class="card tight" style="border-left:4px solid var(--violet)">
+          <div class="eyebrow">วัตถุประสงค์ที่ 2</div>
+          <h3 style="margin:2px 0 6px">สนับสนุนการดำเนินงานตามพระบรมราโชบายด้านการศึกษา</h3>
+          <div class="row" style="gap:14px;align-items:baseline">
+            <span class="small">เน้น <b>คุณธรรม</b> และ <b>การเป็นพลเมืองดี</b></span>
+            <span class="pill" style="${ok2?'color:var(--teal-d);border-color:var(--teal)':'color:var(--gold);border-color:var(--gold)'}">${ok2?'สูงขึ้น':'รอข้อมูลเพิ่ม'}</span></div>
+          <p class="small muted" style="margin-top:6px">
+            พื้นฐานชีวิต มีคุณธรรม ${r2?r2.pre.toFixed(2)+' → '+r2.post.toFixed(2):'—'}
+            · เป็นพลเมืองดี ${r4?r4.pre.toFixed(2)+' → '+r4.post.toFixed(2):'—'}
+            <br>อีก 2 ด้านสอดคล้องบางส่วนและไม่ใช่จุดเน้น ดูรายละเอียดในตารางถัดไป</p>
+        </div>
+      </div>`;})()}
+  </div>
+
+  ${heatDims.length&&heatRooms.length?`<div class="card">
+    <h2>Civic Competency Heatmap · ห้อง × สมรรถนะ</h2>
+    <p class="small muted">ค่าเฉลี่ยหลังเรียนของแต่ละห้อง (ระดับ 1–4) · ใช้หาว่าควรจัดกิจกรรมเสริมเรื่องใดกับห้องใด</p>
+    ${heatLegend()}
+    <div style="overflow-x:auto;margin-top:10px"><table class="heat"><thead><tr><th>ห้อง</th>
+      ${heatDims.map(k=>`<th title="${esc(DIMS[k].n)}">${esc(DIMS[k].n)}</th>`).join('')}</tr></thead><tbody>
+    ${heatRooms.map(s=>{const m=latest(s);
+      return `<tr><td><b>${esc(s.room||s.code)}</b><div class="small muted">${esc(s.grade||'')}</div></td>
+        ${heatDims.map(k=>{const v=m.dims[k]&&m.dims[k][1];
+          return `<td class="hc" style="background:${heatBG(v)}" title="${esc(DIMS[k].n)} · ${v!=null?v.toFixed(2):'ไม่มีข้อมูล'}">${v!=null?v.toFixed(2):'—'}</td>`;}).join('')}</tr>`;}).join('')}
+      <tr><td><b>เฉลี่ยทั้งโรงเรียน</b></td>
+        ${heatDims.map(k=>{const v=dimAvgAll(k);
+          return `<td class="hc" style="background:${heatBG(v)};font-weight:600">${v!=null?v.toFixed(2):'—'}</td>`;}).join('')}</tr>
+    </tbody></table></div>
+    ${(()=>{const weak=heatDims.map(k=>({k,v:dimAvgAll(k)})).filter(x=>x.v!=null).sort((a,b)=>a.v-b.v).slice(0,2);
+      return weak.length?`<div class="notice" style="margin-top:10px"><span class="small">
+        <b>ด้านที่ทั้งโรงเรียนควรเสริมก่อน</b> ${weak.map(x=>esc(DIMS[x.k].n)+' ('+x.v.toFixed(2)+')').join(' · ')}</span></div>`:'';})()}
+  </div>`:''}
+
+  ${hasTrend?`<div class="card">
+    <h2>แนวโน้มระดับโรงเรียนย้อนหลัง 8 สัปดาห์</h2>
+    <p class="small muted">จากสรุปรายสัปดาห์ที่แต่ละห้องส่งขึ้นมา · ยิ่งครูกดส่งสรุปสม่ำเสมอ เส้นแนวโน้มยิ่งสมบูรณ์</p>
+    <table style="margin-top:8px"><thead><tr><th>สัปดาห์</th><th>ห้องที่ส่งสรุป</th><th>ดัชนีประสิทธิผลเฉลี่ย</th><th>สุขภาวะเฉลี่ย</th></tr></thead><tbody>
+    ${trend.map(t=>`<tr><td class="mono small">${esc(t.wk.slice(5))}</td>
+      <td class="mono">${t.rooms||'—'}</td>
+      <td class="mono ${t.ei!=null&&t.ei>=0.5?'ok':''}">${t.ei!=null?t.ei.toFixed(4):'—'}</td>
+      <td>${t.mood!=null?`<span class="mono">${t.mood.toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(t.mood)}</span>`:'<span class="muted">—</span>'}</td></tr>`).join('')}
+    </tbody></table>
+  </div>`:`<div class="card noprint"><div class="notice"><span class="small">
+    <b>แนวโน้มข้ามเวลายังว่างอยู่</b> ระบบเพิ่งเริ่มเก็บสรุปเป็นรายสัปดาห์
+    ให้ครูแต่ละห้องกด "ส่งสรุปให้ผู้บริหาร" สัปดาห์ละครั้ง แล้วตารางแนวโน้มจะขึ้นเอง</span></div></div>`}
 
   <div class="card">
     <h2>การสนับสนุนพระบรมราโชบายด้านการศึกษา ระดับโรงเรียน</h2>
@@ -5128,6 +5279,227 @@ function renderDailyDone(){
       <button class="primary" onclick="go('home')">กลับหน้าแรก</button></div></div>`;
 }
 function dReopen(){ const td=dailyToday(); if(DS&&DS.days[td]) DS.days[td].st=0; renderDailyForm(); }
+
+/* ================= พัฒนาการของฉัน (My Growth) · ฝั่งนักเรียน =================
+   เดิมนักเรียนเห็นได้แค่ "วันนี้ทำแล้ว" ไม่เคยเห็นว่าตัวเองเปลี่ยนไปอย่างไร
+   งานวิจัย ACT 2022 ชี้ว่าความเชื่อว่าตัวเองทำได้ (self-efficacy) เป็นตัวกลางสำคัญ
+   ของการเปลี่ยนพฤติกรรมพลเมือง ซึ่งจะเกิดได้ต่อเมื่อผู้เรียน "เห็นพัฒนาการของตัวเอง"
+
+   หลักสำคัญของหน้านี้ · แยกที่มาของค่าให้ชัดเจน 3 แหล่ง ไม่ปนกัน
+     1 จากภารกิจรายวัน  = สิ่งที่นักเรียนเลือกทำเอง (ระดับ 1-4)
+     2 จากแบบวัด        = คะแนนก่อน-หลังของตัวเอง
+     3 จากครู           = ระดับที่ครูสังเกตและยืนยัน  ← มีน้ำหนักที่สุด
+   ไม่นำสามแหล่งมาเฉลี่ยรวมกันเป็นตัวเลขเดียว เพราะเป็นคนละชนิดของหลักฐาน
+   และไม่ตัดสินว่านักเรียน "ดี" หรือ "ไม่ดี" แสดงเฉพาะสิ่งที่เกิดขึ้นจริง
+   ============================================================================ */
+const GROWTH_WEEKS=12;
+let GR=null;
+function openGrowth(){ go('growth'); renderGrowthPick(); }
+function renderGrowthPick(){
+  $('v-growth').innerHTML=`<div class="card">
+    <div class="eyebrow">พัฒนาการของฉัน</div>
+    <h2>แตะชื่อของตัวเอง</h2>
+    <p class="small muted">ดูว่าตัวเองฝึกอะไรไปบ้าง เปลี่ยนไปอย่างไร และครูเห็นอะไรในตัวเรา</p>
+    <div class="roster">${ROSTER.map((n,i)=>
+      `<div class="rcard" onclick="growthOpen(${i})"><div class="no">${i+1}</div>
+        <div><div class="nm">${esc(n)}</div></div></div>`).join('')}</div>
+    <div class="row" style="margin-top:16px"><button onclick="go('home')">ย้อนกลับ</button></div></div>`;
+}
+async function growthOpen(i){
+  go('growth');
+  $('v-growth').innerHTML='<div class="card"><h2>กำลังรวบรวมพัฒนาการ…</h2></div>';
+  try{
+    await pullAll('lc:');                      /* ครั้งเดียวจบ แล้วอ่านจากเครื่องทั้งหมด */
+    GR=await growthData(i);
+    renderGrowth();
+  }catch(e){
+    $('v-growth').innerHTML=`<div class="card"><h1>แสดงผลไม่สำเร็จ</h1>
+      <div class="notice"><span class="small">${esc(e.message||e)}</span></div>
+      <div class="row"><button class="primary" onclick="growthOpen(${i})">ลองใหม่</button>
+        <button onclick="go('home')">หน้าแรก</button></div></div>`;
+  }
+}
+/* รวบรวมหลักฐานของนักเรียนคนเดียวจากทุกโมดูล อ่านจากเครื่องล้วน ๆ */
+async function growthData(i){
+  const weeks=[]; for(let w=-(GROWTH_WEEKS-1);w<=0;w++) weeks.push(weekKeyShift(w));
+  const g={i,name:ROSTER[i],weeks,
+    dayDone:0, daySlots:0, byDim:{}, byWeek:[], uOk:0, uN:0, acts:[], goals:[],
+    pulseDays:0, moodByWeek:[], told:0, friDone:0,
+    missions:[], teacher:null, teacherNote:'', selfR:null};
+  /* ---- ภารกิจรายวัน ---- */
+  for(const wk of weeks){
+    const r=await dailyRec(wk,i);
+    const lv=[];
+    for(const d of [1,2,3,4,5]){
+      const X=r&&r.days&&r.days[d];
+      if(X&&X.done){
+        g.dayDone++;
+        if(X.level){ lv.push(X.level); if(X.dim) (g.byDim[X.dim]=g.byDim[X.dim]||[]).push(X.level); }
+        if(X.u!==undefined){ g.uN++; if(X.uOk) g.uOk++; }
+        if(d===3&&X.act) g.acts.push({wk,t:X.act,who:X.who||''});
+        if(d===1&&X.goalText) g.goals.push({wk,t:X.goalText});
+        if(d===5){ g.friDone++; if(X.told===true) g.told++; }
+      }
+    }
+    g.daySlots+=5;
+    g.byWeek.push({wk,n:lv.length,avg:lv.length?lv.reduce((a,b)=>a+b,0)/lv.length:null});
+    /* ---- เช็คอินใจ ---- */
+    const pr=await pulseRec(wk,i);
+    const es=pulseEntries(pr);
+    g.pulseDays+=es.length;
+    g.moodByWeek.push(es.length?es.reduce((a,b)=>a+b.mood,0)/es.length:null);
+  }
+  /* ---- ภารกิจเต็มรูปแบบ (ก่อน–หลัง) ---- */
+  for(const m of MISSIONS){
+    let rec=null;
+    try{ rec=JSON.parse(LS.get(mKey(i,m.id))||'null'); }catch(e){}
+    if(!rec) continue;
+    const pre=answeredCount(rec.pre)>=ITEMS.length?total(rec.pre):null;
+    const post=answeredCount(rec.post)>=ITEMS.length?total(rec.post):null;
+    g.missions.push({id:m.id,week:m.week,title:m.title,pre,post,done:!!rec.done,
+      at:rec.finished||rec.started||0,rec});
+    if(rec.teacher&&rec.teacher.score&&Object.keys(rec.teacher.score).length){
+      g.teacher=rec.teacher.score; g.teacherNote=(rec.teacher.note||'').trim();
+    }
+    if(rec.self&&Object.keys(rec.self).length) g.selfR=rec.self;
+  }
+  g.missions.sort((a,b)=>a.week-b.week);
+  return g;
+}
+/* แถบระดับ 1-4 แบบอ่านง่าย ไม่ใช้ตัวเลขล้วน เพื่อให้นักเรียนอ่านเข้าใจ */
+function grBar(v,src){
+  if(v==null) return '<span class="muted small">ยังไม่มีข้อมูล</span>';
+  const pct=Math.max(0,Math.min(100,(v-1)/3*100));
+  const c=v>=3.5?'var(--teal)':v>=2.5?'var(--mint)':v>=1.75?'var(--gold)':'var(--red)';
+  return `<span style="display:inline-flex;align-items:center;gap:8px;min-width:150px">
+    <span style="flex:1;height:9px;border-radius:99px;background:var(--panel2);overflow:hidden;display:inline-block;min-width:80px">
+      <span style="display:block;height:100%;width:${pct}%;background:${c}"></span></span>
+    <b class="mono" style="font-size:14px">${v.toFixed(2)}</b></span>
+    ${src?`<div class="small muted" style="font-size:12px">${esc(src)}</div>`:''}`;
+}
+function renderGrowth(){
+  const g=GR, n=ROSTER.length;
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  const dimKeys=Object.keys(DIMS);
+  const wkAvg=g.byWeek.filter(w=>w.avg!=null);
+  const first=wkAvg.length?wkAvg[0]:null, last=wkAvg.length?wkAvg[wkAvg.length-1]:null;
+  const trend=(first&&last&&wkAvg.length>=2)?(last.avg-first.avg):null;
+  const mDone=g.missions.filter(m=>m.pre!=null&&m.post!=null);
+  const streakTxt=g.dayDone>=20?'สม่ำเสมอมาก':g.dayDone>=10?'เริ่มเป็นนิสัยแล้ว':g.dayDone>0?'เริ่มต้นได้ดี':'ยังไม่เริ่ม';
+  $('v-growth').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · พัฒนาการของ ${esc(g.name)}</div>
+
+  <div class="card">
+    <div class="eyebrow">พัฒนาการของฉัน · ${esc(ROOM)}</div>
+    <h1 style="margin-bottom:2px">${esc(g.name)}</h1>
+    <p class="muted small">รวบรวมจากทุกอย่างที่ทำในระบบ ย้อนหลัง ${GROWTH_WEEKS} สัปดาห์</p>
+    <div class="grid3" style="margin-top:12px">
+      <div class="card tight"><div class="eyebrow">ภารกิจรายวันสะสม</div>
+        <div class="bignum ${g.dayDone>=10?'ok':''}">${g.dayDone}</div>
+        <div class="small muted">วัน · ${esc(streakTxt)}</div></div>
+      <div class="card tight"><div class="eyebrow">เช็คอินใจสะสม</div>
+        <div class="bignum">${g.pulseDays}</div><div class="small muted">วัน</div></div>
+      <div class="card tight"><div class="eyebrow">ระดับการตัดสินใจล่าสุด</div>
+        <div class="bignum">${last?last.avg.toFixed(2):'—'}</div>
+        <div class="small muted">จาก 4${trend!=null?` · ${trend>=0?'▲ +':'▼ '}${trend.toFixed(2)} จากสัปดาห์แรก`:''}</div></div>
+    </div>
+    ${(!g.dayDone&&!g.pulseDays&&!g.missions.length)
+      ?`<div class="notice" style="margin-top:12px"><span class="small">ยังไม่มีข้อมูลของเธอในระบบเลย
+        ลองเริ่มจาก <b>ภารกิจวันนี้</b> แล้วกลับมาดูหน้านี้อีกครั้ง</span></div>`
+      :(!g.dayDone?`<div class="notice" style="margin-top:12px"><span class="small">
+        ยังไม่ได้เริ่ม<b>ภารกิจรายวัน</b> เลย ลองทำวันนี้ดู แล้วช่องด้านล่างจะมีข้อมูลของเธอเอง</span></div>`:'')}
+    <div class="row noprint" style="margin-top:12px">
+      <button onclick="openDaily()">ทำภารกิจวันนี้</button>
+      <button onclick="renderGrowthPick()">ดูของคนอื่น</button>
+      <button onclick="window.print()">พิมพ์</button>
+      <button class="primary" onclick="go('home')">กลับหน้าแรก</button></div>
+  </div>
+
+  ${wkAvg.length?`<div class="card">
+    <h2>ระดับการตัดสินใจของฉันแต่ละสัปดาห์</h2>
+    <p class="small muted">มาจากสถานการณ์ที่เลือกทำเองในภารกิจรายวัน · 1 = เลี่ยงปัญหา · 4 = ทำถูกต้องและชวนคนอื่นด้วย</p>
+    <div style="overflow-x:auto;margin-top:8px"><table><thead><tr><th>สัปดาห์</th><th>ทำไปกี่วัน</th><th>ระดับเฉลี่ย</th></tr></thead><tbody>
+    ${g.byWeek.filter(w=>w.n>0).map(w=>`<tr><td class="mono small">${esc(w.wk.slice(5))}</td>
+      <td class="mono">${w.n}/5</td><td>${grBar(w.avg)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="small muted" style="margin-top:8px">${trend!=null?(trend>0.2?'ระดับของเธอสูงขึ้นจากสัปดาห์แรก เก่งมาก'
+      :trend<-0.2?'ช่วงนี้ระดับลดลงเล็กน้อย ลองคุยกับครูดูว่ามีอะไรติดขัดไหม'
+      :'ระดับค่อนข้างคงที่ ลองท้าทายตัวเองให้ไปถึงระดับ 4 ในสัปดาห์หน้า'):''}</p>
+  </div>`:''}
+
+  <div class="card">
+    <h2>สมรรถนะของฉันรายด้าน</h2>
+    <p class="small muted">แสดงแยกตามที่มาของหลักฐาน <b>ไม่นำมารวมเป็นคะแนนเดียว</b>
+      เพราะสิ่งที่เราเลือกเอง กับสิ่งที่ครูสังเกตเห็น เป็นหลักฐานคนละชนิดกัน</p>
+    <div style="overflow-x:auto;margin-top:8px"><table><thead><tr><th>ด้าน</th>
+      <th>จากภารกิจรายวัน<br><span class="small muted" style="font-weight:400">สิ่งที่ฉันเลือกทำ</span></th>
+      <th>จากครู<br><span class="small muted" style="font-weight:400">สิ่งที่ครูสังเกตเห็น</span></th></tr></thead><tbody>
+    ${dimKeys.map(k=>{
+      const d=avg(g.byDim[k]||[]);
+      const t=(g.teacher&&g.teacher[k])||null;
+      return `<tr><td>${esc(DIMS[k].n)}</td><td>${grBar(d)}</td>
+        <td>${t?grBar(t):'<span class="muted small">ครูยังไม่ได้ประเมิน</span>'}</td></tr>`;}).join('')}
+    </tbody></table></div>
+    ${!g.teacher?`<div class="notice" style="margin-top:10px"><span class="small">ช่องของครูจะขึ้นเมื่อครูทำแบบสังเกตพฤติกรรมให้แล้ว</span></div>`:''}
+  </div>
+
+  ${g.uN?`<div class="card">
+    <h2>ความเข้าใจเรื่องหน้าที่ สิทธิ และกติกา</h2>
+    <p class="small muted">จากขั้น U เข้าใจ ของภารกิจรายวัน ที่ถามว่าเรื่องนั้นเป็นเรื่องเกี่ยวกับอะไร</p>
+    <div class="bignum ${g.uOk/g.uN>=0.7?'ok':''}">${Math.round(g.uOk/g.uN*100)}%</div>
+    <p class="small muted">ตอบถูก ${g.uOk} จาก ${g.uN} ครั้ง</p>
+  </div>`:''}
+
+  ${mDone.length?`<div class="card">
+    <h2>ผลแบบวัดก่อน–หลังของฉัน</h2>
+    <table style="margin-top:6px"><thead><tr><th>ภารกิจ</th><th>ก่อนเรียน</th><th>หลังเรียน</th><th>ต่าง</th></tr></thead><tbody>
+    ${mDone.map(m=>`<tr><td>สัปดาห์ ${m.week} · ${esc(m.title)}</td>
+      <td class="mono">${m.pre}/${FULL_SCORE}</td><td class="mono">${m.post}/${FULL_SCORE}</td>
+      <td class="mono ${m.post-m.pre>0?'ok':m.post-m.pre<0?'bad':''}">${(m.post-m.pre>=0?'+':'')+(m.post-m.pre)}</td></tr>`).join('')}
+    </tbody></table>
+    <p class="small muted" style="margin-top:8px">คะแนนนี้เป็นเพียงส่วนหนึ่งของหลักฐาน สิ่งที่สำคัญกว่าคือสิ่งที่เธอลงมือทำจริง</p>
+  </div>`:''}
+
+  ${(g.acts.length||g.goals.length)?`<div class="card">
+    <h2>สิ่งที่ฉันลงมือทำจริง</h2>
+    <p class="small muted">นี่คือหลักฐานที่มีค่าที่สุด เพราะเป็นสิ่งที่เกิดขึ้นจริงนอกหน้าจอ</p>
+    ${g.acts.slice(-8).reverse().map(a=>`<div class="opt" style="cursor:default">
+      🌱 ${esc(a.t)}${a.who?`<div class="small muted" style="margin-top:3px">ผลที่เกิด: ${esc(a.who)}</div>`:''}
+      <div class="small muted" style="font-size:12px">สัปดาห์ ${esc(a.wk.slice(5))}</div></div>`).join('')}
+    ${g.goals.length?`<p class="small muted" style="margin-top:8px">ตั้งเป้าของสัปดาห์ไปแล้ว ${g.goals.length} ครั้ง
+      · ล่าสุด "${esc(g.goals[g.goals.length-1].t)}"</p>`:''}
+  </div>`:''}
+
+  ${g.friDone?`<div class="card">
+    <h2>การเล่าให้ที่บ้านฟัง</h2>
+    <p class="small muted">งานวิจัยพบว่านักเรียนที่นำสิ่งที่เรียนไปเล่าต่อที่บ้าน ได้ผลที่ยั่งยืนกว่าอย่างชัดเจน</p>
+    <div class="bignum ${g.told/g.friDone>=0.5?'ok':''}">${g.told}/${g.friDone}</div>
+    <p class="small muted">สัปดาห์ที่เล่าให้ที่บ้านฟัง จากที่ทำวันศุกร์ทั้งหมด</p>
+  </div>`:''}
+
+  ${g.moodByWeek.some(v=>v!=null)?`<div class="card">
+    <h2>ความรู้สึกของฉันแต่ละสัปดาห์</h2>
+    <p class="small muted">จากเช็คอินใจรายวัน · ข้อมูลนี้ครูเห็นเพื่อดูแลเธอ ไม่ใช่คะแนน</p>
+    <div class="row" style="gap:6px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;margin-top:8px">
+      ${g.weeks.map((wk,x)=>{const v=g.moodByWeek[x];
+        return `<div style="text-align:center;min-width:52px">
+        <div class="mood-e" style="font-size:26px">${v?MOOD_E(v):'·'}</div>
+        <div class="small muted" style="font-size:11px">${esc(wk.slice(5))}</div></div>`;}).join('')}
+    </div>
+  </div>`:''}
+
+  ${g.teacherNote?`<div class="card">
+    <h2>💬 สิ่งที่ครูเขียนถึงฉัน</h2>
+    <div class="notice good"><span class="small">${esc(g.teacherNote)}</span></div>
+  </div>`:''}
+
+  <div class="card noprint">
+    <div class="row"><button onclick="openDaily()">ทำภารกิจวันนี้</button>
+      <button onclick="openPulse()">เช็คอินใจ</button>
+      <button onclick="renderGrowthPick()">ดูของคนอื่น</button>
+      <button class="primary" onclick="go('home')">กลับหน้าแรก</button></div>
+  </div>`;
+}
 
 /* ---------- ฝั่งครู: ติดตามรายวัน ---------- */
 let DT_SHIFT=0;
@@ -6757,7 +7129,8 @@ renderMissionList(); renderPick(); checkResume();
 (async()=>{
   let routed=false;
   try{ routed=await routeFromURL(); }catch(e){ routed=false; }
-  if(routed){ try{ if(!getRole()) sessionStorage.setItem('lc:role','student'); }catch(e){} return; }
+  if(routed){ try{ if(!getRole()) sessionStorage.setItem('lc:role','student'); }catch(e){} applyRoleUI(); return; }
+  applyRoleUI();
   if(!getRole()){ go('role'); renderRole(); }
 })();
 </script>
