@@ -531,6 +531,7 @@ table.heat td.hc{text-align:center;font-family:var(--mono);font-size:14px;
 <section id="v-weekmis" class="hide"></section>
 <section id="v-school" class="hide"></section>
 <section id="v-sdemo" class="hide"></section>
+<section id="v-tdemo" class="hide"></section>
 <section id="v-evid" class="hide"></section>
 <section id="v-act" class="hide"></section>
 
@@ -887,7 +888,7 @@ const money=n=>'฿'+Number(n||0).toLocaleString('th-TH');
 let _tt=null,_st=null;
 function toast(m,g){const t=$('toast');t.textContent=m;t.className='show'+(g?' good':'');clearTimeout(_tt);_tt=setTimeout(()=>t.className='',3800);}
 function flagSaved(){const e=$('savedTag');if(!e)return;e.classList.add('on');clearTimeout(_st);_st=setTimeout(()=>e.classList.remove('on'),1300);}
-const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','sdemo','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role','growth'];
+const views=['home','pick','test','mission','report','teacher','research','semester','quick','qstudent','qdash','setup2','interview','lock','share','batch','paper','model','more','stats','ioc','plan','pulse','pulsedash','school','sdemo','tdemo','evid','act','daily','dailyteach','dailyrep','cycle','dayplan','level','weekmis','role','growth'];
 function go(v){views.forEach(x=>$('v-'+x).classList.toggle('hide',x!==v));window.scrollTo(0,0);
   paintDemoBar(); navClose();
   document.body.classList.toggle('rolev',v==='role');
@@ -919,6 +920,7 @@ const NAV_MENUS={
     {sep:1},
     {h:'ติดตามและประเมิน'},
     {i:'📊',t:'Dashboard และผลก่อน–หลัง',d:'กราฟ ตารางคะแนน ส่งออก CSV',fn:"needTeacher(openTeacher)"},
+    {i:'🧪',t:'สาธิต · ครูเห็นอะไรบ้าง',d:'ห้องจำลอง 40 คน กลางคาบ · แยกจากข้อมูลจริงโดยสิ้นเชิง',fn:"needTeacher(openTeacherDemo)"},
     {i:'🏅',t:'หลักฐานความสำเร็จ 5 ด้าน',d:'ตัวชี้วัด เกณฑ์ หลักฐานพฤติกรรม',fn:"needTeacher(openEvid)"},
     {i:'📅',t:'ติดตามภารกิจรายวัน',d:'ใครทำวันนี้ · บันทึกแทนเด็กไม่มีมือถือ',fn:"needTeacher(openDailyTeach)"},
     {i:'💚',t:'แดชบอร์ดสุขภาวะ · เช็คอินใจรายวัน',d:'วันนี้ใครยังไม่เช็คอิน · ใครขอความช่วยเหลือ',fn:"needTeacher(openPulseDash)"},
@@ -1942,6 +1944,7 @@ async function openTeacher_(){
       <button onclick="openBatch()">กรอกแทนนักเรียน · ไม่มีมือถือ</button>
       <button class="primary" onclick="openStats()">ผลวิเคราะห์สถิติ (บทที่ 4)</button>
       <button onclick="openEvid()">หลักฐานความสำเร็จ 5 ด้าน</button>
+      <button onclick="openTeacherDemo()">🧪 สาธิต · ครูเห็นอะไรบ้าง</button>
       <button onclick="openMoreTeacher()">เอกสาร / ภาคผนวก</button>
       <button onclick="lockTeacher()">ออกจากหน้าครู</button>
     </div>
@@ -4891,6 +4894,7 @@ function renderSDemo(){
     ${sdemoGradeBtns()}
     <div class="row noprint" style="margin-top:8px">
       <button onclick="openSchool()">← กลับสู่ข้อมูลจริง</button>
+      <button onclick="openTeacherDemo()">🧑‍🏫 ดูมุมมองของครู</button>
       <button onclick="sdemoCSV()">ส่งออก CSV (กำกับว่าจำลอง)</button>
       <button onclick="window.print()">พิมพ์</button>
       <button onclick="go('home')">หน้าแรก</button></div>
@@ -5043,6 +5047,281 @@ function sdemoCSV(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
   a.download='uptogrow_school_DEMO.csv'; a.click();
+}
+
+/* ================= สาธิตมุมมองของครู (Teacher Demo View) =================
+   วัตถุประสงค์: ตอบคำถาม "ครูเห็นอะไรบ้าง" ให้เห็นด้วยตาในครั้งเดียว
+   โดยจำลองห้องเรียนขนาดจริง 40 คน ที่กำลังทำกิจกรรมอยู่กลางคาบ
+
+   ใช้หลักความปลอดภัยของข้อมูลชุดเดียวกับ School Demo View ทุกข้อ
+   1. สร้างในหน่วยความจำด้วยสูตรคงที่ (seeded) เปิดกี่ครั้งก็ได้เลขเดิม
+   2. ไม่เขียน localStorage และไม่เรียก queueRemote/flushRemote แม้แต่ครั้งเดียว
+   3. ไม่แตะ ROSTER, MISSIONS, curMission หรือสถานะใด ๆ ของแอปจริง
+   4. ใช้ชื่อสมมติ (ชื่อจริง + อักษรย่อนามสกุล) ไม่ใช่รายชื่อนักเรียนจริง
+   5. สร้างคำตอบรายข้อ q0..q9 จริง แล้วให้ total()/dimScore()/pairedT() คำนวณตามปกติ
+      ตัวเลขที่เห็นจึงผ่านสูตรเดียวกับข้อมูลจริงทุกบรรทัด ไม่ใช่ตัวเลขที่พิมพ์ทิ้งไว้ */
+const TDEMO_ROOM='ม.2/5 (ห้องสาธิต)';
+const TDEMO_FIRST=['กมล','ชนิดา','ณัฐพล','ปาริชาต','ธีรภัทร','สุพรรษา','อนุชา','พิมพ์ชนก',
+  'วรเมธ','กัญญาณัฐ','ศิวกร','เบญจวรรณ','ปฏิภาณ','อรวรรณ','ธนกฤต','ชลธิชา','ภูมิพัฒน์','ณิชากร',
+  'กิตติพงษ์','สุชานันท์','รัชชานนท์','ปวีณา','จิรายุ','อาทิตยา','นฤเบศร์','ธัญชนก','ศุภกร','มนัสนันท์',
+  'พีรพัฒน์','กชกร','วีรภัทร','สิริกร','อดิศร','นันท์นภัส','ธนวัฒน์','ปิยะธิดา','ก้องภพ','แพรวา',
+  'ชยพล','ญาณิศา'];
+const TDEMO_LAST=['ก.','ข.','ค.','จ.','ฉ.','ช.','ซ.','ด.','ต.','ท.','น.','บ.','ป.','พ.','ม.','ย.','ร.','ล.','ว.','ส.'];
+let TDEMO_CACHE=null;
+function tdemoData(){
+  if(TDEMO_CACHE) return TDEMO_CACHE;
+  const N=40, list=[];
+  /* กระจายสถานะให้เหมือนภาพจริงกลางคาบ: ส่งครบแล้วเป็นส่วนใหญ่
+     ยังทำอยู่กระจายตามขั้น และมีที่ยังไม่เริ่ม (ขาดเรียน/ลืมอุปกรณ์) */
+  for(let i=0;i<N;i++){
+    const r=rng_(569081400+i*97);
+    const nm=TDEMO_FIRST[i]+' '+TDEMO_LAST[i%TDEMO_LAST.length];
+    /* ฐานความสามารถของผู้เรียนแต่ละคน กระจายแบบห้องเรียนจริง */
+    const base=1.75+r()*1.55;
+    const gain=0.45+r()*0.95;
+    const pre={},post={};
+    for(let q=0;q<ITEMS.length;q++){
+      const a=Math.max(1,Math.min(4,Math.round(base+(r()-0.5)*1.05)));
+      pre['q'+q]=a;
+      post['q'+q]=Math.max(a,Math.min(4,Math.round(a+gain+(r()-0.5)*0.85)));
+    }
+    /* สถานะกลางคาบ: 33 คนส่งครบ · 5 คนกำลังทำ · 2 คนยังไม่เริ่ม */
+    let state='done', step=STEPS.length, phase='post';
+    if(i>=33&&i<38){ state='doing'; step=[2,4,5,6,7][i-33]; phase=step>=STEPS.length?'post':'mission'; }
+    else if(i>=38){ state='none'; step=0; phase='pre'; }
+    const day=new Date(); day.setHours(9,5,0,0);
+    const started=day.getTime()+Math.floor(r()*4)*60000;
+    const mins=15+Math.floor(r()*9);                 /* ใช้เวลาจริง 15–23 นาที */
+    const finished=started+mins*60000;
+    /* แบบสังเกตของครู 9 ด้าน ครูยังประเมินไม่ครบทุกคน (ตามความเป็นจริง)
+       อิงพฤติกรรมหลังเรียนบวกความคลาดเคลื่อนของผู้สังเกต ให้ r อยู่ราว .8 */
+    const teacher={score:{},note:''};
+    if(state==='done'&&i<28){
+      Object.keys(TOBS).forEach(k=>{
+        const sv=dimScore(post,k)||Math.round(base+gain);
+        teacher.score[k]=Math.max(1,Math.min(4,Math.round(sv-0.25+(r()-0.5)*1.5)));
+      });
+    }
+    /* เช็คอินใจรายวัน จันทร์–ศุกร์ · บางคนยังไม่เช็คอินของวันนี้ */
+    const moods=[]; for(let d=0;d<5;d++){
+      moods.push(r()<0.14?0:Math.max(1,Math.min(5,Math.round(2.4+gain*0.9+(r()-0.5)*1.9))));
+    }
+    if(i>=36) moods[4]=0;                            /* วันนี้ยังไม่เช็คอิน */
+    const help=(i===7||i===22)?1:0;                  /* ขอให้ครูช่วย 2 คน */
+    if(i===7){ moods[2]=2; moods[3]=2; moods[4]=1; } /* อารมณ์ต่ำติดกัน 3 วัน */
+    if(i===22){ moods[3]=2; moods[4]=2; }
+    list.push({i,name:nm,state,step,phase,pre,post,teacher,moods,help,
+      started,finished:state==='done'?finished:null,mins,
+      done:state==='done',
+      daily:r()<0.82||state==='done'});         /* ทำภารกิจรายวันของวันนี้แล้วหรือยัง */
+  }
+  TDEMO_CACHE=list;
+  return list;
+}
+const TDEMO_NOTE=`<div class="card" style="background:#FFF6DF;border:1.5px solid #E3B84C">
+  <b>⚠ ข้อมูลจำลองเพื่อสาธิตมุมมองของครู</b>
+  <span class="small"> หน้านี้แสดงว่า <b>ครูประจำชั้นเห็นอะไรบ้าง</b> เมื่อใช้ระบบกับห้องเรียนขนาด 40 คน
+  ชื่อและตัวเลขทั้งหมดเป็นข้อมูลสมมติ <b>ไม่ใช่นักเรียนจริงและไม่ใช่ผลการดำเนินงานจริง</b>
+  · ข้อมูลอยู่ในหน่วยความจำเท่านั้น ไม่ถูกบันทึกลงเครื่องและไม่ถูกส่งขึ้นเซิร์ฟเวอร์</span></div>`;
+function openTeacherDemo(){ go('tdemo'); renderTDemo(); }
+function renderTDemo(){
+  const L=tdemoData();
+  const done=L.filter(x=>x.done);
+  const doing=L.filter(x=>x.state==='doing'), none=L.filter(x=>x.state==='none');
+  const pre=done.map(x=>total(x.pre)), post=done.map(x=>total(x.post));
+  const R=pairedT(pre,post), ei=effIndex(pre,post,FULL_SCORE);
+  const mPre=stMean(pre), mPost=stMean(post);
+  /* ความเที่ยงตรงเชิงสภาพ: คะแนนแบบวัดของผู้เรียน เทียบผลสังเกตของครู */
+  const cvX=[],cvY=[];
+  done.forEach(d=>{ const a=[],b=[];
+    Object.keys(TOBS).forEach(k=>{ const p=dimScore(d.post,k), q=tobsLv(d,k); if(p&&q){a.push(p);b.push(q);} });
+    if(a.length===TOBS_N){ cvX.push(stMean(a)); cvY.push(stMean(b)); } });
+  const cv=pearson(cvX,cvY);
+  /* เช็คอินใจ: ภาพของวันนี้ (ช่องที่ 5) และทั้งสัปดาห์ */
+  const today=L.map(x=>x.moods[4]).filter(v=>v>0);
+  const weekAll=L.flatMap(x=>x.moods.filter(v=>v>0));
+  const noCheck=L.filter(x=>!x.moods[4]);
+  const lowRun=L.filter(x=>{let c=0,mx=0; x.moods.forEach(v=>{ if(v&&v<=2){c++;mx=Math.max(mx,c);} else if(v) c=0; }); return mx>=2;});
+  const helpers=L.filter(x=>x.help);
+  const noDaily=L.filter(x=>!x.daily);
+  const cc=CPAL();
+  const shortName=n=>n.split(' ')[0];
+  /* รายชื่อที่ระบบแนะนำให้ครูคุยวันนี้ เรียงตามความเร่งด่วน */
+  const watch=[];
+  helpers.forEach(x=>watch.push({x,why:'กดขอให้ครูช่วยในเช็คอินใจ',lv:1}));
+  lowRun.forEach(x=>{ if(!watch.find(w=>w.x.i===x.i)) watch.push({x,why:'อารมณ์ต่ำติดกันหลายวัน',lv:1}); });
+  none.forEach(x=>watch.push({x,why:'ยังไม่เริ่มทำภารกิจของคาบนี้',lv:2}));
+  noCheck.slice(0,3).forEach(x=>{ if(!watch.find(w=>w.x.i===x.i)) watch.push({x,why:'ยังไม่เช็คอินใจของวันนี้',lv:3}); });
+  watch.sort((a,b)=>a.lv-b.lv);
+  const DAYN=['จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์'];
+  $('v-tdemo').innerHTML=`
+  <div class="printhead">พิมพ์เมื่อ ${new Date().toLocaleString('th-TH')} · สาธิตมุมมองของครู — ข้อมูลจำลอง ไม่ใช่ผลการดำเนินงานจริง</div>
+  ${TDEMO_NOTE}
+  <div class="card">
+    <div class="eyebrow">แอปของครู · สาธิตว่าครูเห็นอะไร</div>
+    <h1>${esc(TDEMO_ROOM)} · ${L.length} คน</h1>
+    <p class="muted small">ภาพจำลองขณะกำลังจัดกิจกรรมอยู่กลางคาบโฮมรูม
+      ครูเปิดหน้านี้บนโทรศัพท์หรือคอมพิวเตอร์แล้วเห็นทุกอย่างนี้พร้อมกันแบบเรียลไทม์</p>
+    <div class="grid3" style="margin-top:12px">
+      <div class="card tight"><div class="eyebrow">ส่งครบแล้ว</div><div class="bignum ok">${done.length}<span style="font-size:.5em">/${L.length}</span></div></div>
+      <div class="card tight"><div class="eyebrow">กำลังทำอยู่</div><div class="bignum">${doing.length} <span style="font-size:.5em">คน</span></div>
+        <div class="small muted">ครูเดินไปช่วยได้ถูกคน</div></div>
+      <div class="card tight"><div class="eyebrow">ต้องคุยวันนี้</div><div class="bignum ${watch.length?'bad':''}">${watch.length} <span style="font-size:.5em">คน</span></div>
+        <div class="small muted">ระบบคัดกรองให้อัตโนมัติ</div></div>
+    </div>
+    <div class="row noprint" style="margin-top:10px">
+      <button onclick="needTeacher(openTeacher)">← กลับสู่ข้อมูลจริงของห้อง</button>
+      <button onclick="openSchoolDemo()">🏫 ดูมุมมองผู้บริหาร</button>
+      <button onclick="tdemoCSV()">ส่งออก CSV (กำกับว่าจำลอง)</button>
+      <button onclick="window.print()">พิมพ์</button>
+      <button onclick="go('home')">หน้าแรก</button></div>
+  </div>
+
+  <div class="card">
+    <h2>1 · ระหว่างคาบ ครูเห็นว่าใครอยู่ขั้นไหน</h2>
+    <p class="small muted">อัปเดตทันทีที่นักเรียนกดถัดไป ครูจึงรู้ว่าควรเดินไปช่วยใครก่อน
+      โดยไม่ต้องเดินดูจอทีละคน · <b>สีเขียว</b> ส่งครบ · <b>สีเหลือง</b> กำลังทำ · <b>สีเทา</b> ยังไม่เริ่ม</p>
+    <div class="grid5" style="margin-top:10px">
+      ${L.map(x=>`<div class="pcard ${x.done?'ok':x.state==='doing'?'go':''}">
+        <div class="n">${esc(shortName(x.name))}</div>
+        <div class="s">${x.done?'ส่งครบแล้ว':x.state==='none'?'ยังไม่เริ่ม'
+          :'ขั้น '+STEPS[Math.min(x.step,STEPS.length-1)][0]+' '+STEPS[Math.min(x.step,STEPS.length-1)][1]}</div></div>`).join('')}
+    </div>
+    <div class="notice" style="margin-top:10px"><span class="small">
+      ตอนนี้มี <b>${doing.length} คนกำลังทำอยู่</b>
+      ${doing.length?'('+doing.map(x=>esc(shortName(x.name))+' ขั้น '+STEPS[Math.min(x.step,STEPS.length-1)][0]).join(' · ')+')':''}
+      และ <b>${none.length} คนยังไม่เริ่ม</b>${none.length?' ('+none.map(x=>esc(shortName(x.name))).join(' · ')+')':''}</span></div>
+  </div>
+
+  <div class="card">
+    <h2>2 · ระบบคัดกรองให้ว่าควรคุยกับใครวันนี้</h2>
+    <p class="small muted">รวมสัญญาณจากเช็คอินใจ ภารกิจรายวัน และความคืบหน้าในคาบ
+      ครูไม่ต้องไล่อ่านทีละคน ระบบชี้เป้าให้ก่อน</p>
+    ${watch.map(w=>`<div class="opt" style="cursor:default;border-left:4px solid ${w.lv===1?'var(--red,#D94F3D)':w.lv===2?'var(--gold,#F0A500)':'var(--line)'}">
+      <h4 style="margin:0">${esc(w.x.name)} <span class="small muted">เลขที่ ${w.x.i+1}</span></h4>
+      <p class="small muted" style="margin:3px 0 0">${esc(w.why)}
+        · อารมณ์สัปดาห์นี้ ${w.x.moods.map(v=>v?MOOD_E(v):'–').join(' ')}</p></div>`).join('')}
+    <div class="notice good" style="margin-top:10px"><span class="small">
+      ข้อมูลนี้เป็นของครูประจำชั้นเท่านั้น ผู้บริหารเห็นเพียงค่าสรุประดับห้อง ไม่เห็นรายบุคคล</span></div>
+  </div>
+
+  <div class="card">
+    <h2>3 · ผลก่อน–หลังของทั้งห้อง</h2>
+    <div class="grid3">
+      <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยก่อน</div><div class="bignum">${mPre.toFixed(2)}</div>
+        <div class="small muted">จากคะแนนเต็ม ${FULL_SCORE}</div></div>
+      <div class="card tight"><div class="eyebrow">ค่าเฉลี่ยหลัง</div><div class="bignum ok">${mPost.toFixed(2)}</div>
+        <div class="small muted">+${(mPost-mPre).toFixed(2)} คะแนน</div></div>
+      <div class="card tight"><div class="eyebrow">ดัชนีประสิทธิผล E.I.</div><div class="bignum ${ei>=0.5?'ok':''}">${ei.toFixed(4)}</div>
+        <div class="small muted">เกณฑ์ 0.50</div></div>
+    </div>
+    <h3 style="font-size:14px;margin-top:16px">คะแนนเฉลี่ยรายด้าน ก่อน–หลัง</h3>
+    ${svgBar(ITEM_DIMS.map(k=>DIMS[k].n),
+             ITEM_DIMS.map(k=>stMean(done.map(x=>dimScore(x.pre,k)))),
+             ITEM_DIMS.map(k=>stMean(done.map(x=>dimScore(x.post,k)))),{max:4})}
+    <div class="chartgrid" style="margin-top:22px">
+      <div><h3 style="font-size:14px">สัดส่วนระดับสมรรถนะที่ครูให้จากการสังเกต</h3>
+        ${(()=>{const lv=[0,0,0,0];
+          done.forEach(d=>Object.keys(TOBS).forEach(k=>{const v=tobsLv(d,k); if(v) lv[v-1]++;}));
+          return svgDonut(['ระดับ 1 เริ่มต้น','ระดับ 2 กำลังพัฒนา','ระดับ 3 สามารถ','ระดับ 4 เชี่ยวชาญ'],lv,
+            [cc.red,cc.amber,cc.tealSoft,cc.teal]);})()}</div>
+      <div><h3 style="font-size:14px">คะแนนรวมก่อน–หลัง รายบุคคล</h3>
+        ${svgLine(done.map(x=>shortName(x.name)),pre,post)}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4 · เช็คอินใจรายวัน จันทร์–ศุกร์</h2>
+    <p class="small muted">นักเรียนใช้เวลา 30 วินาทีต่อวัน ครูเห็นภาพอารมณ์ของห้องทันที
+      และเห็นทันทีว่าใครกดขอความช่วยเหลือ</p>
+    <div class="grid3" style="margin-top:10px">
+      <div class="card tight"><div class="eyebrow">เช็คอินวันนี้</div>
+        <div class="bignum">${today.length}<span style="font-size:.5em">/${L.length}</span></div>
+        <div class="small muted">อารมณ์เฉลี่ย ${stMean(today).toFixed(2)} ${MOOD_E(stMean(today))}</div></div>
+      <div class="card tight"><div class="eyebrow">ขอให้ครูช่วย</div>
+        <div class="bignum ${helpers.length?'bad':''}">${helpers.length} <span style="font-size:.5em">คน</span></div>
+        <div class="small muted">แจ้งเตือนครูทันทีที่กด</div></div>
+      <div class="card tight"><div class="eyebrow">อารมณ์ต่ำติดกัน</div>
+        <div class="bignum ${lowRun.length?'bad':''}">${lowRun.length} <span style="font-size:.5em">คน</span></div>
+        <div class="small muted">สัญญาณที่มองไม่เห็นด้วยตาเปล่า</div></div>
+    </div>
+    <table style="margin-top:12px"><thead><tr><th>วัน</th><th>เช็คอินแล้ว</th><th>อารมณ์เฉลี่ย</th><th>อารมณ์ระดับต่ำ</th></tr></thead><tbody>
+    ${DAYN.map((d,k)=>{const v=L.map(x=>x.moods[k]).filter(m=>m>0);
+      const low=v.filter(m=>m<=2).length;
+      return `<tr><td>${d}</td><td class="mono">${v.length}/${L.length}</td>
+        <td><span class="mono">${stMean(v).toFixed(2)}</span> <span class="mood-e" style="font-size:18px">${MOOD_E(stMean(v))}</span></td>
+        <td class="mono ${low?'bad':''}">${low}</td></tr>`;}).join('')}
+    </tbody></table>
+    <p class="small muted" style="margin-top:8px">ทั้งสัปดาห์เช็คอินแล้ว ${weekAll.length} ครั้ง
+      จากที่เป็นไปได้ ${L.length*5} ครั้ง (ร้อยละ ${Math.round(weekAll.length/(L.length*5)*100)})
+      · ภารกิจรายวันวันนี้ยังไม่ทำ ${noDaily.length} คน</p>
+  </div>
+
+  <div class="card">
+    <h2>5 · ตารางคะแนนรายบุคคล (ภาคผนวก ก ของรายงาน)</h2>
+    <p class="small muted">ครูส่งออกเป็นไฟล์แนบรายงานได้ทันที ไม่ต้องพิมพ์ตารางเอง</p>
+    <div style="overflow-x:auto"><table><thead><tr><th>ที่</th><th>ชื่อ–สกุล</th><th>สถานะ</th><th>ใช้เวลา</th>
+      <th>ก่อน</th><th>หลัง</th><th>ต่าง</th><th>ครูประเมิน</th></tr></thead><tbody>
+    ${L.map(x=>{const p=total(x.pre),q=total(x.post),tc=Object.keys(x.teacher.score).length;
+      return `<tr><td class="mono">${x.i+1}</td><td>${esc(x.name)}</td>
+        <td class="small">${x.done?'ส่งครบ':x.state==='doing'?'กำลังทำ':'ยังไม่เริ่ม'}</td>
+        <td class="mono">${x.done?x.mins+' นาที':'—'}</td>
+        <td class="mono">${x.done?p:'—'}</td><td class="mono">${x.done?q:'—'}</td>
+        <td class="mono ${x.done&&q>p?'ok':''}">${x.done?'+'+(q-p):'—'}</td>
+        <td class="mono ${tc===TOBS_N?'ok':''}">${tc}/${TOBS_N}</td></tr>`;}).join('')}
+    </tbody></table></div>
+  </div>
+
+  <div class="card">
+    <h2>6 · ผลวิเคราะห์ทางสถิติ (บทที่ 4 ของรายงาน)</h2>
+    <p class="small muted">ระบบคำนวณให้อัตโนมัติจากข้อมูลจริงที่นักเรียนทำ ครูไม่ต้องกรอกลงโปรแกรมสถิติเอง</p>
+    <table style="margin-top:8px"><tbody>
+      <tr><td>จำนวนผู้เรียนที่ทำครบทั้งก่อนและหลัง (n)</td><td class="mono">${R.n}</td></tr>
+      <tr><td>ค่าเฉลี่ยก่อนเรียน</td><td class="mono">${R.mPre.toFixed(2)}</td></tr>
+      <tr><td>ค่าเฉลี่ยหลังเรียน</td><td class="mono">${R.mPost.toFixed(2)}</td></tr>
+      <tr><td>ผลต่างเฉลี่ย</td><td class="mono ok">+${R.mD.toFixed(2)}</td></tr>
+      <tr><td>ค่า t (t-test แบบไม่อิสระ)</td><td class="mono">${isFinite(R.t)?R.t.toFixed(3):'—'}</td></tr>
+      <tr><td>ระดับนัยสำคัญ p</td><td class="mono ${R.p<0.05?'ok':''}">${isFinite(R.p)?(R.p<0.001?'< .001':R.p.toFixed(4)):'—'}</td></tr>
+      <tr><td>ดัชนีประสิทธิผล E.I. (เกณฑ์ 0.50)</td><td class="mono ${ei>=0.5?'ok':''}">${ei.toFixed(4)}</td></tr>
+      <tr><td>ความเที่ยงตรงเชิงสภาพ r (แบบวัดของนักเรียน × แบบสังเกตของครู)</td>
+        <td class="mono ${cv.ok&&cv.r>=0.6?'ok':''}">${cv.ok?cv.r.toFixed(3)+' (n='+cv.n+')':'—'}</td></tr>
+    </tbody></table>
+    <div class="notice good" style="margin-top:10px"><span class="small">
+      <b>ทำไมต้องมีค่า r</b> เพราะคะแนนที่นักเรียนตอบเองอาจไม่ตรงกับพฤติกรรมจริง
+      ระบบจึงให้ครูประเมินจากการสังเกต ${TOBS_N} ด้าน แล้วหาสหสัมพันธ์กับแบบวัด
+      ค่าตั้งแต่ .60 ขึ้นไปถือว่าสอดคล้องกันสูง เป็นหลักฐานว่าคะแนนที่ได้เชื่อถือได้</span></div>
+  </div>
+
+  <div class="card">
+    <h2>7 · ครูต้องลงแรงเท่าไร</h2>
+    <div class="grid3" style="margin-top:8px">
+      <div class="card tight"><b>ในคาบ</b><p class="small muted" style="margin:4px 0 0">
+        ครูไม่ต้องตรวจอะไรระหว่างคาบ แค่เปิดหน้านี้ดูว่าใครติด แล้วเดินไปช่วย
+        · กิจกรรมทั้ง 8 ขั้นรวมแบบวัดก่อน–หลัง ใช้เวลาไม่เกิน ${TOTALMIN} นาที</p></div>
+      <div class="card tight"><b>หลังคาบ</b><p class="small muted" style="margin:4px 0 0">
+        คะแนน กราฟ และตารางภาคผนวกขึ้นเองทันที
+        สิ่งที่ครูต้องทำเองคือให้ระดับจากการสังเกต ${TOBS_N} ด้าน ซึ่งเป็นดุลพินิจของครู ระบบทำแทนไม่ได้</p></div>
+      <div class="card tight"><b>รายสัปดาห์</b><p class="small muted" style="margin:4px 0 0">
+        กดปุ่มเดียวเพื่อส่งสรุประดับห้องให้ผู้บริหาร ไม่ต้องทำรายงานซ้ำ
+        · ข้อมูลรายบุคคลยังอยู่กับครูตามระบบดูแลช่วยเหลือนักเรียน</p></div>
+    </div>
+    <div class="notice good" style="margin-top:10px"><span class="small">
+      หน้านี้เป็น<b>สถานการณ์จำลอง</b>ในหน่วยความจำของเครื่องเท่านั้น
+      ไม่มีการบันทึกหรือส่งข้อมูลใด ๆ ข้อมูลจริงของห้องเรียนไม่ถูกแตะต้อง</span></div>
+  </div>`;
+}
+function tdemoCSV(){
+  const el=$('v-tdemo'); if(!el) return;
+  const rows=[['ข้อมูลจำลองเพื่อสาธิตมุมมองของครู — ไม่ใช่ข้อมูลนักเรียนจริง'],['']];
+  el.querySelectorAll('table').forEach((t,ti)=>{
+    rows.push(['ตารางที่ '+(ti+1)]);
+    t.querySelectorAll('tr').forEach(tr=>rows.push([...tr.querySelectorAll('th,td')].map(c=>c.textContent.trim())));
+    rows.push(['']);
+  });
+  const csv='﻿'+rows.map(r=>r.map(c=>`"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='uptogrow_teacher_DEMO.csv'; a.click();
 }
 
 /* ================= ติดตามการลงมือทำ (Action Follow-up) =================
