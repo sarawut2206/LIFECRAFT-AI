@@ -3672,7 +3672,12 @@ function aikToggle(){
   const b=$('aikEye'); if(b) b.textContent = el.type==='password' ? 'แสดงคีย์' : 'ซ่อนคีย์';
 }
 function renderAIKey(){
-  const st = AIK.hasKey===null
+  /* ต้องแยก "ยังตรวจไม่เสร็จ" ออกจาก "ตรวจแล้วไม่สำเร็จ" ให้ชัด
+     ถ้าใช้สถานะเดียวกัน ครูจะเห็นคำว่ากำลังตรวจสอบค้างอยู่ตลอด แล้วเข้าใจว่าโปรแกรมแฮงก์ */
+  const st = AIK.err
+    ? `<span class="pill" style="color:var(--gold);border-color:var(--gold)">ตรวจสอบไม่สำเร็จ</span>
+       <span class="small muted">ดูสาเหตุและวิธีแก้ในกล่องด้านล่าง</span>`
+    : AIK.busy||AIK.hasKey===null
     ? `<span class="pill" style="color:var(--muted)">กำลังตรวจสอบ…</span>`
     : AIK.hasKey
       ? `<span class="pill" style="color:var(--teal-d);border-color:var(--teal)">ตั้งค่าแล้ว</span>
@@ -3690,7 +3695,14 @@ function renderAIKey(){
       <button class="ghost small noprint" onclick="aikRefresh()">ตรวจสอบใหม่</button></div>
 
     ${AIK.msg?`<div class="notice good" style="margin-top:12px"><b>สำเร็จ</b><br><span class="small">${esc(AIK.msg)}</span></div>`:''}
-    ${AIK.err?`<div class="notice" style="margin-top:12px"><b>ยังไม่สำเร็จ</b><br><span class="small">${esc(AIK.err)}</span></div>`:''}
+    ${AIK.err?`<div class="notice" style="margin-top:12px;border-left-color:var(--gold)">
+      <b>ยังไม่สำเร็จ</b><br><span class="small">${esc(AIK.err)}</span>
+      ${/รุ่นเก่า/.test(AIK.err)?`<br><span class="small muted" style="display:block;margin-top:6px">
+        <b>วิธีแก้</b> เปิด Apps Script ของโปรเจกต์นี้ → วางเนื้อหาไฟล์ <span class="mono">Code.gs</span> ฉบับล่าสุดทับของเดิม
+        → กด <b>Deploy → Manage deployments → แก้ไข → Version: New version → Deploy</b>
+        แล้วกลับมากดปุ่ม "ตรวจสอบใหม่" ที่หน้านี้
+        · ระหว่างที่ยังไม่ deploy ระบบยังใช้งานได้ทุกอย่าง เพียงแต่ภารกิจด่วนจะใช้โครงร่างสำรอง</span>`:''}
+      </div>`:''}
 
     <h3 style="margin-top:18px">1 · ขอคีย์จาก Anthropic (ทำครั้งเดียว)</h3>
     <p class="small muted">สมัครบัญชีและเติมเครดิตขั้นต่ำ แล้วกด Create Key จะได้ข้อความยาวขึ้นต้นด้วย <span class="mono">sk-ant-</span></p>
