@@ -315,6 +315,13 @@ body.studentui .hero .herostat{display:none}
 body.studentui .hero .stuonly{display:block;margin:6px 0 0}
 body.studentui .hero h1{font-size:clamp(22px,5vw,30px)}
 body.studentui .hero{padding:18px 20px}
+/* รายการเป้าหมายการเรียนรู้ของภารกิจด่วน · แตะทั้งแถบได้ ปุ่มสูงพอตามมาตรฐานสัมผัส */
+.qgoals{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin-bottom:6px}
+.qgoal{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;
+  padding:11px 13px;margin:0;cursor:pointer;background:var(--soft);color:var(--text);font-size:15.5px;min-height:44px}
+.qgoal:hover{border-color:var(--teal)}
+.qgoal input{width:19px;height:19px;flex:0 0 auto;margin-top:2px;accent-color:var(--teal)}
+.qgoal:has(input:checked){border-color:var(--teal);background:var(--panel2)}
 table.heat th{font-size:13px;font-weight:600;vertical-align:bottom}
 table.heat td.hc{text-align:center;font-family:var(--mono);font-size:14px;
   border:1px solid #ffffff;min-width:64px;color:var(--text)}
@@ -2127,11 +2134,57 @@ const QDIMS={
   digital:{n:'การรู้เท่าทันสื่อและพลเมืองดิจิทัล',res:['European Commission and UNESCO (2025)','สมรรถนะดิจิทัลกับการเรียนรู้ตลอดชีวิต (2567)']}
 };
 
+/* ---------- เป้าหมายการเรียนรู้: ครูเลือกได้ว่าอยากให้นักเรียนได้อะไรจากภารกิจนี้ ----------
+   เลือกได้มากกว่า 1 ข้อ และพิมพ์เพิ่มเองได้ · ค่านี้ถูกส่งเข้า prompt ของ AI โดยตรง
+   และใช้เลือกโครงร่างสำรองด้วย ทำให้ภารกิจตรงกับสิ่งที่ครูต้องการวัดจริง
+   รายการนี้ล้อกับหลักฐานความสำเร็จ 5 ด้าน เพื่อให้ผลที่ได้ไปต่อในระบบรายงานได้ */
+const QGOALS=[
+ {id:'know',   t:'รู้และเข้าใจว่าเรื่องนี้เกี่ยวกับหน้าที่ สิทธิ หรือกติกาอะไร'},
+ {id:'reason', t:'คิดวิเคราะห์และตัดสินใจโดยใช้เหตุผลและข้อมูล'},
+ {id:'respect',t:'เคารพความแตกต่างและสิทธิของผู้อื่น'},
+ {id:'own',    t:'รับผิดชอบผลของการกระทำของตัวเอง'},
+ {id:'common', t:'คำนึงถึงประโยชน์ส่วนรวมมากกว่าความสะดวกของตัวเอง'},
+ {id:'act',    t:'ลงมือทำสิ่งที่เป็นประโยชน์ต่อห้องหรือโรงเรียนจริง'},
+ {id:'calm',   t:'จัดการอารมณ์และควบคุมตัวเองได้ในสถานการณ์กดดัน'},
+ {id:'media',  t:'รู้เท่าทันสื่อ ตรวจสอบข้อมูลก่อนเชื่อหรือแชร์'},
+];
+const qGoalText=(ids,extra)=>{
+  const a=(ids||[]).map(i=>{const g=QGOALS.find(x=>x.id===i); return g&&g.t;}).filter(Boolean);
+  if((extra||'').trim()) a.push(extra.trim());
+  return a;
+};
+/* ---------- เกณฑ์ประเมินสำรองแยกตามสมรรถนะ ----------
+   เดิมใช้เกณฑ์ชุดเดียวกับทุกสมรรถนะ ทำให้เลือก "พลเมืองดี" แล้วได้เกณฑ์ของ "การคิด"
+   ซึ่งทำให้ผลที่วัดไม่ตรงกับสิ่งที่ครูตั้งใจวัด แก้เป็นชุดละสมรรถนะ */
+const QRUBRIC={
+  think:['ตัดสินใจจากความรู้สึก ไม่อธิบายเหตุผล',
+         'อธิบายเหตุผลได้บ้าง แต่ยังไม่คำนึงถึงผู้อื่น',
+         'อธิบายเหตุผลด้วยข้อมูล และคำนึงถึงผู้ได้รับผลกระทบ',
+         'อธิบายด้วยข้อมูล คำนึงถึงผู้อื่น และระบุวิธีรับผิดชอบผลได้'],
+  self: ['ปล่อยให้อารมณ์พาไป ไม่จัดการตัวเอง',
+         'รู้ตัวว่าควรทำอะไร แต่ยังไม่ได้ลงมือ',
+         'ควบคุมตัวเองและทำหน้าที่ของตนได้จนเสร็จ',
+         'ควบคุมตัวเองได้ ทำหน้าที่จนเสร็จ และวางแผนป้องกันไม่ให้เกิดซ้ำ'],
+  comm: ['เงียบหรือหลีกเลี่ยงการพูดคุย',
+         'พูดความเห็นตัวเอง แต่ยังไม่ฟังคนอื่นจนจบ',
+         'ฟังจนจบ อธิบายเหตุผลของตน และหาจุดร่วมได้',
+         'ฟังทุกฝ่าย สรุปจุดร่วม และเสนอทางออกที่ทุกฝ่ายรับได้'],
+  civic:['คิดถึงความสะดวกของตัวเองเป็นหลัก',
+         'เห็นด้วยกับส่วนรวม แต่ยังไม่ลงมือทำ',
+         'ทำสิ่งที่เป็นประโยชน์ต่อส่วนรวมด้วยตัวเอง',
+         'ทำเพื่อส่วนรวม และชวนคนอื่นร่วมหรือเสนอเป็นข้อตกลงของห้อง'],
+  digital:['เชื่อหรือแชร์ทันทีโดยไม่ตรวจสอบ',
+         'สงสัยแต่ไม่ได้ตรวจสอบ และไม่บอกใคร',
+         'ตรวจสอบแหล่งที่มาก่อนเชื่อหรือแชร์',
+         'ตรวจสอบ แล้วเตือนเพื่อนพร้อมบอกวิธีตรวจสอบให้ด้วย'],
+};
 /* ---------- ตัวสร้างสำรอง ใช้เมื่อ AI ไม่พร้อม เพื่อให้ครูใช้งานได้เสมอ ---------- */
-function qFallback(topic,dim){
-  const d=QDIMS[dim];
+function qFallback(topic,dim,goals){
+  const d=QDIMS[dim], gs=goals&&goals.length?goals:[];
+  const gLine=gs.length?(' ครูต้องการให้นักเรียนได้ '+gs.join(' และ ')):'';
   return {
-    situation:'สถานการณ์: '+topic+' เกิดขึ้นในห้องเรียนของเราวันนี้ นักเรียนต้องตัดสินใจว่าจะทำอย่างไร โดยคำนึงถึงผลที่จะเกิดกับตัวเองและกับผู้อื่นในห้อง สถานการณ์นี้ไม่มีคำตอบที่ถูกเพียงข้อเดียว',
+    situation:'สถานการณ์: '+topic+' เกิดขึ้นในห้องเรียนของเราวันนี้ นักเรียนต้องตัดสินใจว่าจะทำอย่างไร '+
+      'โดยคำนึงถึงผลที่จะเกิดกับตัวเองและกับผู้อื่นในห้อง สถานการณ์นี้ไม่มีคำตอบที่ถูกเพียงข้อเดียว'+gLine,
     options:[
       {t:'ทำตามความรู้สึกของตัวเองในตอนนั้นทันที',level:1},
       {t:'ทำตามที่เพื่อนส่วนใหญ่ทำ เพราะไม่อยากแตกต่าง',level:2},
@@ -2148,39 +2201,64 @@ function qFallback(topic,dim){
       'ถ้าเกิดเหตุการณ์นี้จริง ฉันจะทำเหมือนเดิมหรือไม่ เพราะอะไร'
     ],
     rubricName:d.n,
-    rubric:[
-      'ตัดสินใจจากความรู้สึก ไม่อธิบายเหตุผล',
-      'อธิบายเหตุผลได้บ้าง แต่ยังไม่คำนึงถึงผู้อื่น',
-      'อธิบายเหตุผลด้วยข้อมูล และคำนึงถึงผู้ได้รับผลกระทบ',
-      'อธิบายด้วยข้อมูล คำนึงถึงผู้อื่น และระบุวิธีรับผิดชอบผลได้'
-    ],
+    rubric:(QRUBRIC[dim]||QRUBRIC.think).slice(),
     research:d.res,
     byAI:false
   };
+}
+/* ตรวจอย่างหยาบว่าสถานการณ์ที่ได้ พูดถึงหัวข้อที่ครูพิมพ์จริงหรือไม่
+   ภาษาไทยไม่เว้นวรรคระหว่างคำ จึงใช้วิธีเลื่อนหน้าต่าง 6 ตัวอักษรจากหัวข้อไปหาในสถานการณ์
+   เป็นการตรวจแบบผ่อนปรน ถ้าไม่ผ่านจะ "เตือนครู" ไม่ใช่ปฏิเสธทิ้ง */
+/* เป้าหมายข้อนี้ถูก AI ระบุว่าวัดได้จริงหรือไม่
+   เทียบแบบผ่อนปรน เพราะ AI มักคัดลอกข้อความกลับมาไม่ตรงทุกตัวอักษร */
+function qGoalHit(goal,covered){
+  const g=String(goal||'').replace(/\s/g,'');
+  if(!g) return true;
+  const key=g.slice(0,10);
+  return (covered||[]).some(c=>{
+    const s=String(c||'').replace(/\s/g,'');
+    return s.indexOf(key)>=0 || g.indexOf(s.slice(0,10))>=0;
+  });
+}
+function qOnTopic(topic,situation){
+  const t=String(topic||'').replace(/[\s​]/g,'');
+  const s=String(situation||'').replace(/[\s​]/g,'');
+  if(t.length<6) return true;
+  for(let i=0;i+6<=t.length;i++){ if(s.indexOf(t.slice(i,i+6))>=0) return true; }
+  return false;
 }
 
 /* ---------- เรียก AI ให้สร้างภารกิจ โดยบังคับให้อ้างอิงฐานงานวิจัย ---------- */
 async function qGenerate(){
   const topic=($('qTopic')||{}).value?.trim()||'';
   const dim=($('qDim')||{}).value||'think';
+  const goalIds=QGOALS.map(g=>g.id).filter(id=>{const el=$('qg_'+id); return el&&el.checked;});
+  const goalExtra=(($('qGoalTxt')||{}).value||'').trim();
+  const goals=qGoalText(goalIds,goalExtra);
   if(topic.length<5){ bad('qTopic','พิมพ์หัวข้อสถานการณ์ให้ชัดเจนก่อน เช่น มีนักเรียนถ่ายคลิปเพื่อนไปโพสต์ในกลุ่ม'); return; }
+  if(!goals.length){ toast('เลือกอย่างน้อย 1 เป้าหมายว่าต้องการให้นักเรียนได้อะไร หรือพิมพ์เพิ่มเอง'); return; }
   const btn=$('qGenBtn'); if(btn){btn.disabled=true;btn.textContent='กำลังให้ AI ร่างภารกิจ…';}
   const resList=RESEARCH.map(r=>r.n+' — '+r.p).join('\n');
   const sys=`คุณเป็นผู้ช่วยครูไทยออกแบบภารกิจสถานการณ์สั้นสำหรับคาบโฮมรูม ระดับชั้น ${GRADE}
 ตอบกลับเป็น JSON เท่านั้น ห้ามมีข้อความอื่นนอก JSON ห้ามใส่ markdown หรือ backtick
 โครงสร้าง JSON ที่ต้องการ
-{"situation":"...","options":[{"t":"...","level":1},{"t":"...","level":2},{"t":"...","level":3},{"t":"...","level":4}],"probe":["...","...","..."],"reflect":["...","..."],"rubricName":"...","rubric":["ระดับ1","ระดับ2","ระดับ3","ระดับ4"],"research":["ชื่องานวิจัยที่ใช้อ้างอิง"]}
+{"situation":"...","options":[{"t":"...","level":1},{"t":"...","level":2},{"t":"...","level":3},{"t":"...","level":4}],"probe":["...","...","..."],"reflect":["...","..."],"rubricName":"...","rubric":["ระดับ1","ระดับ2","ระดับ3","ระดับ4"],"research":["ชื่องานวิจัยที่ใช้อ้างอิง"],"goalsCovered":["เป้าหมายที่ภารกิจนี้วัดได้จริง"]}
 กฎเหล็ก
-1 situation ต้องเป็นสถานการณ์ที่ไม่มีคำตอบถูกเพียงข้อเดียว มีข้อจำกัดจริง ยาวไม่เกิน 4 บรรทัด ภาษาไทยที่นักเรียนระดับ ${GRADE} เข้าใจ
-2 options ต้องมี 4 ข้อ เรียงจากพฤติกรรมระดับ 1 ถึง 4 ตามเกณฑ์ โดยห้ามให้ข้อใดดูถูกชัดเจนจนเดาได้ทันที ทุกข้อต้องเป็นสิ่งที่นักเรียนจริงอาจเลือก
-3 probe คือคำถามกระตุ้นคิด 3 ข้อ ห้ามเป็นคำถามที่มีคำตอบถูกผิด
-4 rubric 4 ระดับ ต้องเป็นพฤติกรรมที่ครูสังเกตได้จริง ไม่ใช่ความรู้สึก
-5 research ต้องเลือกจากรายการที่ให้มาเท่านั้น 2 ถึง 3 รายการ ห้ามสร้างชื่องานวิจัยขึ้นเอง`;
-  const prompt=`หัวข้อที่ครูกำหนด: ${topic}
+1 situation ต้องเป็นเรื่อง "หัวข้อที่ครูกำหนด" โดยตรง ห้ามเปลี่ยนไปเรื่องอื่น ต้องมีคำหรือใจความของหัวข้อนั้นปรากฏชัดในสถานการณ์
+2 situation ต้องไม่มีคำตอบถูกเพียงข้อเดียว มีข้อจำกัดจริง ยาวไม่เกิน 4 บรรทัด ภาษาไทยที่นักเรียนระดับ ${GRADE} เข้าใจ
+3 options ต้องมี 4 ข้อ เรียงจากพฤติกรรมระดับ 1 ถึง 4 ทุกข้อต้องเป็นสิ่งที่นักเรียนจริงอาจเลือก ห้ามให้ข้อใดดูถูกชัดเจนจนเดาได้ทันที
+4 ทั้ง options และ rubric ต้องวัด "เป้าหมายที่ครูระบุ" ให้ครบทุกข้อ ระดับ 1 ถึง 4 ต้องไล่จากยังไม่ถึงเป้าหมาย ไปถึงบรรลุเป้าหมายและขยายผลไปถึงผู้อื่น
+5 probe คือคำถามกระตุ้นคิด 3 ข้อ ต้องเชื่อมกับเป้าหมายที่ครูระบุ ห้ามเป็นคำถามที่มีคำตอบถูกผิด
+6 rubric 4 ระดับ ต้องเป็นพฤติกรรมที่ครูสังเกตได้จริง ไม่ใช่ความรู้สึก
+7 research ต้องเลือกจากรายการที่ให้มาเท่านั้น 2 ถึง 3 รายการ ห้ามสร้างชื่องานวิจัยขึ้นเอง
+8 goalsCovered ให้คัดลอกข้อความเป้าหมายที่ครูระบุ เฉพาะข้อที่ภารกิจนี้วัดได้จริง`;
+  const prompt=`หัวข้อที่ครูกำหนด (ภารกิจต้องเป็นเรื่องนี้เท่านั้น): ${topic}
 สมรรถนะเป้าหมาย: ${QDIMS[dim].n}
+เป้าหมายที่ครูต้องการให้นักเรียนได้จากภารกิจนี้ (ต้องวัดให้ครบทุกข้อ):
+${goals.map((g,i)=>(i+1)+' '+g).join('\n')}
 รายการงานวิจัยที่เลือกอ้างอิงได้ (ห้ามใช้ชื่ออื่นนอกรายการนี้):
 ${resList}`;
-  let def=null;
+  let def=null, warn='';
   try{
     const j=await apiCall({action:'coach',system:sys,prompt});
     let txt=(j.reply||'').trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
@@ -2196,14 +2274,21 @@ ${resList}`;
         rubricName:o.rubricName||QDIMS[dim].n,
         rubric:o.rubric.map(String),
         research:(o.research||[]).filter(r=>valid.some(v=>String(r).includes(v.split(' (')[0]))).slice(0,3),
+        covered:(o.goalsCovered||[]).map(String),
         byAI:true};
       if(!def.research.length) def.research=QDIMS[dim].res;
-      if(def.probe.length<3) def.probe=qFallback(topic,dim).probe;
-      if(def.reflect.length<2) def.reflect=qFallback(topic,dim).reflect;
+      if(def.probe.length<3) def.probe=qFallback(topic,dim,goals).probe;
+      if(def.reflect.length<2) def.reflect=qFallback(topic,dim,goals).reflect;
+      /* ตรวจว่าตรงหัวข้อและครอบคลุมเป้าหมายที่ครูสั่งจริง ถ้าไม่ครบให้เตือนครูก่อนอนุมัติ
+         จับคู่ "รายข้อ" ไม่ใช่นับจำนวน เพื่อบอกได้ว่าเป้าหมายข้อไหนที่ยังไม่ถูกวัด */
+      const miss=goals.filter(g=>!qGoalHit(g,def.covered));
+      if(!qOnTopic(topic,def.situation)) warn='สถานการณ์ที่ได้อาจไม่ตรงกับหัวข้อที่ครูพิมพ์ ตรวจก่อนอนุมัติ หรือกดร่างใหม่';
+      else if(miss.length) warn='ยังไม่ยืนยันว่าวัดเป้าหมายนี้ได้ — '+miss.join(' · ')+' — ตรวจตัวเลือกและเกณฑ์ให้แน่ใจ';
     }
   }catch(e){ def=null; }
-  if(!def){ def=qFallback(topic,dim); toast('AI ไม่พร้อมใช้งาน ระบบใช้โครงร่างสำรองแทน ครูแก้ไขข้อความได้ทุกช่องก่อนเปิดใช้'); }
-  QDEF=Object.assign({topic,dim,created:Date.now()},def);
+  if(!def){ def=qFallback(topic,dim,goals);
+    toast('AI ไม่พร้อมใช้งาน ระบบใช้โครงร่างสำรองตามสมรรถนะที่เลือกแทน ครูแก้ไขข้อความได้ทุกช่องก่อนเปิดใช้'); }
+  QDEF=Object.assign({topic,dim,goalIds,goalExtra,goals,warn,created:Date.now()},def);
   if(btn){btn.disabled=false;btn.textContent='ให้ AI ร่างภารกิจใหม่';}
   renderQuick();
 }
@@ -2220,6 +2305,14 @@ function renderQuick(){
         <h2 style="margin:0">ร่างภารกิจ ตรวจและแก้ไขได้ทุกช่อง</h2>
         <span class="pill">${QDEF.byAI?'ร่างโดย AI':'โครงร่างสำรอง'}</span></div>
       <p class="small muted">ครูเป็นผู้ตรวจสอบและอนุมัติก่อนเปิดให้นักเรียนทำเสมอ ระบบจะไม่ส่งข้อความของ AI ถึงนักเรียนโดยตรง</p>
+      ${QDEF.warn?`<div class="notice" style="border-left-color:var(--gold)"><span class="small">
+        <b>⚠ ควรตรวจก่อนอนุมัติ</b> ${esc(QDEF.warn)}</span></div>`:''}
+      ${(QDEF.goals||[]).length?`<div class="notice good"><span class="small">
+        <b>เป้าหมายที่ภารกิจนี้ต้องวัด</b><br>
+        ${QDEF.goals.map(g=>{const hit=qGoalHit(g,QDEF.covered);
+          return `<span class="pill" style="${QDEF.byAI?(hit?'color:var(--teal-d);border-color:var(--teal)':'color:var(--gold);border-color:var(--gold)'):''}">${esc(g)}</span>`;}).join(' ')}
+        ${QDEF.byAI?'<div class="small" style="margin-top:6px">สีเขียว = AI ระบุว่าวัดได้จริง · สีเหลือง = ยังไม่ยืนยัน ครูควรอ่านตัวเลือกและเกณฑ์ให้แน่ใจ</div>':''}
+      </span></div>`:''}
       <label for="qSit">สถานการณ์</label><textarea id="qSit" style="min-height:110px">${esc(QDEF.situation)}</textarea>
       <h3 style="font-size:15px;margin-top:14px">ตัวเลือก 4 ระดับ</h3>
       ${QDEF.options.map((o,i)=>`<label for="qo${i}">ตัวเลือกที่ ${i+1} (ระดับ ${o.level})</label><input id="qo${i}" value="${esc(o.t)}">`).join('')}
@@ -2249,6 +2342,18 @@ function renderQuick(){
     <input id="qTopic" placeholder="เช่น มีนักเรียนถ่ายคลิปเพื่อนขณะล้มแล้วโพสต์ลงกลุ่มห้อง" value="${QDEF?esc(QDEF.topic):''}">
     <label for="qDim">สมรรถนะเป้าหมาย</label>
     <select id="qDim">${dimOpts}</select>
+
+    <h3 style="margin-top:18px">ต้องการให้นักเรียนได้อะไรจากภารกิจนี้</h3>
+    <p class="small muted" style="margin:0 0 8px">เลือกได้มากกว่า 1 ข้อ · ระบบจะสั่งให้ AI สร้างตัวเลือกและเกณฑ์ประเมิน
+      ให้<b>วัดเป้าหมายที่เลือกไว้โดยตรง</b> ไม่ใช่สร้างลอย ๆ</p>
+    <div class="qgoals">
+      ${QGOALS.map(g=>`<label class="qgoal" for="qg_${g.id}">
+        <input type="checkbox" id="qg_${g.id}" ${(QDEF&&(QDEF.goalIds||[]).indexOf(g.id)>=0)?'checked':''}>
+        <span>${esc(g.t)}</span></label>`).join('')}
+    </div>
+    <label for="qGoalTxt">เป้าหมายเพิ่มเติมที่ครูกำหนดเอง <span class="muted" style="font-weight:400">(ไม่บังคับ)</span></label>
+    <textarea id="qGoalTxt" style="min-height:56px"
+      placeholder="เช่น ให้นักเรียนรู้ว่าการนิ่งเฉยเมื่อเห็นเพื่อนถูกแกล้ง ก็เป็นส่วนหนึ่งของปัญหา">${QDEF?esc(QDEF.goalExtra||''):''}</textarea>
     ${QDEF?'':'<div class="row" style="margin-top:16px"><button class="primary" id="qGenBtn" onclick="qGenerate()">ให้ AI ร่างภารกิจ</button></div>'}
   </div>
   ${editor}
@@ -2264,6 +2369,12 @@ async function qApprove(){
   QDEF.probe=QDEF.probe.map((q,i)=>($('qp'+i)||{}).value||q);
   QDEF.reflect=QDEF.reflect.map((q,i)=>($('qr'+i)||{}).value||q);
   QDEF.rubric=QDEF.rubric.map((r,i)=>($('qb'+i)||{}).value||r);
+  /* อ่านเป้าหมายจากหน้าจออีกครั้ง เผื่อครูติ๊กเพิ่มหรือพิมพ์เพิ่มหลังจากให้ AI ร่างแล้ว
+     เก็บติดไปกับภารกิจ เพื่อให้รายงานผลบอกได้ว่าภารกิจนี้ตั้งใจวัดอะไร */
+  const gi=QGOALS.map(g=>g.id).filter(id=>{const el=$('qg_'+id); return el&&el.checked;});
+  const gx=(($('qGoalTxt')||{}).value||'').trim();
+  if(gi.length||gx){ QDEF.goalIds=gi; QDEF.goalExtra=gx; QDEF.goals=qGoalText(gi,gx); }
+  if(!(QDEF.goals||[]).length){ toast('เลือกอย่างน้อย 1 เป้าหมายว่าต้องการให้นักเรียนได้อะไร'); return; }
   if(QDEF.situation.trim().length<20){ bad('qSit','สถานการณ์สั้นเกินไป ควรอธิบายให้นักเรียนเห็นภาพและมีข้อจำกัดชัดเจน'); return; }
   QCODE=QDEF.code||('Q'+String(Date.now()).slice(-5));
   QDEF.code=QCODE; QDEF.approvedAt=Date.now();

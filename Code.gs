@@ -205,8 +205,11 @@ function coach_(req) {
       contentType: 'application/json',
       headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
       payload: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 300,
+        /* ภารกิจด่วนเป็น JSON ยาว (สถานการณ์ + ตัวเลือก 4 + คำถาม 5 + เกณฑ์ 4 + อ้างอิง)
+           ค่าเดิม 300 ทำให้คำตอบถูกตัดกลางคัน แล้ว JSON.parse ไม่ผ่าน
+           ระบบจึงตกไปใช้โครงร่างสำรองทุกครั้งแม้จะใส่ API key แล้ว */
+        model: req.model || 'claude-sonnet-5',
+        max_tokens: req.maxTokens || 2000,
         system: req.system,
         messages: [{ role: 'user', content: req.prompt }]
       }),
